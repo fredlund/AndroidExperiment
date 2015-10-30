@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
@@ -20,14 +22,14 @@ import java.util.Map;
 
 public class SearchableActivity extends AppCompatActivity {
 
-    private List<Map<String,Object>> listValues;
+    private List<Map<String, Object>> listValues;
     private ListView listView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("search activitity was created");
         super.onCreate(savedInstanceState);
-        listValues = new ArrayList<Map<String,Object>>();
+        listValues = new ArrayList<Map<String, Object>>();
 
         // Get the intent, verify the action and get the query
         System.out.println("before intent");
@@ -41,8 +43,30 @@ public class SearchableActivity extends AppCompatActivity {
         setContentView(R.layout.mylist);
         listView = (ListView) findViewById(android.R.id.list);
 
-    SimpleAdapter adapter = new SimpleAdapter(this, listValues,android.R.layout.simple_list_item_1,new String[] { "1" },new int[] { android.R.id.text1 });
-    listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("item "+position+" was clicked="+listValues.get(position));
+            }
+
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("item "+position+" was longclicked="+listValues.get(position));
+                return true;
+            }
+
+        });
+
+        SimpleAdapter adapter =
+                new SimpleAdapter(this, listValues, android.R.layout.simple_list_item_1,
+                        new String[]{"1"}, new int[]{android.R.id.text1});
+        listView.setAdapter(adapter);
 
 
     }
