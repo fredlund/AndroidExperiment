@@ -148,10 +148,15 @@ public class SearchableActivity extends AppCompatActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("item " + position + " was longclicked=" + found[position]);
-                found[position].isEnabled = !found[position].isEnabled;
+                Entry entry = found[position];
+                System.out.println("item " + position + " was longclicked=" + entry);
+                entry.isEnabled = !entry.isEnabled;
                 EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder)view.getTag();
-                //holder.checkBox.setChecked(found[position].isEnabled);
+                if (entry.isEnabled)
+                    holder.image.setImageResource(R.drawable.ic_done_white);
+                else
+                    holder.image.setImageBitmap(null);
+
                 return true;
             }
 

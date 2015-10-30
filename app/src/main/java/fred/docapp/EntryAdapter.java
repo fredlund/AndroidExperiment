@@ -59,7 +59,7 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
             value = entry.fileName + " ("+size_to_string(entry.size)+")";
         holder.txtTitle.setText(value);
         if (entry.isEnabled)
-        holder.image.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_stat_name,null));
+            holder.image.setImageResource(R.drawable.ic_done_white);
         return row;
     }
 
