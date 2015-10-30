@@ -24,6 +24,8 @@ public class SearchableActivity extends AppCompatActivity {
 
     private List<Map<String, Object>> listValues;
     private ListView listView = null;
+    Entry found[] = null;
+    private ListView listView1 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +41,10 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.flush();
         handleIntent(intent, listValues);
 
+
         //prepareData(listValues);
-        setContentView(R.layout.mylist);
+        /*
+
         listView = (ListView) findViewById(android.R.id.list);
 
 
@@ -67,6 +71,7 @@ public class SearchableActivity extends AppCompatActivity {
                 new SimpleAdapter(this, listValues, android.R.layout.simple_list_item_1,
                         new String[]{"1"}, new int[]{android.R.id.text1});
         listView.setAdapter(adapter);
+        */
 
 
     }
@@ -109,12 +114,13 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     void doMySearch(String query,List<Map<String,Object>> listValues) {
-      System.out.println("will search for "+query);
+      System.out.println("will search for "+ query);
         System.out.flush();
-        Entry[] found = MLocate.find(query,SearchableActivity.this);
+        found = MLocate.find(query,SearchableActivity.this);
         System.out.println("size of found: "+found.length);
         System.out.flush();
-        for (Entry entry : found) {
+
+        /*for (Entry entry : found) {
             String value;
             Map<String,Object> item = new HashMap<String,Object>();
             if (entry.isDir)
@@ -123,7 +129,34 @@ public class SearchableActivity extends AppCompatActivity {
                 value = entry.fileName + " ("+size_to_string(entry.size)+")";
             item.put("1",value);
             listValues.add(item);
-        }
+        }*/
+         EntryAdapter adapter = new EntryAdapter(this,
+                R.layout.listview_item_row, found);
+
+        setContentView(R.layout.mylist);
+         listView1 = (ListView)findViewById(android.R.id.list);
+         listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("item " + position + " was clicked=" + found[position]);
+            }
+
+        });
+
+        listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("item " + position + " was longclicked=" + found[position]);
+                found[position].isEnabled = !found[position].isEnabled;
+                EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder)view.getTag();
+                //holder.checkBox.setChecked(found[position].isEnabled);
+                return true;
+            }
+
+        });
+        listView1.setAdapter(adapter);
     }
 
     String size_to_string(long size) {

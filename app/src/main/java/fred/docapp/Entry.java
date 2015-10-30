@@ -9,6 +9,7 @@ public class Entry {
     long pos;
     String fileName;
     String dirName;
+    boolean isEnabled = false;
 
     Entry(boolean isDir, long size, long pos, String dirName, String fileName) {
 	this.isDir = isDir;
