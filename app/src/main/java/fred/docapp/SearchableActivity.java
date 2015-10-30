@@ -48,7 +48,7 @@ public class SearchableActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("item "+position+" was clicked="+listValues.get(position));
+                System.out.println("item " + position + " was clicked=" + listValues.get(position));
             }
 
         });
@@ -57,7 +57,7 @@ public class SearchableActivity extends AppCompatActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("item "+position+" was longclicked="+listValues.get(position));
+                System.out.println("item " + position + " was longclicked=" + listValues.get(position));
                 return true;
             }
 
@@ -90,25 +90,15 @@ public class SearchableActivity extends AppCompatActivity {
         return true;
     }
 
-    void prepareData(List<Map<String,Object>> listValues) {
-        Map<String,Object> item;
-        item = new HashMap<String,Object>();
-        item.put("1","A");
-        listValues.add(item);
-        item = new HashMap<String,Object>();
-        item.put("1","B");
-        listValues.add(item);
-    }
-
     //@Override
     protected void onNewIntent(Intent intent) {
         System.out.println("onNewIntent");
         System.out.flush();
-        handleIntent(intent,listValues);
+        handleIntent(intent, listValues);
     }
 
  private void handleIntent(Intent intent,List<Map<String,Object>> listValues) {
-        System.out.println("handleIntent "+intent);
+        System.out.println("handleIntent " + intent);
         System.out.flush();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
@@ -125,12 +115,29 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("size of found: "+found.length);
         System.out.flush();
         for (Entry entry : found) {
+            String value;
             Map<String,Object> item = new HashMap<String,Object>();
             if (entry.isDir)
-                item.put("1",entry.dirName);
+                value = entry.dirName + "/";
             else
-                item.put("1",entry.fileName);
+                value = entry.fileName + " ("+size_to_string(entry.size)+")";
+            item.put("1",value);
             listValues.add(item);
         }
+    }
+
+    String size_to_string(long size) {
+        if (size < 1024)
+            return size+" bytes";
+        else if (size < 1024*1024) {
+            long KB = size / 1024;
+            return KB+" KB";
+        } else if (size < 1024*1024*1024) {
+            long MB = size / (1024 * 1024);
+            return MB + " MB";
+        } else if (size < 1024*1024*1024*1024) {
+            long GB= size / (1024 * 1024 * 1024);
+            return GB + " MB";
+        } else return "very big";
     }
 }
