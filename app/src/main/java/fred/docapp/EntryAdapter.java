@@ -54,7 +54,7 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
         Entry entry = data[position];
         String value;
         if (entry.isDir)
-            value = entry.dirName + "/";
+            value = entry.fileName + "/";
         else
             value = entry.fileName + " ("+size_to_string(entry.size)+")";
         holder.txtTitle.setText(value);

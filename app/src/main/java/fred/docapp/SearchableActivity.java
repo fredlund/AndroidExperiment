@@ -116,7 +116,8 @@ public class SearchableActivity extends AppCompatActivity {
     void doMySearch(String query,List<Map<String,Object>> listValues) {
       System.out.println("will search for "+ query);
         System.out.flush();
-        found = MLocate.find(query,SearchableActivity.this);
+        MLocate mloc = new MLocate();
+        found = mloc.find(query,SearchableActivity.this);
         System.out.println("size of found: "+found.length);
         System.out.flush();
 
