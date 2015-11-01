@@ -143,7 +143,7 @@ public class MLocate {
 		return entries;
 	}
 
-	Entry[] read_dir(Entry entry, long pos) {
+	Entry[] read_dir(Entry entry) {
 		try {
 			FileOpsClassB in = new FileOpsClassB("locatedb_pnt", "rw");
 			long seek_pos = entry.pos;
