@@ -25,6 +25,9 @@ public class NewApp extends AppCompatActivity {
        MenuInflater inflater = getMenuInflater();
        inflater.inflate(R.menu.my_menu, menu);
 
+       System.out.println("NewApp running");
+       System.out.flush();
+
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         System.out.println("item is "+menu.findItem(R.id.menu_search));

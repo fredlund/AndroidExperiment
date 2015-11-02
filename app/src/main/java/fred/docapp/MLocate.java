@@ -103,24 +103,27 @@ public class MLocate {
 					stopping = true;
 				}
 
-				String dirName = getString(in);
-				if (dirName.length() > root.length())
-					dirName = dirName.substring(root.length() + 1);
-				//System.out.println("dirName is "+dirName);
+				if (!stopping) {
+					String dirName = getString(in);
+					if (dirName.length() > root.length())
+						dirName = dirName.substring(root.length() + 1);
+					//System.out.println("dirName is "+dirName);
 
-				if (dirPrefix != null)
-					if (!dirName.startsWith(dirPrefix))
-						dirPrefix = null;
+					if (dirPrefix != null)
+						if (!dirName.startsWith(dirPrefix))
+							dirPrefix = null;
 
-				if (dirPrefix == null) {
-					if (find(m, dirName, true, dirName)) {
-						dirPrefix = dirName;
-						Entry entry = new Entry(0, pos, 0, null, dirName, Entry.EntryType.DefineDir);
-						resultList.add(entry);
-						System.out.println(dirName + ":" + "    at " + pos);
+					if (dirPrefix == null) {
+						if (find(m, dirName, true, dirName)) {
+							dirPrefix = dirName;
+							Entry entry = new Entry(0, pos, 0, null, dirName, Entry.EntryType.DefineDir);
+							resultList.add(entry);
+							System.out.println(dirName + ":" + "    at " + pos);
+						}
 					}
+
+					scan_dir(in, dirPrefix != null, false, dirName, resultList, m);
 				}
-				scan_dir(in, dirPrefix != null, false, dirName, resultList, m);
 			} while (!stopping);
 		} catch (Exception exc) {
 			if (!(exc instanceof java.io.IOException)) {
@@ -143,9 +146,9 @@ public class MLocate {
 		return entries;
 	}
 
-	Entry[] read_dir(Entry entry) {
+	Entry[] read_dir(Context context, Entry entry) {
 		try {
-			FileOpsClassB in = new FileOpsClassB("locatedb_pnt", "rw");
+			FileOpsClassB in = new FileOpsClassB(context.getFilesDir()+"/locatedb_pnt", "rw");
 			long seek_pos = entry.pos;
 			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);
@@ -246,7 +249,10 @@ byte[] longToByteArray(long value) {
 	byte b;
 
 	while (index++ < size) {
-	    b = getByte(in);
+		try { b = getByte(in); }
+		catch (IOException exc) {
+			return index;
+		}
 	}
 	return index;
     }
@@ -271,6 +277,8 @@ byte[] longToByteArray(long value) {
 	    readSize = in.read(tmp2,0,1);
 	    if (readSize < 0) {
 		System.out.println("EOF at getByte");
+			new Exception().printStackTrace();
+			System.out.flush();
 		throw new java.io.IOException();
 	    }
 	    pos += 1;

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
- <item
+<item android:id="@+id/spinner"
+    app:showAsAction="always"
+    android:actionViewClass="android.widget.Spinner" />
+    <item
        android:id="@+id/menu_search"
        app:actionViewClass="android.widget.SearchView"
      app:showAsAction="always"
