@@ -106,29 +106,30 @@ public class SearchableActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         System.out.println("searchView=" + searchView);
         System.out.flush();
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         ComponentName cn = new ComponentName(this, SearchableActivity.class);
-        try { wait(200); } catch (InterruptedException exc) {};
+       // try { wait(200); } catch (InterruptedException exc) {};
         searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("before spinning");
         System.out.flush();
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("onCreateOptionsMenu: spinner item is " + menu.findItem(R.id.spinner));
         System.out.flush();
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         if (menu.findItem(R.id.spinner) == null) {
             try { wait(200); } catch (InterruptedException exc) {};
             new Exception().printStackTrace();
         }
-        try { wait(200); } catch (InterruptedException exc) {};
+       // try { wait(200); } catch (InterruptedException exc) {};
         Spinner spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
-        try { wait(200); } catch (InterruptedException exc) {};
+        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("Spinner is " + spinner + " spinner adapter is "+spinnerAdapter);
         System.out.flush();
-        spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and content
+        spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
+        // content
         //spinner.setOnItemSelectedListener(onItemSelectedListener); // set the listener, to perform actions based on item selection
 
         return true;
