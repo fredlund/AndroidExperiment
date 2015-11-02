@@ -147,12 +147,13 @@ public class MLocate {
 		try {
 			FileOpsClassB in = new FileOpsClassB("locatedb_pnt", "rw");
 			long seek_pos = entry.pos;
+			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);
 			List<Entry> result = new ArrayList<Entry>();
 			scan_dir(in, false, true, entry.fileName, result, null);
 			return result.toArray(new Entry[result.size()]);
-		} catch (FileNotFoundException exc) { return null; }
-		catch (IOException exc) { return null; }
+		} catch (FileNotFoundException exc) { System.out.println("FileNotFound"); return null; }
+		catch (IOException exc) { System.out.println("IOException"); return null; }
 	}
 
 	void scan_dir(FileOps in, boolean skipping, boolean exploring, String dirName, List<Entry> resultList, Matcher[] m) throws java.io.IOException {
@@ -174,11 +175,14 @@ public class MLocate {
 		pos += sizeSize;
 		long fileSize = bytesToLong(size, 0, sizeSize);
 
+		if (exploring)
+		System.out.println("in scan_dir: fileType="+fileType+" fileSize="+fileSize);
 		switch (fileType) {
 			case 0:
 				String fileName = getString(in);
 				if (!skipping) {
 					if (exploring || (!skipping && find(m, fileName, false, dirName))) {
+						System.out.println("adding file "+fileName);
 						Entry entry = new Entry(fileSize, pos, 0, dirName, fileName, Entry.EntryType.File);
 						resultList.add(entry);
 					}
@@ -193,6 +197,7 @@ public class MLocate {
 				pos += 4;
 				long lpointer = bytesToLong(pointer,0,4);
 				if (exploring) {
+					System.out.println("adding directory "+dirRef);
 					Entry entry = new Entry(fileSize, pos, 0, dirName, dirRef, Entry.EntryType.ReferDir);
 					resultList.add(entry);
 				}

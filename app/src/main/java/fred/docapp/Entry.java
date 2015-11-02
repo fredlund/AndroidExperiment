@@ -25,5 +25,9 @@ public class Entry {
 	this.fileName = fileName;
         this.dirName = dirName;
     }
-}
 
+    public String toString() {
+        return "entry:{size=" + size + ",pos=" + pos + ",dirName=" + dirName + ",fileName=" +
+                fileName + ",entryType=" + entryType + "}";
+    }
+}

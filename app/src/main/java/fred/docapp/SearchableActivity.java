@@ -143,9 +143,12 @@ public class SearchableActivity extends AppCompatActivity {
                 Entry entry = found[position];
                 System.out.println("item " + position + " was clicked=" + found[position]);
                 if (entry.entryType != Entry.EntryType.File) {
+                    System.out.println("will try to read "+entry);
                     Entry[] dirEntries = mloc.read_dir(entry);
-                    System.out.println("numer of entries are :" + dirEntries.length);
-                    System.out.flush();
+                    if (dirEntries != null) {
+                        System.out.println("numer of entries are :" + dirEntries.length);
+                        System.out.flush();
+                    }
                 }
             }
 
