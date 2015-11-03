@@ -77,7 +77,7 @@ public class MLocate {
 			final int headerSize = 8 + 4 + 1 + 1 + 2;
 			byte header[] = new byte[headerSize];
 
-			result = in.read(header, 0, headerSize);
+			result = read(in,header, 0, headerSize);
 			if (result < headerSize) {
 				System.out.println
 						("*** Error: read " + result + " bytes from header");
@@ -116,7 +116,7 @@ public class MLocate {
 					if (dirPrefix == null) {
 						if (find(m, dirName, true, dirName)) {
 							dirPrefix = dirName;
-							Entry entry = new Entry(0, pos, 0, null, dirName, Entry.EntryType.DefineDir);
+							Entry entry = new Entry(0, pos, null, dirName, Entry.EntryType.DefineDir);
 							resultList.add(entry);
 							System.out.println(dirName + ":" + "    at " + pos);
 						}
@@ -130,7 +130,7 @@ public class MLocate {
 				System.out.println
 						("*** Error: exception " + exc + " raised");
 				exc.printStackTrace();
-				System.exit(1);
+				throw new RuntimeException();
 			}
 
 		} finally {
@@ -154,6 +154,7 @@ public class MLocate {
 			in.seek(seek_pos);
 			List<Entry> result = new ArrayList<Entry>();
 			scan_dir(in, false, true, entry.fileName, result, null);
+			in.close();
 			return result.toArray(new Entry[result.size()]);
 		} catch (FileNotFoundException exc) { System.out.println("FileNotFound"); return null; }
 		catch (IOException exc) { System.out.println("IOException"); return null; }
@@ -169,24 +170,25 @@ public class MLocate {
 		final int sizeSize = 4;
 		byte size[] = new byte[sizeSize];
 
-		int result = in.read(size, 0, sizeSize);
+		int result = read(in,size, 0, sizeSize);
 		if (result < sizeSize) {
 			System.out.println
-					("*** Error: could not read file size");
-			System.exit(1);
+					("*** Error: could not read file size at dir "+dirName+" read="+result+" " +
+							"should be "+sizeSize+" pos="+pos+" fileType was "+fileType);
+			throw new RuntimeException();
 		}
 		pos += sizeSize;
 		long fileSize = bytesToLong(size, 0, sizeSize);
 
-		if (exploring)
-		System.out.println("in scan_dir: fileType="+fileType+" fileSize="+fileSize);
 		switch (fileType) {
 			case 0:
 				String fileName = getString(in);
 				if (!skipping) {
 					if (exploring || (!skipping && find(m, fileName, false, dirName))) {
 						System.out.println("adding file "+fileName);
-						Entry entry = new Entry(fileSize, pos, 0, dirName, fileName, Entry.EntryType.File);
+						Entry entry = new Entry(fileSize, pos, dirName, fileName, Entry.EntryType
+								.File);
+						System.out.println("in scan_dir: entry: "+entry);
 						resultList.add(entry);
 					}
 				}
@@ -196,12 +198,14 @@ public class MLocate {
 				//System.out.println("a directory "+getString(in));
 				String dirRef = getString(in);
 				byte pointer[] = new byte[4];
-				in.read(pointer, 0, 4);
+				read(in,pointer, 0, 4);
 				pos += 4;
 				long lpointer = bytesToLong(pointer,0,4);
 				if (exploring) {
 					System.out.println("adding directory "+dirRef);
-					Entry entry = new Entry(fileSize, pos, 0, dirName, dirRef, Entry.EntryType.ReferDir);
+					Entry entry = new Entry(fileSize, lpointer, dirName, dirRef, Entry.EntryType
+							.ReferDir);
+					System.out.println("in scan_dir: entry: "+entry);
 					resultList.add(entry);
 				}
 				break;
@@ -235,6 +239,17 @@ public class MLocate {
 	    }
 	return value;
     }
+
+	int read(FileOps f, byte[] buf, int offset, int len) throws IOException {
+		int bytes_to_read = len;
+		do {
+			int bytes_read = f.read(buf,offset,bytes_to_read);
+			if (bytes_read < 0) return bytes_read;
+			bytes_to_read -= bytes_read;
+			offset += bytes_read;
+		} while (bytes_to_read > 0);
+		return len;
+	}
 
 byte[] longToByteArray(long value) {
     return new byte[] {

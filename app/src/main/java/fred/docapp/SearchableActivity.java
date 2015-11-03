@@ -18,6 +18,7 @@ import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ public class SearchableActivity extends AppCompatActivity {
     Stack<DirView> stack = null;
     SearchableActivity myself = null;
     SpinnerAdapter spinnerAdapter = null;
+    Spinner spinner = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,13 +126,26 @@ public class SearchableActivity extends AppCompatActivity {
             new Exception().printStackTrace();
         }
        // try { wait(200); } catch (InterruptedException exc) {};
-        Spinner spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
+        spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
         //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("Spinner is " + spinner + " spinner adapter is "+spinnerAdapter);
         System.out.flush();
         spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
         // content
-        //spinner.setOnItemSelectedListener(onItemSelectedListener); // set the listener, to perform actions based on item selection
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                                              @Override
+                                              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                  System.out.println("onItemSelected position=" + position);
+                                              }
+
+                                              @Override
+                                              public void onNothingSelected(AdapterView<?> parent) {
+                                                  System.out.println("onNothingSelected");
+                                              }
+                                          }
+
+            );
 
         return true;
     }
@@ -179,8 +194,8 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("before stack push");
         System.out.flush();
             stack = new Stack<DirView>();
-        DirView dv = new DirView("some dir",adapter,found);
-        stack.push(dv);
+        //DirView dv = new DirView(name(mloc.root),adapter,found);
+        //stack.push(dv);
         System.out.println("after stack push");
         System.out.flush();
 
@@ -190,18 +205,40 @@ public class SearchableActivity extends AppCompatActivity {
 
              @Override
              public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                 System.out.println("onItemClick position="+position+" found size="+
+                         ((found==null)?-1:found.length));
+                 System.out.flush();
                  Entry entry = found[position];
                  System.out.println("item " + position + " was clicked=" + found[position]);
                  if (entry.entryType != Entry.EntryType.File) {
                      System.out.println("will try to read " + entry);
                      Entry[] dirEntries = mloc.read_dir(SearchableActivity.this, entry);
                      if (dirEntries != null && dirEntries.length > 0) {
+                         found = dirEntries;
                          System.out.println("numer of entries are :" + dirEntries.length);
                          System.out.flush();
                          EntryAdapter adapter = new EntryAdapter(myself, R.layout.listview_item_row, dirEntries);
+                         System.out.println("computed new adapter");
+                         System.out.flush();
                          listView1.setAdapter(adapter);
-                         DirView dv = new DirView("some dir", adapter, dirEntries);
+                         System.out.println("set adapter");
+                         System.out.flush();
+                         DirView dv = new DirView(entry.fileName, adapter, dirEntries);
                          stack.push(dv);
+                         System.out.println("pushed");
+                         System.out.flush();
+                         System.out.println("before spinner adapter");
+                         System.out.flush();
+
+                         spinnerAdapter = new SpinnerAdapter(SearchableActivity.this,
+                                 android.R.layout.simple_spinner_item,
+                                 //R.layout.spinner_item_row,
+                                 //R.id.spinnerText,
+                                 stack);
+
+                         System.out.println("after spinner adapter");
+                         System.out.flush();
+                          spinner.setAdapter(spinnerAdapter);
                      }
                  }
              }
@@ -230,10 +267,20 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("before spinner adapter");
         System.out.flush();
 
-        spinnerAdapter = new SpinnerAdapter(this,R.layout.spinner_item_row,stack);
+        spinnerAdapter = new SpinnerAdapter(SearchableActivity.this,
+                 android.R.layout.simple_spinner_item,
+                //R.id.spinnerText,
+                //R.layout.spinner_item_row,
+                stack);
 
         System.out.println("after spinner adapter");
         System.out.flush();
+    }
+
+    String name(String path) {
+        if (path==null) return null;
+        File f = new File(path);
+        return f.getName();
     }
 
     String size_to_string(long size) {

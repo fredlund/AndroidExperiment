@@ -7,21 +7,18 @@ public class Entry {
         DefineDir, File, ReferDir;
     }
 
-    boolean isDir;
     long size;
     long pos;
-    long pointer;
     String fileName;
     String dirName;
     boolean isEnabled = false;
     EntryType entryType;
 
 
-    Entry(long size, long pos, long pointer, String dirName, String fileName, EntryType entryType) {
+    Entry(long size, long pos, String dirName, String fileName, EntryType entryType) {
 	this.entryType = entryType;
         this.size = size;
 	this.pos = pos;
-        this.pointer = pointer;
 	this.fileName = fileName;
         this.dirName = dirName;
     }

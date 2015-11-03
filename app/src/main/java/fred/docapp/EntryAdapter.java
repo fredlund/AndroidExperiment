@@ -32,6 +32,8 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        System.out.println("in getView: position="+position);
+        System.out.flush();
         View row = convertView;
         EntryHolder holder = null;
 
@@ -53,7 +55,7 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
 
         Entry entry = data[position];
         String value;
-        if (entry.isDir)
+        if (entry.entryType != Entry.EntryType.File)
             value = entry.fileName + "/";
         else
             value = entry.fileName + " ("+size_to_string(entry.size)+")";

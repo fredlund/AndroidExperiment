@@ -37,7 +37,8 @@ public class SpinnerAdapter extends ArrayAdapter<DirView> {
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new SpinnerHolder();
-            holder.txtTitle = (TextView)row.findViewById(R.id.listText);
+            //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);
+            holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
 
             row.setTag(holder);
         }
@@ -46,8 +47,9 @@ public class SpinnerAdapter extends ArrayAdapter<DirView> {
             holder = (SpinnerHolder)row.getTag();
         }
 
-        DirView dirView = dirs[position];
+        DirView dirView = dirs[dirs.length-(position+1)];
         holder.txtTitle.setText(dirView.dirName);
+        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
         return row;
     }
 
