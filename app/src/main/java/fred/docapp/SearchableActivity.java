@@ -33,7 +33,7 @@ public class SearchableActivity extends AppCompatActivity {
     private ListView listView1 = null;
     private MenuItem spinnerItem = null;
     private Menu menu;
-    Stack<DirView> stack = null;
+    ArrayList<DirView> stack = null;
     SearchableActivity myself = null;
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
@@ -133,10 +133,23 @@ public class SearchableActivity extends AppCompatActivity {
         spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
         // content
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
                                               @Override
                                               public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                                  System.out.println("onItemSelected position=" + position);
+                                                  System.out.println("onItemSelected position=" + position+" size="+stack.size());
+                                                  if (position < stack.size()-1 && userIsInteracting) {
+                                                      for (int i = stack.size() - 1; i > position; i--) {
+                                                          stack.remove(i);
+                                                      }
+                                                      DirView dv = stack.get(position);
+                                                      listView1.setAdapter(dv.adapter);
+                                                      found = dv.entries;
+                                                      spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                                                              android.R.layout.simple_spinner_item,
+                                                              //R.layout.spinner_item_row,
+                                                              //R.id.spinnerText,
+                                                              stack);
+                                                      spinner.setAdapter(spinnerAdapter);
+                                                  }
                                               }
 
                                               @Override
@@ -193,7 +206,7 @@ public class SearchableActivity extends AppCompatActivity {
 
         System.out.println("before stack push");
         System.out.flush();
-            stack = new Stack<DirView>();
+            stack = new ArrayList<DirView>();
         //DirView dv = new DirView(name(mloc.root),adapter,found);
         //stack.push(dv);
         System.out.println("after stack push");
@@ -224,7 +237,7 @@ public class SearchableActivity extends AppCompatActivity {
                          System.out.println("set adapter");
                          System.out.flush();
                          DirView dv = new DirView(entry.fileName, adapter, dirEntries);
-                         stack.push(dv);
+                         stack.add(dv);
                          System.out.println("pushed");
                          System.out.flush();
                          System.out.println("before spinner adapter");

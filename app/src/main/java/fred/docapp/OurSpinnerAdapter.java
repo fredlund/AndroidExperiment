@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -18,13 +19,13 @@ import java.util.Stack;
 public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerAdapter {//ArrayAdapter<DirView> {
     Context context;
     int layoutResourceId;
-    DirView[] dirs = null;
+    ArrayList<DirView> dirs = null;
 
-    public OurSpinnerAdapter(Context context, int layoutResourceId, Stack<DirView> stack) {
+    public OurSpinnerAdapter(Context context, int layoutResourceId, ArrayList<DirView> stack) {
         super(context, layoutResourceId, stack);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
-        this.dirs = stack.toArray(new DirView[stack.size()]);
+        this.dirs = stack;
     }
 
     @Override
@@ -48,12 +49,12 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
             holder = (SpinnerHolder)row.getTag();
         }
 
-        DirView dirView = dirs[dirs.length-(position+1)];
+        DirView dirView = dirs.get(dirs.size()-(position+1));
         holder.txtTitle.setText(dirView.dirName);
         System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
         return row;
     }
-    
+
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
         SpinnerHolder holder = null;
@@ -74,7 +75,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
             holder = (SpinnerHolder)row.getTag();
         }
 
-        DirView dirView = dirs[dirs.length-(position+1)];
+        DirView dirView = dirs.get(dirs.size()-(position+1));
         holder.txtTitle.setText(dirView.dirName);
         System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
         return row;
