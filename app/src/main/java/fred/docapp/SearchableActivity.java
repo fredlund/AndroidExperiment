@@ -35,7 +35,7 @@ public class SearchableActivity extends AppCompatActivity {
     private Menu menu;
     Stack<DirView> stack = null;
     SearchableActivity myself = null;
-    SpinnerAdapter spinnerAdapter = null;
+    OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
 
     @Override
@@ -230,7 +230,7 @@ public class SearchableActivity extends AppCompatActivity {
                          System.out.println("before spinner adapter");
                          System.out.flush();
 
-                         spinnerAdapter = new SpinnerAdapter(SearchableActivity.this,
+                         spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                                  android.R.layout.simple_spinner_item,
                                  //R.layout.spinner_item_row,
                                  //R.id.spinnerText,
@@ -267,7 +267,7 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("before spinner adapter");
         System.out.flush();
 
-        spinnerAdapter = new SpinnerAdapter(SearchableActivity.this,
+        spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                  android.R.layout.simple_spinner_item,
                 //R.id.spinnerText,
                 //R.layout.spinner_item_row,

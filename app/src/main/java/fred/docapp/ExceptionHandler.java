@@ -56,7 +56,7 @@ public class ExceptionHandler implements
         errorReport.append(Build.VERSION.INCREMENTAL);
         errorReport.append(LINE_SEPARATOR);
 
-        Intent intent = new Intent(myContext, NewApp.class);
+        Intent intent = new Intent(myContext, SearchableActivity.class);
         intent.putExtra("error", errorReport.toString());
         myContext.startActivity(intent);
 

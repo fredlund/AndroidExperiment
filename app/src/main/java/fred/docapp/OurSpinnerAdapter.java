@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.Stack;
@@ -14,12 +15,12 @@ import java.util.Stack;
 /**
  * Created by fred on 2/11/15.
  */
-public class SpinnerAdapter extends ArrayAdapter<DirView> {
+public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerAdapter {//ArrayAdapter<DirView> {
     Context context;
     int layoutResourceId;
     DirView[] dirs = null;
 
-    public SpinnerAdapter(Context context, int layoutResourceId, Stack<DirView> stack) {
+    public OurSpinnerAdapter(Context context, int layoutResourceId, Stack<DirView> stack) {
         super(context, layoutResourceId, stack);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
@@ -28,6 +29,32 @@ public class SpinnerAdapter extends ArrayAdapter<DirView> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        View row = convertView;
+        SpinnerHolder holder = null;
+
+        if(row == null)
+        {
+            LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+            row = inflater.inflate(layoutResourceId, parent, false);
+
+            holder = new SpinnerHolder();
+            //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);
+            holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
+
+            row.setTag(holder);
+        }
+        else
+        {
+            holder = (SpinnerHolder)row.getTag();
+        }
+
+        DirView dirView = dirs[dirs.length-(position+1)];
+        holder.txtTitle.setText(dirView.dirName);
+        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
+        return row;
+    }
+    
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
         SpinnerHolder holder = null;
 
