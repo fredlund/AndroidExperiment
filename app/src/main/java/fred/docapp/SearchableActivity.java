@@ -136,7 +136,7 @@ public class SearchableActivity extends AppCompatActivity {
                                               @Override
                                               public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                                                   System.out.println("onItemSelected position=" + position+" size="+stack.size());
-                                                  if (position < stack.size()-1 && userIsInteracting) {
+                                                  if (position < stack.size()-1 && position > 0) {
                                                       for (int i = stack.size() - 1; i > position; i--) {
                                                           stack.remove(i);
                                                       }
