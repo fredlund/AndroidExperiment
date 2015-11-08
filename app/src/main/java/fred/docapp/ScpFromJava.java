@@ -5,8 +5,6 @@ package fred.docapp;
  */
 
 import com.jcraft.jsch.*;
-import java.awt.*;
-import javax.swing.*;
 import java.io.*;
 
 public class ScpFromJava {
@@ -32,10 +30,7 @@ public class ScpFromJava {
 
             JSch jsch=new JSch();
             Session session=jsch.getSession(user, host, 22);
-
-            // username and password will be given via UserInfo interface.
-            UserInfo ui=new MyUserInfo();
-            session.setUserInfo(ui);
+            
             session.connect();
 
             // exec 'scp -f rfile' remotely
