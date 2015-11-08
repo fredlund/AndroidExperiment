@@ -30,7 +30,7 @@ public class ScpFromJava {
 
             JSch jsch=new JSch();
             Session session=jsch.getSession(user, host, 22);
-            
+
             session.connect();
 
             // exec 'scp -f rfile' remotely

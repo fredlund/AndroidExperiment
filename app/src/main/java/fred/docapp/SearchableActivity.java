@@ -39,6 +39,7 @@ public class SearchableActivity extends AppCompatActivity {
     SearchableActivity myself = null;
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
+    UserInfo ui;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,8 @@ public class SearchableActivity extends AppCompatActivity {
 
          Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
+        ui = new UserInfo();
+
 
         // Get the intent, verify the action and get the query
         System.out.println("before intent");
@@ -231,8 +234,12 @@ public class SearchableActivity extends AppCompatActivity {
             System.out.println("before stack push");
             System.out.flush();
             stack = new ArrayList<DirView>();
-            //DirView dv = new DirView(name(mloc.root),adapter,found);
-            //stack.push(dv);
+
+            DirView root = new DirView("---",adapter,null);
+            stack.add(root);
+            DirView dv = new DirView(name(mloc.root),adapter,found);
+            stack.add(dv);
+
             System.out.println("after stack push");
             System.out.flush();
 
@@ -294,6 +301,9 @@ public class SearchableActivity extends AppCompatActivity {
                         holder.image.setImageResource(R.drawable.ic_done_white);
                     else
                         holder.image.setImageBitmap(null);
+                    System.out.println("ui is "+ui);
+                    System.out.flush();
+                    ui.getPassword(SearchableActivity.this,new UserHost("fred","tabitha"));
 
                     return true;
                 }
