@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -50,8 +51,12 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
         }
 
         DirView dirView = dirs.get(dirs.size()-(position+1));
-        holder.txtTitle.setText(dirView.dirName);
-        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
+        File f = new File(dirView.dirName);
+        String str = f.getName();
+        str = str.substring(0,Math.min(str.length(),20));
+
+        holder.txtTitle.setText(str);
+        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+str);
         return row;
     }
 
@@ -76,8 +81,12 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
         }
 
         DirView dirView = dirs.get(dirs.size()-(position+1));
-        holder.txtTitle.setText(dirView.dirName);
-        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+dirView.dirName);
+        File f = new File(dirView.dirName);
+        String str = f.getName();
+        str = str.substring(0,Math.min(str.length(),20));
+
+        holder.txtTitle.setText(str);
+        System.out.println("SpinnerAdapter.getView(" + position + "); dirName="+str);
         return row;
     }
 
