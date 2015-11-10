@@ -140,7 +140,9 @@ public class SearchableActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                               @Override
                                               public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                                  System.out.println("onItemSelected position=" + position+" size="+stack.size());
+                                                  System.out.println("ONITEMSELECTED!!! " +
+                                                          "position=" + position+" size="+stack.size());
+                                                  System.out.flush();
                                                   if (position < stack.size()-1 && position > 0) {
                                                       for (int i = stack.size() - 1; i > position; i--) {
                                                           stack.remove(i);
@@ -159,7 +161,8 @@ public class SearchableActivity extends AppCompatActivity {
 
                                               @Override
                                               public void onNothingSelected(AdapterView<?> parent) {
-                                                  System.out.println("onNothingSelected");
+                                                  System.out.println("ONNOTHINGSELECTED");
+                                                  System.out.flush();
                                               }
                                           }
 

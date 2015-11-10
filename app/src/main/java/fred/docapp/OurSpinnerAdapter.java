@@ -50,7 +50,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
             holder = (SpinnerHolder)row.getTag();
         }
 
-        DirView dirView = dirs.get(dirs.size()-(position+1));
+        DirView dirView = dirs.get(position);
         File f = new File(dirView.dirName);
         String str = f.getName();
         str = str.substring(0,Math.min(str.length(),20));
@@ -80,7 +80,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
             holder = (SpinnerHolder)row.getTag();
         }
 
-        DirView dirView = dirs.get(dirs.size()-(position+1));
+        DirView dirView = dirs.get(position);
         File f = new File(dirView.dirName);
         String str = f.getName();
         str = str.substring(0,Math.min(str.length(),20));
