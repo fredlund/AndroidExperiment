@@ -171,6 +171,8 @@ public class SearchableActivity extends AppCompatActivity {
                                                       spinner.setAdapter(spinnerAdapter);
                                                   }
                                                   else {
+                                                      if (stack != null)
+                                                      spinner.setSelection(stack.size()-1);
                                                       Log.i("setOnItemSelected","position wrong or 0");
                                                   }
                                                   Log.i("setOnItemSelected","done");
