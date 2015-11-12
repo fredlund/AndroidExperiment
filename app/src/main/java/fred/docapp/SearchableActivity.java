@@ -285,7 +285,7 @@ public class SearchableActivity extends AppCompatActivity {
                     if (entry.entryType != Entry.EntryType.File) {
                         System.out.println("will try to read " + entry);
                         Entry[] dirEntries = mloc.read_dir(SearchableActivity.this, entry);
-                        if (dirEntries != null && dirEntries.length > 0) {
+                        if (dirEntries != null) { //&& dirEntries.length > 0) {
                             found = dirEntries;
                             System.out.println("numer of entries are :" + dirEntries.length);
                             System.out.flush();
