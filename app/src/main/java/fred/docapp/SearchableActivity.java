@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Intent;
@@ -42,12 +43,31 @@ public class SearchableActivity extends AppCompatActivity {
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
     UserInfo ui;
+    String locateDBlocation = null;
+    String location = null;
+    String userName = null;
+    String passWord = null;
+    String dbLocation = null;
+    String dbUserName = null;
+    String dbPassWord = null;
+    String dbFileLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
+
+        SharedPreferences defaultPreferences = getSharedPreferences("defaults",0);
+        if (defaultPreferences.contains("defaultLibrary")) {
+            location = defaultPreferences.getString("location","");
+            userName = defaultPreferences.getString("userName","");
+            passWord = defaultPreferences.getString("passWord","");
+            dbLocation = defaultPreferences.getString("dbLocation","");
+            dbUserName = defaultPreferences.getString("dbUserName","");
+            dbPassWord = defaultPreferences.getString("dbPassWord","");
+            dbFileLocation = defaultPreferences.getString("dbFileLocation","");
+        }
 
          Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
@@ -145,37 +165,36 @@ public class SearchableActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                               @Override
                                               public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                                  Log.v("setOnItemSelected","stack="+stack);
-                                                  Log.v("setOnItemSelected","ONITEMSELECTED!!! " +
+                                                  Log.v("setOnItemSelected", "stack=" + stack);
+                                                  Log.v("setOnItemSelected", "ONITEMSELECTED!!! " +
                                                           "position=" + position + " size=" + stack.size());
                                                   System.out.flush();
-                                                  if (position < stack.size()-1 && position > 0) {
-                                                      Log.i("setOnItemSelected","correct position; will remove from stack");
+                                                  if (position < stack.size() - 1 && position > 0) {
+                                                      Log.i("setOnItemSelected", "correct position; will remove from stack");
                                                       for (int i = stack.size() - 1; i > position; i--) {
                                                           stack.remove(i);
                                                       }
                                                       Log.i("setOnItemSelected", "correct position; will get");
                                                       DirView dv = stack.get(position);
-                                                      Log.i("setOnItemSelected","correct position; will setAdapter for listview");
+                                                      Log.i("setOnItemSelected", "correct position; will setAdapter for listview");
                                                       listView1.setAdapter(dv.adapter);
                                                       found = dv.entries;
-                                                      Log.i("setOnItemSelected","new spinneradapter");
+                                                      Log.i("setOnItemSelected", "new spinneradapter");
                                                       spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                                                               android.R.layout.simple_spinner_item,
                                                               //R.layout.spinner_item_row,
                                                               //R.id.spinnerText,
                                                               stack);
-                                                      Log.i("setOnItemSelected","setSelection");
+                                                      Log.i("setOnItemSelected", "setSelection");
                                                       spinner.setSelection(position);
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for spinner");
                                                       spinner.setAdapter(spinnerAdapter);
-                                                  }
-                                                  else {
+                                                  } else {
                                                       if (stack != null)
-                                                      spinner.setSelection(stack.size()-1);
-                                                      Log.i("setOnItemSelected","position wrong or 0");
+                                                          spinner.setSelection(stack.size() - 1);
+                                                      Log.i("setOnItemSelected", "position wrong or 0");
                                                   }
-                                                  Log.i("setOnItemSelected","done");
+                                                  Log.i("setOnItemSelected", "done");
                                               }
 
                                               @Override
@@ -185,7 +204,7 @@ public class SearchableActivity extends AppCompatActivity {
                                               }
                                           }
 
-            );
+        );
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

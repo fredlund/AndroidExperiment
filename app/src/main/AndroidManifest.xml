@@ -10,6 +10,7 @@
 
     <application
         android:allowBackup="true"
+        android:debuggable="true"
         android:icon="@mipmap/books"
         android:logo="@mipmap/books"
         android:label="@string/app_name"
