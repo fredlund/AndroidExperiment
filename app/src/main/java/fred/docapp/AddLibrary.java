@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class AddLibrary extends AppCompatActivity {
     boolean is_new = true;
     String libraryName;
@@ -66,6 +69,12 @@ if (extras != null) {
                     editor.putString("library_password", editTextToString(R.id.library_password));
                     editor.putString("library_username", editTextToString(R.id.library_username));
                     editor.commit();
+                    SharedPreferences appData = getSharedPreferences("appData",0);
+                    Set<String> libraries = appData.getStringSet("libraries", new
+                            HashSet<String>());
+                    SharedPreferences.Editor appDataEditor = appData.edit();
+                    libraries.add(library);
+                    appDataEditor.putStringSet("libraries",libraries);
                     finish();
                 }
             }

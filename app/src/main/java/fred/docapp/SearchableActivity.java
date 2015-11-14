@@ -239,6 +239,18 @@ public boolean onOptionsItemSelected(MenuItem item) {
                                     System.out.println("creating new intent for addlibrary");
                                     Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
                                     newIntent.putExtra("libraryName", library);
+                                    newIntent.putExtra("db_location",libraryPreferences.getString
+                                            ("db_location",""));
+                                    newIntent.putExtra("db_username",libraryPreferences.getString
+                                            ("db_username",""));
+                                    newIntent.putExtra("db_password",libraryPreferences.getString
+                                            ("db_password",""));
+                                    newIntent.putExtra("library_username",libraryPreferences
+                                            .getString
+                                            ("library_username",""));
+                                    newIntent.putExtra("library_password",libraryPreferences
+                                            .getString
+                                            ("library_password",""));
                                     startActivity(newIntent);
 
                                 }
