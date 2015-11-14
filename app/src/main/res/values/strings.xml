@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hacc</string>
+    <string name="app_name">Billy</string>
     <string name="action_settings">Settings</string>
     <string name="search_hint">"search_hint"</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>

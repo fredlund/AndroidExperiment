@@ -14,4 +14,12 @@
             android:id="@+id/menu_download"
         app:showAsAction="never"
         android:title="Download"/>
+    <item
+            android:id="@+id/menu_add_library"
+            app:showAsAction="never"
+            android:title="New Library"/>
+    <item
+        android:id="@+id/menu_edit_library"
+        app:showAsAction="never"
+        android:title="Edit Library"/>
 </menu>

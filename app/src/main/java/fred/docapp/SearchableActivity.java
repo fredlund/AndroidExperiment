@@ -1,10 +1,12 @@
 package fred.docapp;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,12 +14,14 @@ import android.content.Intent;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
@@ -43,14 +47,10 @@ public class SearchableActivity extends AppCompatActivity {
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
     UserInfo ui;
+    String library = null;
     String locateDBlocation = null;
-    String location = null;
-    String userName = null;
-    String passWord = null;
-    String dbLocation = null;
-    String dbUserName = null;
-    String dbPassWord = null;
-    String dbFileLocation = null;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,16 +58,6 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.flush();
         super.onCreate(savedInstanceState);
 
-        SharedPreferences defaultPreferences = getSharedPreferences("defaults",0);
-        if (defaultPreferences.contains("defaultLibrary")) {
-            location = defaultPreferences.getString("location","");
-            userName = defaultPreferences.getString("userName","");
-            passWord = defaultPreferences.getString("passWord","");
-            dbLocation = defaultPreferences.getString("dbLocation","");
-            dbUserName = defaultPreferences.getString("dbUserName","");
-            dbPassWord = defaultPreferences.getString("dbPassWord","");
-            dbFileLocation = defaultPreferences.getString("dbFileLocation","");
-        }
 
          Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
@@ -214,6 +204,71 @@ public class SearchableActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    @Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.menu_add_library:
+            System.out.println("creating new intent");
+            Intent intent = new Intent(this, AddLibrary.class);
+            startActivity(intent);
+            break;
+        case R.id.menu_edit_library:
+            final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+
+            System.out.println("have builder"); System.out.flush();
+            builder.setTitle("Edit library spec");
+            builder.setMessage("Library to edit ");
+            final EditText input = new EditText(SearchableActivity.this);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+            builder.setView(input);
+            System.out.println("setView"); System.out.flush();
+
+            library=null;
+
+            builder.setNegativeButton("login",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            /** DO THE METHOD HERE WHEN PROCEED IS CLICKED*/
+                            library = input.getText().toString();
+                            System.out.println("user_text is "+library);
+                            return;
+                        }
+                    })
+                    .setPositiveButton("cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    library = null;
+                                    return;
+                                }
+                            });
+
+            // create alert dialog
+            //AlertDialog alertDialog = alertDialogBuilder.create();
+
+            System.out.println("setbuttons done"); System.out.flush();
+            // show it
+            builder.show();
+
+            if (library != null) {
+            SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+            if (libraryPreferences.contains("is_created")) {
+            System.out.println("creating new intent");
+            Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
+                newIntent.putExtra("libraryName",library);
+            startActivity(newIntent);
+
+            }
+            }
+
+            break;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+        return super.onOptionsItemSelected(item);
+}
 
     //@Override
     protected void onNewIntent(Intent intent) {

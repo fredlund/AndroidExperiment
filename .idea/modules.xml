@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidExperiment.iml" filepath="$PROJECT_DIR$/AndroidExperiment.iml" />
-      <module fileurl="file://$PROJECT_DIR$/DocApp.iml" filepath="$PROJECT_DIR$/DocApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/jsch-0.1.53/jsch-0.1.53.iml" filepath="$PROJECT_DIR$/jsch-0.1.53/jsch-0.1.53.iml" />
     </modules>
