@@ -47,7 +47,6 @@ public class SearchableActivity extends AppCompatActivity {
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
     UserInfo ui;
-    String library = null;
     String locateDBlocation = null;
 
 
@@ -226,21 +225,32 @@ public boolean onOptionsItemSelected(MenuItem item) {
             builder.setView(input);
             System.out.println("setView"); System.out.flush();
 
-            library=null;
 
-            builder.setNegativeButton("login",
+            builder.setNegativeButton("edit library",
                     new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
+                        public void onClick(DialogInterface dialog, int id) {
                             /** DO THE METHOD HERE WHEN PROCEED IS CLICKED*/
-                            library = input.getText().toString();
-                            System.out.println("user_text is "+library);
+                            String library = input.getText().toString();
+                            System.out.println("user_text is " + library);
+                            System.out.println("after builder");
+                                System.out.println("library is " + library);
+                                SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+                                if (libraryPreferences.contains("is_created")) {
+                                    System.out.println("creating new intent for addlibrary");
+                                    Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
+                                    newIntent.putExtra("libraryName", library);
+                                    startActivity(newIntent);
+
+                                }
+                            System.out.flush();
+
                             return;
                         }
                     })
                     .setPositiveButton("cancel",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    library = null;
+                                    System.out.println("cancelling");
                                     return;
                                 }
                             });
@@ -250,18 +260,9 @@ public boolean onOptionsItemSelected(MenuItem item) {
 
             System.out.println("setbuttons done"); System.out.flush();
             // show it
-            builder.show();
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
 
-            if (library != null) {
-            SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-            if (libraryPreferences.contains("is_created")) {
-            System.out.println("creating new intent");
-            Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
-                newIntent.putExtra("libraryName",library);
-            startActivity(newIntent);
-
-            }
-            }
 
             break;
         default:
