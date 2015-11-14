@@ -31,21 +31,19 @@ public class AddLibrary extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
 if (extras != null) {
-    libraryName = extras.getString("libraryName");
    is_new = false;
 }
+        System.out.println("in onCreate; is_new = "+is_new);
         if (!is_new) {
-            EditText libraryNameView = (EditText) findViewById(R.id.libraryName);
-            libraryNameView.setText(libraryName);
-            newItent.putExtra("db_location", editTextToString
-                    (R.id
-                            .db_location));
-            editor.putString("db_username", editTextToString(R.id.db_username));
-            editor.putString("db_password", editTextToString(R.id.db_password));
-            editor.putString("library_password", editTextToString(R.id.library_password));
-            editor.putString("library_username", editTextToString(R.id.library_username));
+            System.out.println("extras.getString(libraryName)=>"+extras.getString("libraryName"));
+            System.out.println("extras.getString(db_location)=>"+extras.getString("db_location"));
+            putStringToEditText(extras.getString("libraryName"), R.id.libraryName);
+            putStringToEditText(extras.getString("db_location"), R.id.db_location);
+            putStringToEditText(extras.getString("db_username"), R.id.db_username);
+            putStringToEditText(extras.getString("db_password"), R.id.db_password);
+            putStringToEditText(extras.getString("library_username"), R.id.library_username);
+            putStringToEditText(extras.getString("library_password"), R.id.library_password);
         }
-
 
         final Button create_button = (Button) findViewById(R.id.create_library);
         create_button.setOnClickListener(new View.OnClickListener() {
@@ -80,5 +78,10 @@ if (extras != null) {
                     finish();
             }
         });
+    }
+
+    void putStringToEditText(String string, int id) {
+        EditText editText = (EditText) findViewById(id);
+        editText.setText(string);
     }
 }
