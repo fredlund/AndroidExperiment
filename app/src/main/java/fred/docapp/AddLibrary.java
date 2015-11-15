@@ -17,7 +17,7 @@ public class AddLibrary extends AppCompatActivity {
     String libraryName;
 
     String editTextToString(int id)  {
-        EditText editText = (EditText) findViewById(R.id.libraryName);
+        EditText editText = (EditText) findViewById(id);
         return editText.getText().toString();
     }
 
@@ -68,6 +68,8 @@ if (extras != null) {
                     editor.putString("db_password", editTextToString(R.id.db_password));
                     editor.putString("library_password", editTextToString(R.id.library_password));
                     editor.putString("library_username", editTextToString(R.id.library_username));
+                    System.out.println("db_location=" + editTextToString(R.id.db_location));
+                    System.out.println("db_password="+editTextToString(R.id.db_password));
                     editor.commit();
                     SharedPreferences appData = getSharedPreferences("appData",0);
                     Set<String> libraries = appData.getStringSet("libraries", new
@@ -75,6 +77,7 @@ if (extras != null) {
                     SharedPreferences.Editor appDataEditor = appData.edit();
                     libraries.add(library);
                     appDataEditor.putStringSet("libraries",libraries);
+                    appDataEditor.commit();
                     finish();
                 }
             }
