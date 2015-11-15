@@ -38,12 +38,12 @@ if (extras != null) {
 }
         System.out.println("in onCreate; is_new = "+is_new);
         if (!is_new) {
-            System.out.println("extras.getString(libraryName)=>"+extras.getString("libraryName"));
-            System.out.println("extras.getString(db_location)=>"+extras.getString("db_location"));
             putStringToEditText(extras.getString("libraryName"), R.id.libraryName);
+            putStringToEditText(extras.getString("db_host"), R.id.db_host);
             putStringToEditText(extras.getString("db_location"), R.id.db_location);
             putStringToEditText(extras.getString("db_username"), R.id.db_username);
             putStringToEditText(extras.getString("db_password"), R.id.db_password);
+            putStringToEditText(extras.getString("library_host"), R.id.library_host);
             putStringToEditText(extras.getString("library_username"), R.id.library_username);
             putStringToEditText(extras.getString("library_password"), R.id.library_password);
         }
@@ -63,13 +63,13 @@ if (extras != null) {
                 } else {
                     SharedPreferences.Editor editor = libraryPreferences.edit();
                     editor.putBoolean("is_created", true);
+                    editor.putString("db_host", editTextToString(R.id.db_host));
                     editor.putString("db_location", editTextToString(R.id.db_location));
                     editor.putString("db_username", editTextToString(R.id.db_username));
                     editor.putString("db_password", editTextToString(R.id.db_password));
-                    editor.putString("library_password", editTextToString(R.id.library_password));
+                    editor.putString("library_host", editTextToString(R.id.library_host));
                     editor.putString("library_username", editTextToString(R.id.library_username));
-                    System.out.println("db_location=" + editTextToString(R.id.db_location));
-                    System.out.println("db_password="+editTextToString(R.id.db_password));
+                    editor.putString("library_password", editTextToString(R.id.library_password));
                     editor.commit();
                     SharedPreferences appData = getSharedPreferences("appData",0);
                     Set<String> libraries = appData.getStringSet("libraries", new

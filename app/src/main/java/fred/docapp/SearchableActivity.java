@@ -333,12 +333,17 @@ public boolean onOptionsItemSelected(MenuItem item) {
                         System.out.println("db_password=" + libraryPreferences.getString("db_password", ""));
                         Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
                         newIntent.putExtra("libraryName", library);
+                        newIntent.putExtra("db_host", libraryPreferences.getString
+                                ("db_host", ""));
                         newIntent.putExtra("db_location", libraryPreferences.getString
                                 ("db_location", ""));
                         newIntent.putExtra("db_username", libraryPreferences.getString
                                 ("db_username", ""));
                         newIntent.putExtra("db_password", libraryPreferences.getString
                                 ("db_password", ""));
+                        newIntent.putExtra("library_host", libraryPreferences
+                                .getString
+                                        ("library_host", ""));
                         newIntent.putExtra("library_username", libraryPreferences
                                 .getString
                                         ("library_username", ""));
@@ -450,7 +455,9 @@ public boolean onOptionsItemSelected(MenuItem item) {
     void doMySearch(final String query,List<Map<String,Object>> listValues) {
       System.out.println("will search for " + query);
         System.out.flush();
-        final MLocate mloc = new MLocate();
+	currentLibrary = find_current_library(currentLibrary);
+	if (currentLibrary != null) {
+        final MLocate mloc = new MLocate(currentLibrary);
         final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
@@ -589,10 +596,42 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	};
 	task.execute((Void[]) null);
 
+	}
+	else {
+	    AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
+                    ok.setTitle("Unspecified Library");
+                    ok.setMessage("Cannot figure out which library to use");
 
+                    ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
 
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
 
+                    });
 
+                    AlertDialog alert = ok.create();
+                    alert.show();
+	}
+    }
+
+    String find_current_library(String currentLibrary) {
+	SharedPreferences data =
+	    getSharedPreferences("appData", 0);
+	Set<String> libraries =
+	    data.getStringSet("libraries", new HashSet<String>());
+	DefaultLibrary =
+	    data.getString("default_library", "");
+	
+	if (currentLibrary != "" && libraries.contains(currentLibrary)
+	    return currentLibrary;
+	if (DefaultLibrary != "" && libraries.contains(DefaultLibrary))
+	    return DefaultLibrary;
+	if (libraries.size() == 1) {
+	    String[] libraryObjects = libraries.toArray(new String[1]);
+	    return libraryObjects[0];
+	}
+	return null;
     }
 
     String name(String path) {
