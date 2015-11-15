@@ -54,7 +54,7 @@ if (extras != null) {
 
                 String library = editTextToString(R.id.libraryName);
                 SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-                if (libraryPreferences.contains("is_created")) {
+                if (is_new && libraryPreferences.contains("is_created")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(AddLibrary.this);
                     builder.setTitle("Error");
                     builder.setMessage("Library " + library + " already exists");

@@ -15,6 +15,10 @@
         app:showAsAction="never"
         android:title="Download"/>
     <item
+            android:id="@+id/menu_set_default_library"
+        app:showAsAction="never"
+        android:title="Set default library"/>
+    <item
             android:id="@+id/menu_add_library"
             app:showAsAction="never"
             android:title="New Library"/>
@@ -22,4 +26,8 @@
         android:id="@+id/menu_edit_library"
         app:showAsAction="never"
         android:title="Edit Library"/>
+    <item
+        android:id="@+id/menu_delete_library"
+        app:showAsAction="never"
+        android:title="Delete Library"/>
 </menu>

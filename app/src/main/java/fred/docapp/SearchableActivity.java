@@ -210,24 +210,26 @@ public class SearchableActivity extends AppCompatActivity {
 public boolean onOptionsItemSelected(MenuItem item) {
     // Handle item selection
     switch (item.getItemId()) {
-        case R.id.menu_add_library:
+        case R.id.menu_add_library: {
             System.out.println("creating new intent");
             Intent intent = new Intent(this, AddLibrary.class);
             startActivity(intent);
+        }
             break;
-        case R.id.menu_edit_library:
-            SharedPreferences data = getSharedPreferences("appData",0);
+        case R.id.menu_delete_library: {
+            SharedPreferences data = getSharedPreferences("appData", 0);
             Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
             final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
 
             final String[] librariesString = libraries.toArray(new String[libraries.size()]);
-            System.out.println("have builder"); System.out.flush();
+            System.out.println("have builder");
+            System.out.flush();
             builder.setTitle("Edit library spec");
             //builder.setMessage("Library to edit ");
             //final EditText input = new EditText(SearchableActivity.this);
             //input.setInputType(InputType.TYPE_CLASS_TEXT);
             for (String library : libraries)
-                System.out.println("library: "+library);
+                System.out.println("library: " + library);
             System.out.println();
 
             //builder.setView(input);
@@ -237,8 +239,92 @@ public boolean onOptionsItemSelected(MenuItem item) {
             builder.setItems(librariesString, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    System.out.println("which is "+which);
-                    String library = librariesString[which];
+                    System.out.println("which is " + which);
+                    final String library = librariesString[which];
+                    System.out.println("user_text is " + library);
+                    final SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+                    AlertDialog.Builder confirmDelete = new AlertDialog.Builder(SearchableActivity.this);
+                    confirmDelete.setTitle("Confirm");
+                    confirmDelete.setMessage("Are you sure?");
+
+                    confirmDelete.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            SharedPreferences appData = getSharedPreferences("appData", 0);
+                            Set<String> libraries = appData.getStringSet("libraries", new
+                                    HashSet<String>());
+                            SharedPreferences.Editor appDataEditor = appData.edit();
+                            libraries.remove(library);
+                            appDataEditor.putStringSet("libraries", libraries);
+                            appDataEditor.commit();
+                            SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
+                            libraryEditor.clear();
+                            libraryEditor.commit();
+                            dialog.dismiss();
+                        }
+
+                    });
+
+                    confirmDelete.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    AlertDialog alert = confirmDelete.create();
+                    alert.show();
+
+                }
+            });
+
+
+            builder.setPositiveButton("cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            System.out.println("cancelling");
+                            return;
+                        }
+                    });
+
+
+            // create alert dialog
+            //AlertDialog alertDialog = alertDialogBuilder.create();
+
+            System.out.println("setbuttons done");
+            System.out.flush();
+            // show it
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+        }
+            break;
+        case R.id.menu_edit_library: {
+            SharedPreferences edit_data = getSharedPreferences("appData", 0);
+            Set<String> edit_libraries = edit_data.getStringSet("libraries", new HashSet<String>());
+            final AlertDialog.Builder edit_builder = new AlertDialog.Builder(SearchableActivity.this);
+
+            final String[] edit_librariesString = edit_libraries.toArray(new String[edit_libraries.size()]);
+            System.out.println("have builder");
+            System.out.flush();
+            edit_builder.setTitle("Edit library spec");
+            //builder.setMessage("Library to edit ");
+            //final EditText input = new EditText(SearchableActivity.this);
+            //input.setInputType(InputType.TYPE_CLASS_TEXT);
+            for (String library : edit_libraries)
+                System.out.println("library: " + library);
+            System.out.println();
+
+            //builder.setView(input);
+            //System.out.println("setView"); System.out.flush();
+
+
+            edit_builder.setItems(edit_librariesString, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    System.out.println("which is " + which);
+                    String library = edit_librariesString[which];
                     System.out.println("user_text is " + library);
                     SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
                     if (libraryPreferences.contains("is_created")) {
@@ -264,60 +350,79 @@ public boolean onOptionsItemSelected(MenuItem item) {
                 }
             });
 
-            builder.setNegativeButton("edit library",
+
+            edit_builder.setPositiveButton("cancel",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-/*
-                            String library = input.getText().toString();
-                            System.out.println("user_text is " + library);
-                            System.out.println("after builder");
-                                System.out.println("library is " + library);
-                                SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-                                if (libraryPreferences.contains("is_created")) {
-                                    System.out.println("creating new intent for addlibrary");
-                                    System.out.println("db_location="+libraryPreferences.getString("db_location",""));
-                                    System.out.println("db_password="+libraryPreferences.getString("db_password",""));
-                                    Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
-                                    newIntent.putExtra("libraryName", library);
-                                    newIntent.putExtra("db_location",libraryPreferences.getString
-                                            ("db_location",""));
-                                    newIntent.putExtra("db_username",libraryPreferences.getString
-                                            ("db_username",""));
-                                    newIntent.putExtra("db_password",libraryPreferences.getString
-                                            ("db_password",""));
-                                    newIntent.putExtra("library_username",libraryPreferences
-                                            .getString
-                                            ("library_username",""));
-                                    newIntent.putExtra("library_password",libraryPreferences
-                                            .getString
-                                            ("library_password",""));
-                                    startActivity(newIntent);
-
-                                }
-                            System.out.flush();
-*/
+                            System.out.println("cancelling");
                             return;
                         }
-                    })
-                    .setPositiveButton("cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    System.out.println("cancelling");
-                                    return;
-                                }
-                            });
+                    });
 
 
             // create alert dialog
             //AlertDialog alertDialog = alertDialogBuilder.create();
 
-            System.out.println("setbuttons done"); System.out.flush();
+            System.out.println("setbuttons done");
+            System.out.flush();
+            // show it
+            AlertDialog edit_alertDialog = edit_builder.create();
+            edit_alertDialog.show();
+        }
+
+            break;
+        case R.id.menu_set_default_library: {
+            final SharedPreferences data = getSharedPreferences("appData", 0);
+            Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
+            final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+
+            final String[] librariesString = libraries.toArray(new String[libraries.size()]);
+            System.out.println("have builder");
+            System.out.flush();
+            builder.setTitle("Set default library");
+            //builder.setMessage("Library to edit ");
+            //final EditText input = new EditText(SearchableActivity.this);
+            //input.setInputType(InputType.TYPE_CLASS_TEXT);
+            for (String library : libraries)
+                System.out.println("library: " + library);
+            System.out.println();
+
+            //builder.setView(input);
+            //System.out.println("setView"); System.out.flush();
+
+
+            builder.setItems(librariesString, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    System.out.println("which is " + which);
+                    final String library = librariesString[which];
+                    System.out.println("user_text is " + library);
+                    SharedPreferences.Editor edit = data.edit();
+                    edit.putString("default_library", library);
+                }});
+
+
+            builder.setPositiveButton("cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            System.out.println("cancelling");
+                            return;
+                        }
+                    });
+
+
+            // create alert dialog
+            //AlertDialog alertDialog = alertDialogBuilder.create();
+
+            System.out.println("setbuttons done");
+            System.out.flush();
             // show it
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
 
 
             break;
+        }
         default:
             return super.onOptionsItemSelected(item);
     }
