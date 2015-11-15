@@ -11,8 +11,8 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="30dp"
-        android:paddingBottom="30dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <TextView
             android:layout_width="120dp"
@@ -34,8 +34,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingBottom="30dp">
+        android:paddingTop="0dp"
+        android:paddingBottom="10dp">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -121,7 +121,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="30dp">
+        android:paddingBottom="10dp">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -189,21 +189,27 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp">
+        android:paddingTop="10dp"
+        android:layout_gravity="center"
+        android:gravity="center">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="save"
             android:id="@+id/create_library"
-            android:enabled="true" />
+            android:enabled="true"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="cancel"
             android:id="@+id/cancel_add_library"
-            android:enabled="true" />
+            android:enabled="true"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp" />
     </LinearLayout>
 </LinearLayout>
     </ScrollView>

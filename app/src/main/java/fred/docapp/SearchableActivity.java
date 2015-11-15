@@ -50,6 +50,7 @@ public class SearchableActivity extends AppCompatActivity {
     Spinner spinner = null;
     UserInfo ui;
     String locateDBlocation = null;
+    String currentLibrary = null;
 
 
 
@@ -255,6 +256,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
                                     HashSet<String>());
                             SharedPreferences.Editor appDataEditor = appData.edit();
                             libraries.remove(library);
+                            appDataEditor.remove("libraries");
                             appDataEditor.putStringSet("libraries", libraries);
                             appDataEditor.commit();
                             SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
@@ -620,10 +622,10 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	    getSharedPreferences("appData", 0);
 	Set<String> libraries =
 	    data.getStringSet("libraries", new HashSet<String>());
-	DefaultLibrary =
+	String DefaultLibrary =
 	    data.getString("default_library", "");
 	
-	if (currentLibrary != "" && libraries.contains(currentLibrary)
+	if (currentLibrary != "" && libraries.contains(currentLibrary))
 	    return currentLibrary;
 	if (DefaultLibrary != "" && libraries.contains(DefaultLibrary))
 	    return DefaultLibrary;

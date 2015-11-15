@@ -62,6 +62,7 @@ if (extras != null) {
                     AlertDialog dialog = builder.show();
                 } else {
                     SharedPreferences.Editor editor = libraryPreferences.edit();
+                    editor.clear();
                     editor.putBoolean("is_created", true);
                     editor.putString("db_host", editTextToString(R.id.db_host));
                     editor.putString("db_location", editTextToString(R.id.db_location));
@@ -75,6 +76,7 @@ if (extras != null) {
                     Set<String> libraries = appData.getStringSet("libraries", new
                             HashSet<String>());
                     SharedPreferences.Editor appDataEditor = appData.edit();
+                    appDataEditor.remove("libraries");
                     libraries.add(library);
                     appDataEditor.putStringSet("libraries",libraries);
                     appDataEditor.commit();

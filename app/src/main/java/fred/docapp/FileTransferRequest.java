@@ -1,4 +1,7 @@
-public class FileTransferRequest implements Parceable {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class FileTransferRequest implements Parcelable {
     String host;
     String userName;
     String passWord;
@@ -15,10 +18,12 @@ public class FileTransferRequest implements Parceable {
     }
 
     public FileTransferRequest(Parcel in) {
-	FileTransferRequest(in.readString(),
-			    in.readString(),
-			    in.readString(),
-			    in.readStringArray());
+		int length = in.readInt();
+		host = in.readString();
+		userName = in.readString();
+		passWord = in.readString();
+		files = new String[length];
+		in.readStringArray(files);
     }
 
     public int describeContents() {
@@ -26,14 +31,15 @@ public class FileTransferRequest implements Parceable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(files.length);
 	dest.writeString(host);
 	dest.writeString(userName);
 	dest.writeString(passWord);
 	dest.writeStringArray(files);
     }
 
-    public static final Parelable.Creator CREATOR =
-	new Parceable.Creator() {
+    public static final Parcelable.Creator CREATOR =
+	new Parcelable.Creator() {
 	    public FileTransferRequest createFromParcel(Parcel in) {
 		return new FileTransferRequest(in);
 	    }
