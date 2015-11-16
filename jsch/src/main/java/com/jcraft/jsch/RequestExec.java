@@ -27,7 +27,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 class RequestExec extends Request{
   private byte[] command=new byte[0];

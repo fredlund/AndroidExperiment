@@ -33,11 +33,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      http://www.socks.nec.com/protocol/socks4.protocol
  */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 import java.io.*;
 import java.net.*;
-import java.net.Proxy;
+//import java.net.Proxy;
 
 public class ProxySOCKS4 implements Proxy {
   private static int DEFAULTPORT=1080;

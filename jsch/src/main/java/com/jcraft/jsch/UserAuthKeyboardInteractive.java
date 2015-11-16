@@ -27,7 +27,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 class UserAuthKeyboardInteractive extends UserAuth{
   public boolean start(Session session) throws Exception{

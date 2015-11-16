@@ -27,11 +27,11 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 import java.io.*;
 import java.net.*;
-import java.net.Proxy;
+//import java.net.Proxy;
 
 public class ProxyHTTP implements Proxy {
   private static int DEFAULTPORT=80;

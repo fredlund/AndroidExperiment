@@ -27,7 +27,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 public abstract class UserAuth{
   protected static final int SSH_MSG_USERAUTH_REQUEST=               50;

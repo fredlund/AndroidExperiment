@@ -33,11 +33,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    - RFC 1929  Username/Password Authentication for SOCKS V5. 
  */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 import java.io.*;
 import java.net.*;
-import java.net.Proxy;
+//import java.net.Proxy;
 
 public class ProxySOCKS5 implements Proxy {
   private static int DEFAULTPORT=1080;

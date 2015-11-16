@@ -27,7 +27,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 class JSchPartialAuthException extends JSchException{
   //private static final long serialVersionUID=-378849862323360367L;

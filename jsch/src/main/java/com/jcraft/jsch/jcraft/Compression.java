@@ -27,7 +27,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.jcraft.com.jcraft.olle.pelle;
+package com.jcraft.jsch.jcraft;
 import com.jcraft.jzlib.*;
 import com.jcraft.jsch.*;
 

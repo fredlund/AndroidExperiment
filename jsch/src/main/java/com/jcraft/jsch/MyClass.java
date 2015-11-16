@@ -1,4 +1,4 @@
-package com.jcraft.com.jcraft.olle;
+package com.jcraft.jsch;
 
 public class MyClass {
 }
