@@ -51,7 +51,7 @@ public class SearchableActivity extends AppCompatActivity {
     UserInfo ui;
     String locateDBlocation = null;
     String currentLibrary = null;
-    Map<String,Entry> toDownload = new HashMap<String,Entry>();
+    Map<String, Entry> toDownload = new HashMap<String, Entry>();
 
 
     @Override
@@ -59,9 +59,10 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
-        currentLibrary = null;
+        SharedPreferences appData = getSharedPreferences("appData",0);
+        currentLibrary = appData.getString("default_library",null);
 
-         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
         ui = new UserInfo();
 
@@ -128,7 +129,7 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.flush();
         //try { wait(200); } catch (InterruptedException exc) {};
         ComponentName cn = new ComponentName(this, SearchableActivity.class);
-       // try { wait(200); } catch (InterruptedException exc) {};
+        // try { wait(200); } catch (InterruptedException exc) {};
         searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
         //try { wait(200); } catch (InterruptedException exc) {};
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
@@ -140,20 +141,24 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.flush();
         //try { wait(200); } catch (InterruptedException exc) {};
         if (menu.findItem(R.id.spinner) == null) {
-            try { wait(200); } catch (InterruptedException exc) {};
+            try {
+                wait(200);
+            } catch (InterruptedException exc) {
+            }
+            ;
             new Exception().printStackTrace();
         }
-       // try { wait(200); } catch (InterruptedException exc) {};
+        // try { wait(200); } catch (InterruptedException exc) {};
         spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
         //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("Spinner is " + spinner + " spinner adapter is " + spinnerAdapter);
         System.out.flush();
         spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
         // content
-        System.out.println("stack is "+stack);
+        System.out.println("stack is " + stack);
         System.out.flush();
         if (stack != null)
-          spinner.setSelection(stack.size()-1);
+            spinner.setSelection(stack.size() - 1);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                               @Override
                                               public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -208,310 +213,335 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     @Override
-public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle item selection
-    switch (item.getItemId()) {
-        case R.id.menu_download: {
-            if (toDownload.size()>0) {
-                final String library = find_current_library(currentLibrary);
-                final String username;
-                final String location;
-                if (library != null) {
-                    if ((location = find_location(library)) != null) {
-                        if ((username = find_username(library)) != null) {
-                            final String password = find_password(library);
-                            if (password == null) {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.menu_download: {
+                System.out.println("in download");
+                if (toDownload.size() > 0) {
+                    final String library = find_current_library();
+                    final String username;
+                    final String host;
+                    if (library != null) {
+                        final SharedPreferences libraryPrefs = getSharedPreferences(library,0);
+                        if ((host = find_host(library,libraryPrefs)) != null) {
+                            if ((username = find_username(library,libraryPrefs)) != null) {
+                                final String password = find_password(library,libraryPrefs);
+                                if (password == null) {
 
-                                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
 
-                                builder.setTitle("password");
-                                builder.setMessage("password");
+                                    builder.setTitle("password");
+                                    builder.setMessage("password");
 
-                                final EditText input = new EditText(SearchableActivity.this);
+                                    final EditText input = new EditText(SearchableActivity.this);
 
-                                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                                builder.setView(input);
+                                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                    builder.setView(input);
 
-                                builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                    builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
 
-                                    public void onClick(DialogInterface dialog, int which) {
+                                        public void onClick(DialogInterface dialog, int which) {
 
-                                        String result = input.getText().toString();
-                                        String files[] = new String[toDownload.size()];
-                                        int i = 0;
-                                        for (Entry entry : toDownload.values()) {
-                                            files[i++] = entry.dirName + "/" + entry.fileName;
+                                            String result = input.getText().toString();
+                                            String files[] = new String[toDownload.size()];
+                                            int i = 0;
+                                            for (Entry entry : toDownload.values()) {
+                                                files[i++] = entry.dirName + "/" + entry.fileName;
+                                            }
+                                            FileTransferRequest ftr = new FileTransferRequest(host, username, result, files);
+                                            System.out.println("making intent");
+                                            Intent intent = new Intent(SearchableActivity.this, FileService.class);
+                                            intent.putExtra("fred.docApp.FileTransferRequest", ftr);
+                                            System.out.println("intent prepared");
+                                            startService(intent);
+
+
                                         }
-                                        FileTransferRequest ftr = new FileTransferRequest(location,username,password,files);
-                                        Intent intent = new Intent(SearchableActivity.this, FileService.class);
-                                        intent.putExtra("fred.docApp.FileTransferRequest",ftr);
-                                        startService(intent);
 
+                                    });
 
+                                    builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
 
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+
+                                } else {
+                                    String files[] = new String[toDownload.size()];
+                                    int i = 0;
+                                    for (Entry entry : toDownload.values()) {
+                                        files[i++] = entry.dirName + "/" + entry.fileName;
                                     }
+                                    FileTransferRequest ftr = new FileTransferRequest(host, username, password, files);
+                                    System.out.println("making intent");
+                                    Intent intent = new Intent(SearchableActivity.this, FileService.class);
+                                    intent.putExtra("fred.docApp.FileTransferRequest", ftr);
+                                    System.out.println("intent prepared");
+                                    startService(intent);
 
-                                });
-
-                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-
+                                }
+                            } else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                                builder.setTitle("Error");
+                                builder.setMessage("Don't know which username to use");
+                                builder.setPositiveButton("OK", null);
+                                AlertDialog dialog = builder.show();
                             }
+                        } else {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                            builder.setTitle("Error");
+                            builder.setMessage("Don't know which host to contact");
+                            builder.setPositiveButton("OK", null);
+                            AlertDialog dialog = builder.show();
                         }
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                         builder.setTitle("Error");
-                        builder.setMessage("Don't know which library to use");
+                        builder.setMessage("Don't know in which library the items are located");
                         builder.setPositiveButton("OK", null);
                         AlertDialog dialog = builder.show();
                     }
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                     builder.setTitle("Error");
-                    builder.setMessage("Don't know where library is located");
+                    builder.setMessage("No files to download");
                     builder.setPositiveButton("OK", null);
                     AlertDialog dialog = builder.show();
                 }
-            } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-                builder.setTitle("Error");
-                builder.setMessage("No files to download");
-                builder.setPositiveButton("OK", null);
-                AlertDialog dialog = builder.show();
             }
-        }
-        break;
-        case R.id.menu_add_library: {
-            System.out.println("creating new intent");
-            Intent intent = new Intent(this, AddLibrary.class);
-            startActivity(intent);
-        }
             break;
-        case R.id.menu_delete_library: {
-            SharedPreferences data = getSharedPreferences("appData", 0);
-            Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
-            final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-
-            final String[] librariesString = libraries.toArray(new String[libraries.size()]);
-            System.out.println("have builder");
-            System.out.flush();
-            builder.setTitle("Edit library spec");
-            //builder.setMessage("Library to edit ");
-            //final EditText input = new EditText(SearchableActivity.this);
-            //input.setInputType(InputType.TYPE_CLASS_TEXT);
-            for (String library : libraries)
-                System.out.println("library: " + library);
-            System.out.println();
-
-            //builder.setView(input);
-            //System.out.println("setView"); System.out.flush();
-
-
-            builder.setItems(librariesString, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    System.out.println("which is " + which);
-                    final String library = librariesString[which];
-                    System.out.println("user_text is " + library);
-                    final SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-                    AlertDialog.Builder confirmDelete = new AlertDialog.Builder(SearchableActivity.this);
-                    confirmDelete.setTitle("Confirm");
-                    confirmDelete.setMessage("Are you sure?");
-
-                    confirmDelete.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            SharedPreferences appData = getSharedPreferences("appData", 0);
-                            Set<String> libraries = appData.getStringSet("libraries", new
-                                    HashSet<String>());
-                            SharedPreferences.Editor appDataEditor = appData.edit();
-                            Set<String> copiedLibraries = new HashSet<String>(libraries);
-                            copiedLibraries.remove(library);
-                            appDataEditor.remove("libraries");
-                            appDataEditor.putStringSet("libraries", copiedLibraries);
-                            appDataEditor.commit();
-                            SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
-                            libraryEditor.clear();
-                            libraryEditor.commit();
-                            dialog.dismiss();
-                        }
-
-                    });
-
-                    confirmDelete.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-
-                    AlertDialog alert = confirmDelete.create();
-                    alert.show();
-
-                }
-            });
-
-
-            builder.setPositiveButton("cancel",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            System.out.println("cancelling");
-                            return;
-                        }
-                    });
-
-
-            // create alert dialog
-            //AlertDialog alertDialog = alertDialogBuilder.create();
-
-            System.out.println("setbuttons done");
-            System.out.flush();
-            // show it
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-
-        }
+            case R.id.menu_add_library: {
+                System.out.println("creating new intent");
+                Intent intent = new Intent(this, AddLibrary.class);
+                startActivity(intent);
+            }
             break;
-        case R.id.menu_edit_library: {
-            SharedPreferences edit_data = getSharedPreferences("appData", 0);
-            Set<String> edit_libraries = edit_data.getStringSet("libraries", new HashSet<String>());
-            final AlertDialog.Builder edit_builder = new AlertDialog.Builder(SearchableActivity.this);
+            case R.id.menu_delete_library: {
+                SharedPreferences data = getSharedPreferences("appData", 0);
+                Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
 
-            final String[] edit_librariesString = edit_libraries.toArray(new String[edit_libraries.size()]);
-            System.out.println("have builder");
-            System.out.flush();
-            edit_builder.setTitle("Edit library spec");
-            //builder.setMessage("Library to edit ");
-            //final EditText input = new EditText(SearchableActivity.this);
-            //input.setInputType(InputType.TYPE_CLASS_TEXT);
-            for (String library : edit_libraries)
-                System.out.println("library: " + library);
-            System.out.println();
+                final String[] librariesString = libraries.toArray(new String[libraries.size()]);
+                System.out.println("have builder");
+                System.out.flush();
+                builder.setTitle("Edit library spec");
+                //builder.setMessage("Library to edit ");
+                //final EditText input = new EditText(SearchableActivity.this);
+                //input.setInputType(InputType.TYPE_CLASS_TEXT);
+                for (String library : libraries)
+                    System.out.println("library: " + library);
+                System.out.println();
 
-            //builder.setView(input);
-            //System.out.println("setView"); System.out.flush();
+                //builder.setView(input);
+                //System.out.println("setView"); System.out.flush();
 
 
-            edit_builder.setItems(edit_librariesString, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    System.out.println("which is " + which);
-                    String library = edit_librariesString[which];
-                    System.out.println("user_text is " + library);
-                    SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-                    if (libraryPreferences.contains("is_created")) {
-                        System.out.println("creating new intent for addlibrary");
-                        System.out.println("db_location=" + libraryPreferences.getString("db_location", ""));
-                        System.out.println("db_password=" + libraryPreferences.getString("db_password", ""));
-                        Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
-                        newIntent.putExtra("libraryName", library);
-                        newIntent.putExtra("db_host", libraryPreferences.getString
-                                ("db_host", ""));
-                        newIntent.putExtra("db_location", libraryPreferences.getString
-                                ("db_location", ""));
-                        newIntent.putExtra("db_username", libraryPreferences.getString
-                                ("db_username", ""));
-                        newIntent.putExtra("db_password", libraryPreferences.getString
-                                ("db_password", ""));
-                        newIntent.putExtra("library_host", libraryPreferences
-                                .getString
-                                        ("library_host", ""));
-                        newIntent.putExtra("library_username", libraryPreferences
-                                .getString
-                                        ("library_username", ""));
-                        newIntent.putExtra("library_password", libraryPreferences
-                                .getString
-                                        ("library_password", ""));
-                        startActivity(newIntent);
+                builder.setItems(librariesString, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("which is " + which);
+                        final String library = librariesString[which];
+                        System.out.println("user_text is " + library);
+                        final SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+                        AlertDialog.Builder confirmDelete = new AlertDialog.Builder(SearchableActivity.this);
+                        confirmDelete.setTitle("Confirm");
+                        confirmDelete.setMessage("Are you sure?");
+
+                        confirmDelete.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences appData = getSharedPreferences("appData", 0);
+                                Set<String> libraries = appData.getStringSet("libraries", new
+                                        HashSet<String>());
+                                SharedPreferences.Editor appDataEditor = appData.edit();
+                                Set<String> copiedLibraries = new HashSet<String>(libraries);
+                                copiedLibraries.remove(library);
+                                appDataEditor.remove("libraries");
+                                appDataEditor.putStringSet("libraries", copiedLibraries);
+                                appDataEditor.commit();
+                                SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
+                                libraryEditor.clear();
+                                libraryEditor.commit();
+                                dialog.dismiss();
+                            }
+
+                        });
+
+                        confirmDelete.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog alert = confirmDelete.create();
+                        alert.show();
+
                     }
-                }
-            });
+                });
 
 
-            edit_builder.setPositiveButton("cancel",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            System.out.println("cancelling");
-                            return;
+                builder.setPositiveButton("cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                System.out.println("cancelling");
+                                return;
+                            }
+                        });
+
+
+                // create alert dialog
+                //AlertDialog alertDialog = alertDialogBuilder.create();
+
+                System.out.println("setbuttons done");
+                System.out.flush();
+                // show it
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
+            }
+            break;
+            case R.id.menu_edit_library: {
+                SharedPreferences edit_data = getSharedPreferences("appData", 0);
+                Set<String> edit_libraries = edit_data.getStringSet("libraries", new HashSet<String>());
+                final AlertDialog.Builder edit_builder = new AlertDialog.Builder(SearchableActivity.this);
+
+                final String[] edit_librariesString = edit_libraries.toArray(new String[edit_libraries.size()]);
+                System.out.println("have builder");
+                System.out.flush();
+                edit_builder.setTitle("Edit library spec");
+                //builder.setMessage("Library to edit ");
+                //final EditText input = new EditText(SearchableActivity.this);
+                //input.setInputType(InputType.TYPE_CLASS_TEXT);
+                for (String library : edit_libraries)
+                    System.out.println("library: " + library);
+                System.out.println();
+
+                //builder.setView(input);
+                //System.out.println("setView"); System.out.flush();
+
+
+                edit_builder.setItems(edit_librariesString, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("which is " + which);
+                        String library = edit_librariesString[which];
+                        System.out.println("user_text is " + library);
+                        SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+                        if (libraryPreferences.contains("is_created")) {
+                            System.out.println("creating new intent for addlibrary");
+                            System.out.println("db_location=" + libraryPreferences.getString("db_location", ""));
+                            System.out.println("db_password=" + libraryPreferences.getString("db_password", ""));
+                            Intent newIntent = new Intent(SearchableActivity.this, AddLibrary.class);
+                            newIntent.putExtra("libraryName", library);
+                            newIntent.putExtra("db_host", libraryPreferences.getString
+                                    ("db_host", ""));
+                            newIntent.putExtra("db_location", libraryPreferences.getString
+                                    ("db_location", ""));
+                            newIntent.putExtra("db_username", libraryPreferences.getString
+                                    ("db_username", ""));
+                            newIntent.putExtra("db_password", libraryPreferences.getString
+                                    ("db_password", ""));
+                            newIntent.putExtra("library_host", libraryPreferences
+                                    .getString
+                                            ("library_host", ""));
+                            newIntent.putExtra("library_username", libraryPreferences
+                                    .getString
+                                            ("library_username", ""));
+                            newIntent.putExtra("library_password", libraryPreferences
+                                    .getString
+                                            ("library_password", ""));
+                            startActivity(newIntent);
                         }
-                    });
+                    }
+                });
 
 
-            // create alert dialog
-            //AlertDialog alertDialog = alertDialogBuilder.create();
+                edit_builder.setPositiveButton("cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                System.out.println("cancelling");
+                                return;
+                            }
+                        });
 
-            System.out.println("setbuttons done");
-            System.out.flush();
-            // show it
-            AlertDialog edit_alertDialog = edit_builder.create();
-            edit_alertDialog.show();
-        }
+
+                // create alert dialog
+                //AlertDialog alertDialog = alertDialogBuilder.create();
+
+                System.out.println("setbuttons done");
+                System.out.flush();
+                // show it
+                AlertDialog edit_alertDialog = edit_builder.create();
+                edit_alertDialog.show();
+            }
 
             break;
-        case R.id.menu_set_default_library: {
-            final SharedPreferences data = getSharedPreferences("appData", 0);
-            Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
-            final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+            case R.id.menu_set_default_library: {
+                final SharedPreferences data = getSharedPreferences("appData", 0);
+                Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
 
-            final String[] librariesString = libraries.toArray(new String[libraries.size()]);
-            System.out.println("have builder");
-            System.out.flush();
-            builder.setTitle("Set default library");
-            //builder.setMessage("Library to edit ");
-            //final EditText input = new EditText(SearchableActivity.this);
-            //input.setInputType(InputType.TYPE_CLASS_TEXT);
-            for (String library : libraries)
-                System.out.println("library: " + library);
-            System.out.println();
+                final String[] librariesString = libraries.toArray(new String[libraries.size()]);
+                System.out.println("have builder");
+                System.out.flush();
+                builder.setTitle("Set default library");
+                //builder.setMessage("Library to edit ");
+                //final EditText input = new EditText(SearchableActivity.this);
+                //input.setInputType(InputType.TYPE_CLASS_TEXT);
+                for (String library : libraries)
+                    System.out.println("library: " + library);
+                System.out.println();
 
-            //builder.setView(input);
-            //System.out.println("setView"); System.out.flush();
-
-
-            builder.setItems(librariesString, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    System.out.println("which is " + which);
-                    final String library = librariesString[which];
-                    System.out.println("user_text is " + library);
-                    SharedPreferences.Editor edit = data.edit();
-                    edit.putString("default_library", library);
-                }});
+                //builder.setView(input);
+                //System.out.println("setView"); System.out.flush();
 
 
-            builder.setPositiveButton("cancel",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            System.out.println("cancelling");
-                            return;
-                        }
-                    });
+                builder.setItems(librariesString, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("which is " + which);
+                        final String library = librariesString[which];
+                        System.out.println("user_text is " + library);
+                        SharedPreferences.Editor edit = data.edit();
+                        edit.putString("default_library", library);
+                        edit.commit();
+                        currentLibrary = library;
+                    }
+                });
 
 
-            // create alert dialog
-            //AlertDialog alertDialog = alertDialogBuilder.create();
+                builder.setPositiveButton("cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                System.out.println("cancelling");
+                                return;
+                            }
+                        });
 
-            System.out.println("setbuttons done");
-            System.out.flush();
-            // show it
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+
+                // create alert dialog
+                //AlertDialog alertDialog = alertDialogBuilder.create();
+
+                System.out.println("setbuttons done");
+                System.out.flush();
+                // show it
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
 
 
-            break;
+                break;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        default:
-            return super.onOptionsItemSelected(item);
-    }
         return super.onOptionsItemSelected(item);
-}
+    }
 
     //@Override
     protected void onNewIntent(Intent intent) {
@@ -520,40 +550,41 @@ public boolean onOptionsItemSelected(MenuItem item) {
         handleIntent(intent, listValues);
     }
 
- private void handleIntent(Intent intent,List<Map<String,Object>> listValues) {
+    private void handleIntent(Intent intent, List<Map<String, Object>> listValues) {
         System.out.println("handleIntent " + intent);
         System.out.flush();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
-            doMySearch(query,listValues);
+            doMySearch(query, listValues);
             //finish();
         }
     }
 
-    void doMySearch(final String query,List<Map<String,Object>> listValues) {
-      System.out.println("will search for " + query);
+    void doMySearch(final String query, List<Map<String, Object>> listValues) {
+        System.out.println("will search for " + query);
         System.out.flush();
-	currentLibrary = find_current_library(currentLibrary);
-	if (currentLibrary != null) {
-        final MLocate mloc = new MLocate(currentLibrary);
-        final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+        currentLibrary = find_current_library();
 
-		@Override
-		protected void onPreExecute() {
-			pd.setTitle("Processing...");
-			pd.setMessage("Please wait.");
-			pd.setCancelable(false);
-			pd.setIndeterminate(true);
-			pd.show();
-		}
+        if (currentLibrary != null) {
+            final MLocate mloc = new MLocate(currentLibrary);
+            final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
+            AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
-		@Override
-		protected Void doInBackground(Void... arg0) {
-            found = mloc.find(query,SearchableActivity.this);
-            System.out.println("size of found: " + found.length);
-            System.out.flush();
+                @Override
+                protected void onPreExecute() {
+                    pd.setTitle("Processing...");
+                    pd.setMessage("Please wait.");
+                    pd.setCancelable(false);
+                    pd.setIndeterminate(true);
+                    pd.show();
+                }
+
+                @Override
+                protected Void doInBackground(Void... arg0) {
+                    found = mloc.find(query, SearchableActivity.this);
+                    System.out.println("size of found: " + found.length);
+                    System.out.flush();
 
         /*for (Entry entry : found) {
             String value;
@@ -566,192 +597,195 @@ public boolean onOptionsItemSelected(MenuItem item) {
             listValues.add(item);
         }*/
 
-            return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			if (pd!=null) {
-				pd.dismiss();
-
-			}
-            EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
-                    R.layout.listview_item_row, found);
-
-            System.out.println("before stack push");
-            System.out.flush();
-            stack = new ArrayList<DirView>();
-
-            DirView root = new DirView("---",adapter,null);
-            stack.add(root);
-            DirView dv = new DirView(name(mloc.root),adapter,found);
-            stack.add(dv);
-
-            System.out.println("after stack push");
-            System.out.flush();
-
-            setContentView(R.layout.mylist);
-            listView1 = (ListView)findViewById(android.R.id.list);
-            listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    return null;
+                }
 
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    System.out.println("onItemClick position="+position+" found size="+
-                            ((found==null)?-1:found.length));
-                    System.out.flush();
-                    Entry entry = found[position];
-                    System.out.println("item " + position + " was clicked=" + found[position]);
-                    if (entry.entryType != Entry.EntryType.File) {
-                        System.out.println("will try to read " + entry);
-                        Entry[] dirEntries = mloc.read_dir(SearchableActivity.this, entry);
-                        if (dirEntries != null) { //&& dirEntries.length > 0) {
-                            found = dirEntries;
-                            System.out.println("numer of entries are :" + dirEntries.length);
-                            System.out.flush();
-                            EntryAdapter adapter = new EntryAdapter(myself, R.layout.listview_item_row, dirEntries);
-                            System.out.println("computed new adapter");
-                            System.out.flush();
-                            listView1.setAdapter(adapter);
-                            System.out.println("set adapter");
-                            System.out.flush();
-                            DirView dv = new DirView(entry.fileName, adapter, dirEntries);
-                            stack.add(dv);
-                            System.out.println("pushed");
-                            System.out.flush();
-                            System.out.println("before spinner adapter");
-                            System.out.flush();
+                protected void onPostExecute(Void result) {
+                    if (pd != null) {
+                        pd.dismiss();
 
-                            spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                                    android.R.layout.simple_spinner_item,
-                                    //R.layout.spinner_item_row,
-                                    //R.id.spinnerText,
-                                    stack);
-
-                            System.out.println("after spinner adapter");
-                            System.out.flush();
-                            spinner.setSelection(stack.size()-1);
-                            spinner.setAdapter(spinnerAdapter);
-                        }
                     }
-                }
+                    EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
+                            R.layout.listview_item_row, found);
 
-            });
+                    System.out.println("before stack push");
+                    System.out.flush();
+                    stack = new ArrayList<DirView>();
 
-            listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    DirView root = new DirView("---", adapter, null);
+                    stack.add(root);
+                    DirView dv = new DirView(name(mloc.root), adapter, found);
+                    stack.add(dv);
 
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Entry entry = found[position];
-                    System.out.println("item " + position + " was longclicked=" + entry);
-                    entry.isEnabled = !entry.isEnabled;
-                    EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
-                    String fullPath = entry.dirName+"/"+entry.fileName;
-                    if (toDownload.containsKey(fullPath))
-                        toDownload.remove(fullPath);
-                    else
-                        toDownload.put(fullPath, entry);
-                    if (entry.isEnabled)
-                        holder.image.setImageResource(R.drawable.ic_done_white);
-                    else
-                        holder.image.setImageBitmap(null);
-                    System.out.println("ui is "+ui);
-                    System.out.flush();;
+                    System.out.println("after stack push");
+                    System.out.flush();
 
-                    return true;
-                }
+                    setContentView(R.layout.mylist);
+                    listView1 = (ListView) findViewById(android.R.id.list);
+                    listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            });
-            listView1.setAdapter(adapter);
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            System.out.println("onItemClick position=" + position + " found size=" +
+                                    ((found == null) ? -1 : found.length));
+                            System.out.flush();
+                            Entry entry = found[position];
+                            System.out.println("item " + position + " was clicked=" + found[position]);
+                            if (entry.entryType != Entry.EntryType.File) {
+                                System.out.println("will try to read " + entry);
+                                Entry[] dirEntries = mloc.read_dir(SearchableActivity.this, entry);
+                                if (dirEntries != null) { //&& dirEntries.length > 0) {
+                                    found = dirEntries;
+                                    System.out.println("numer of entries are :" + dirEntries.length);
+                                    System.out.flush();
+                                    EntryAdapter adapter = new EntryAdapter(myself, R.layout.listview_item_row, dirEntries);
+                                    System.out.println("computed new adapter");
+                                    System.out.flush();
+                                    listView1.setAdapter(adapter);
+                                    System.out.println("set adapter");
+                                    System.out.flush();
+                                    DirView dv = new DirView(entry.fileName, adapter, dirEntries);
+                                    stack.add(dv);
+                                    System.out.println("pushed");
+                                    System.out.flush();
+                                    System.out.println("before spinner adapter");
+                                    System.out.flush();
 
-            System.out.println("before spinner adapter");
-            System.out.flush();
+                                    spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                                            android.R.layout.simple_spinner_item,
+                                            //R.layout.spinner_item_row,
+                                            //R.id.spinnerText,
+                                            stack);
 
-            spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                    android.R.layout.simple_spinner_item,
-                    //R.id.spinnerText,
-                    //R.layout.spinner_item_row,
-                    stack);
-
-            System.out.println("after spinner adapter");
-            System.out.flush();
-		}
-
-	};
-	task.execute((Void[]) null);
-
-	}
-	else {
-	    AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
-                    ok.setTitle("Unspecified Library");
-                    ok.setMessage("Cannot figure out which library to use");
-
-                    ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
+                                    System.out.println("after spinner adapter");
+                                    System.out.flush();
+                                    spinner.setSelection(stack.size() - 1);
+                                    spinner.setAdapter(spinnerAdapter);
+                                }
+                            }
                         }
 
                     });
 
-                    AlertDialog alert = ok.create();
-                    alert.show();
-	}
+                    listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                            Entry entry = found[position];
+                            System.out.println("item " + position + " was longclicked=" + entry);
+                            entry.isEnabled = !entry.isEnabled;
+                            EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
+                            String fullPath = entry.dirName + "/" + entry.fileName;
+                            if (toDownload.containsKey(fullPath))
+                                toDownload.remove(fullPath);
+                            else
+                                toDownload.put(fullPath, entry);
+                            if (entry.isEnabled)
+                                holder.image.setImageResource(R.drawable.ic_done_white);
+                            else
+                                holder.image.setImageBitmap(null);
+                            System.out.println("ui is " + ui);
+                            System.out.flush();
+                            ;
+
+                            return true;
+                        }
+
+                    });
+                    listView1.setAdapter(adapter);
+
+                    System.out.println("before spinner adapter");
+                    System.out.flush();
+
+                    spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                            android.R.layout.simple_spinner_item,
+                            //R.id.spinnerText,
+                            //R.layout.spinner_item_row,
+                            stack);
+
+                    System.out.println("after spinner adapter");
+                    System.out.flush();
+                }
+
+            };
+            task.execute((Void[]) null);
+
+        } else {
+            AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
+            ok.setTitle("Unspecified Library");
+            ok.setMessage("Cannot figure out which library to use");
+
+            ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+
+            });
+
+            AlertDialog alert = ok.create();
+            alert.show();
+        }
     }
 
-    String find_current_library(String currentLibrary) {
-	SharedPreferences data =
-	    getSharedPreferences("appData", 0);
-	Set<String> libraries =
-	    data.getStringSet("libraries", new HashSet<String>());
-	String DefaultLibrary =
-	    data.getString("default_library", "");
-	
-	if (currentLibrary != "" && libraries.contains(currentLibrary))
-	    return currentLibrary;
-	if (DefaultLibrary != "" && libraries.contains(DefaultLibrary))
-	    return DefaultLibrary;
-	if (libraries.size() == 1) {
-	    String[] libraryObjects = libraries.toArray(new String[1]);
-	    return libraryObjects[0];
-	}
-	return null;
+    String find_current_library() {
+        SharedPreferences data =
+                getSharedPreferences("appData", 0);
+        Set<String> libraries =
+                data.getStringSet("libraries", new HashSet<String>());
+
+        if (currentLibrary != null && currentLibrary != "" && libraries.contains(currentLibrary)) {
+            System.out.println("currentLibrary is "+currentLibrary+" and is contained");
+            return currentLibrary;
+        }
+        if (libraries.size() == 1) {
+            String[] libraryObjects = libraries.toArray(new String[1]);
+            System.out.println("current library does not exist; just one library "+libraryObjects[0]);
+            return libraryObjects[0];
+        }
+        System.out.println("currentLibrary "+currentLibrary+" does not exist; size of libraries is "+libraries.size());
+        return null;
     }
 
-    String find_location(String library) {
-        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
-        String location = libraryPreferences.getString("library_location", null);
+    String find_host(String library, SharedPreferences prefs) {
+        String location = prefs.getString("library_host", null);
+        if (location == null)
+            location = prefs.getString("db_host", null);
         return location;
     }
 
-    String find_username(String library) {
-        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
-        String username = libraryPreferences.getString("library_username", null);
+    String find_username(String library, SharedPreferences prefs) {
+        String username = prefs.getString("library_username", null);
+        if (username == null)
+            username = prefs.getString("db_username",null);
         return username;
     }
 
-    String find_password(String library) {
-        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
-        String password = libraryPreferences.getString("library_password",null);
+    String find_password(String library, SharedPreferences prefs) {
+        String password = prefs.getString("library_password", null);
+        if (password == null)
+            password = prefs.getString("db_password",null);
         return password;
     }
 
     String name(String path) {
-        if (path==null) return null;
+        if (path == null) return null;
         File f = new File(path);
         return f.getName();
     }
 
     String size_to_string(long size) {
         if (size < 1024)
-            return size+" bytes";
-        else if (size < 1024*1024) {
+            return size + " bytes";
+        else if (size < 1024 * 1024) {
             long KB = size / 1024;
-            return KB+" KB";
-        } else if (size < 1024*1024*1024) {
+            return KB + " KB";
+        } else if (size < 1024 * 1024 * 1024) {
             long MB = size / (1024 * 1024);
             return MB + " MB";
-        } else if (size < 1024*1024*1024*1024) {
-            long GB= size / (1024 * 1024 * 1024);
+        } else if (size < 1024 * 1024 * 1024 * 1024) {
+            long GB = size / (1024 * 1024 * 1024);
             return GB + " MB";
         } else return "very big";
     }
