@@ -1,3 +1,5 @@
+package fred.docapp;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -48,5 +50,12 @@ public class FileTransferRequest implements Parcelable {
 		return new FileTransferRequest[size];
 	    }
 	};
+
+    public String toString() {
+        StringBuffer fileStr = new StringBuffer();
+        for (String file : files)
+            fileStr.append(file+";");
+        return "ftr: {" + host + "," + userName + "," + passWord + "," + fileStr + "}";
+    }
 
 }

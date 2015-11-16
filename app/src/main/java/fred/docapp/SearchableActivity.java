@@ -51,7 +51,7 @@ public class SearchableActivity extends AppCompatActivity {
     UserInfo ui;
     String locateDBlocation = null;
     String currentLibrary = null;
-
+    Map<String,Entry> toDownload = new HashMap<String,Entry>();
 
 
     @Override
@@ -59,7 +59,7 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
-
+        currentLibrary = null;
 
          Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
@@ -211,6 +211,82 @@ public class SearchableActivity extends AppCompatActivity {
 public boolean onOptionsItemSelected(MenuItem item) {
     // Handle item selection
     switch (item.getItemId()) {
+        case R.id.menu_download: {
+            if (toDownload.size()>0) {
+                final String library = find_current_library(currentLibrary);
+                final String username;
+                final String location;
+                if (library != null) {
+                    if ((location = find_location(library)) != null) {
+                        if ((username = find_username(library)) != null) {
+                            final String password = find_password(library);
+                            if (password == null) {
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+
+                                builder.setTitle("password");
+                                builder.setMessage("password");
+
+                                final EditText input = new EditText(SearchableActivity.this);
+
+                                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                builder.setView(input);
+
+                                builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        String result = input.getText().toString();
+                                        String files[] = new String[toDownload.size()];
+                                        int i = 0;
+                                        for (Entry entry : toDownload.values()) {
+                                            files[i++] = entry.dirName + "/" + entry.fileName;
+                                        }
+                                        FileTransferRequest ftr = new FileTransferRequest(location,username,password,files);
+                                        Intent intent = new Intent(SearchableActivity.this, FileService.class);
+                                        intent.putExtra("fred.docApp.FileTransferRequest",ftr);
+                                        startService(intent);
+
+
+
+                                    }
+
+                                });
+
+                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                            }
+                        }
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                        builder.setTitle("Error");
+                        builder.setMessage("Don't know which library to use");
+                        builder.setPositiveButton("OK", null);
+                        AlertDialog dialog = builder.show();
+                    }
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("Don't know where library is located");
+                    builder.setPositiveButton("OK", null);
+                    AlertDialog dialog = builder.show();
+                }
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                builder.setTitle("Error");
+                builder.setMessage("No files to download");
+                builder.setPositiveButton("OK", null);
+                AlertDialog dialog = builder.show();
+            }
+        }
+        break;
         case R.id.menu_add_library: {
             System.out.println("creating new intent");
             Intent intent = new Intent(this, AddLibrary.class);
@@ -255,9 +331,10 @@ public boolean onOptionsItemSelected(MenuItem item) {
                             Set<String> libraries = appData.getStringSet("libraries", new
                                     HashSet<String>());
                             SharedPreferences.Editor appDataEditor = appData.edit();
-                            libraries.remove(library);
+                            Set<String> copiedLibraries = new HashSet<String>(libraries);
+                            copiedLibraries.remove(library);
                             appDataEditor.remove("libraries");
-                            appDataEditor.putStringSet("libraries", libraries);
+                            appDataEditor.putStringSet("libraries", copiedLibraries);
                             appDataEditor.commit();
                             SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
                             libraryEditor.clear();
@@ -568,13 +645,17 @@ public boolean onOptionsItemSelected(MenuItem item) {
                     System.out.println("item " + position + " was longclicked=" + entry);
                     entry.isEnabled = !entry.isEnabled;
                     EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
+                    String fullPath = entry.dirName+"/"+entry.fileName;
+                    if (toDownload.containsKey(fullPath))
+                        toDownload.remove(fullPath);
+                    else
+                        toDownload.put(fullPath, entry);
                     if (entry.isEnabled)
                         holder.image.setImageResource(R.drawable.ic_done_white);
                     else
                         holder.image.setImageBitmap(null);
                     System.out.println("ui is "+ui);
-                    System.out.flush();
-                    ui.getPassword(SearchableActivity.this,new UserHost("fred","tabitha"));
+                    System.out.flush();;
 
                     return true;
                 }
@@ -634,6 +715,24 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	    return libraryObjects[0];
 	}
 	return null;
+    }
+
+    String find_location(String library) {
+        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
+        String location = libraryPreferences.getString("library_location", null);
+        return location;
+    }
+
+    String find_username(String library) {
+        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
+        String username = libraryPreferences.getString("library_username", null);
+        return username;
+    }
+
+    String find_password(String library) {
+        SharedPreferences libraryPreferences = getSharedPreferences(library,0);
+        String password = libraryPreferences.getString("library_password",null);
+        return password;
     }
 
     String name(String path) {

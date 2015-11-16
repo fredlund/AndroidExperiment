@@ -44,7 +44,7 @@ public class MLocate {
 	}
 
 	public MLocate(String file) {
-		this.file = file;
+		this.file = "locatedb_pnt";
 	}
 
 	public Entry[] open(Entry entry) {
@@ -63,6 +63,7 @@ public class MLocate {
 		Matcher[] m = new Matcher[args.length];
 		pos = 0;
 
+		System.out.println("file is "+file);
 		for (int i = 0; i < args.length; i++) {
 			Pattern p = Pattern.compile(args[i]);
 			m[i] = p.matcher("");

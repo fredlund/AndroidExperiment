@@ -75,10 +75,11 @@ if (extras != null) {
                     SharedPreferences appData = getSharedPreferences("appData",0);
                     Set<String> libraries = appData.getStringSet("libraries", new
                             HashSet<String>());
+                    Set<String> copiedLibraries = new HashSet<String>(libraries);
                     SharedPreferences.Editor appDataEditor = appData.edit();
                     appDataEditor.remove("libraries");
-                    libraries.add(library);
-                    appDataEditor.putStringSet("libraries",libraries);
+                    copiedLibraries.add(library);
+                    appDataEditor.putStringSet("libraries",copiedLibraries);
                     appDataEditor.commit();
                     finish();
                 }
