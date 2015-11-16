@@ -37,7 +37,7 @@ public class ARCFOUR256 implements Cipher{
   private static final int ivsize=8;
   private static final int bsize=32;
   private static final int skip=1536; 
-  private Cipher cipher;
+  private javax.crypto.Cipher cipher;
   public int getIVSize(){return ivsize;} 
   public int getBlockSize(){return bsize;}
   public void init(int mode, byte[] key, byte[] iv) throws Exception{
@@ -48,7 +48,7 @@ public class ARCFOUR256 implements Cipher{
       key=tmp;
     }
     try{
-      cipher= Cipher.getInstance("RC4");
+      cipher= javax.crypto.Cipher.getInstance("RC4");
       SecretKeySpec _key = new SecretKeySpec(key, "RC4");
       synchronized(Cipher.class){
         cipher.init((mode==ENCRYPT_MODE?

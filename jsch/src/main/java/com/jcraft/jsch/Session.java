@@ -31,7 +31,6 @@ package com.jcraft.jsch;
 
 import java.io.*;
 import java.net.*;
-import java.net.Proxy;
 import java.util.Vector;
 
 public class Session implements Runnable{
@@ -129,7 +128,7 @@ public class Session implements Runnable{
 
   private java.util.Hashtable config=null;
 
-  private java.net.Proxy proxy=null;
+  private Proxy proxy=null;
   private UserInfo userinfo;
 
   private String hostKeyAlias=null;

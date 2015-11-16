@@ -1,6 +1,6 @@
-/* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
+/* -*-mode:java; c-basic-offset:2; -*- */
 /*
-Copyright (c) 2008-2015 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -25,46 +25,20 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
+/*
+ * This program is based on zlib-1.1.3, so all credit should go authors
+ * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
+ * and contributors of zlib.
+ */
 
-package com.jcraft.jsch.jce;
+package com.jcraft.jzlib;
 
-import com.jcraft.jsch.Cipher;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-
-public class ARCFOUR implements Cipher{
-  private static final int ivsize=8;
-  private static final int bsize=16;
-  private javax.crypto.Cipher cipher;
-  public int getIVSize(){return ivsize;} 
-  public int getBlockSize(){return bsize;}
-  public void init(int mode, byte[] key, byte[] iv) throws Exception{
-    String pad="NoPadding";      
-    byte[] tmp;
-    if(key.length>bsize){
-      tmp=new byte[bsize];
-      System.arraycopy(key, 0, tmp, 0, tmp.length);
-      key=tmp;
-    }
-
-    try{
-      cipher= javax.crypto.Cipher.getInstance("RC4");
-      SecretKeySpec _key = new SecretKeySpec(key, "RC4");
-      synchronized(Cipher.class){
-        cipher.init((mode==ENCRYPT_MODE?
-                     Cipher.ENCRYPT_MODE:
-                     Cipher.DECRYPT_MODE),
-		    _key);
-      }
-    }
-    catch(Exception e){
-      cipher=null;
-      throw e;
-    }
+public class GZIPException extends java.io.IOException {
+  public GZIPException() {
+    super();
   }
-  public void update(byte[] foo, int s1, int len, byte[] bar, int s2) throws Exception{
-    cipher.update(foo, s1, len, bar, s2);
+  public GZIPException(String s) {
+    super(s);
   }
-  public boolean isCBC(){return false; }
 }

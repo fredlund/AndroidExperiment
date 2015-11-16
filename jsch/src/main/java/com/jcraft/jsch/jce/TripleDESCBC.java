@@ -36,7 +36,7 @@ import javax.crypto.spec.*;
 public class TripleDESCBC implements Cipher{
   private static final int ivsize=8;
   private static final int bsize=24;
-  private Cipher cipher;
+  private javax.crypto.Cipher cipher;
   public int getIVSize(){return ivsize;} 
   public int getBlockSize(){return bsize;}
   public void init(int mode, byte[] key, byte[] iv) throws Exception{
@@ -55,7 +55,7 @@ public class TripleDESCBC implements Cipher{
     }
 
     try{
-      cipher= Cipher.getInstance("DESede/CBC/"+pad);
+      cipher= javax.crypto.Cipher.getInstance("DESede/CBC/"+pad);
 /*
       // The following code does not work on IBM's JDK 1.4.1
       SecretKeySpec skeySpec = new SecretKeySpec(key, "DESede");

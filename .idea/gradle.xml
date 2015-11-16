@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/jsch" />
             <option value="$PROJECT_DIR$/jsch-0.1.53" />
+            <option value="$PROJECT_DIR$/jzlib" />
           </set>
         </option>
       </GradleProjectSettings>
