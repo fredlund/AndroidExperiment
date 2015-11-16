@@ -253,7 +253,7 @@ public class SearchableActivity extends AppCompatActivity {
                                             FileTransferRequest ftr = new FileTransferRequest(host, username, result, files);
                                             System.out.println("making intent");
                                             Intent intent = new Intent(SearchableActivity.this, FileService.class);
-                                            intent.putExtra("fred.docApp.FileTransferRequest", ftr);
+                                            intent.putExtra("fred.docapp.FileTransferRequest", ftr);
                                             System.out.println("intent prepared");
                                             startService(intent);
 
