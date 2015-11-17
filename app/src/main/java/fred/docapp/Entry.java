@@ -12,10 +12,12 @@ public class Entry {
     String fileName;
     String dirName;
     boolean isEnabled = false;
+    MLocate mloc;
     EntryType entryType;
 
 
-    Entry(long size, long pos, String dirName, String fileName, EntryType entryType) {
+    Entry(MLocate mloc, long size, long pos, String dirName, String fileName, EntryType entryType) {
+        this.mloc = mloc;
 	this.entryType = entryType;
         this.size = size;
 	this.pos = pos;

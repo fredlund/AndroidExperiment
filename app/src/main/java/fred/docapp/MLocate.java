@@ -51,6 +51,8 @@ public class MLocate {
 		return null;
 	}
 
+	public String root() { return root; }
+
 	public Entry[] find(String arg, Context context) {
 		return find(new String[]{arg}, context);
 	}
@@ -117,7 +119,7 @@ public class MLocate {
 					if (dirPrefix == null) {
 						if (find(m, dirName, true, dirName)) {
 							dirPrefix = dirName;
-							Entry entry = new Entry(0, pos, null, dirName, Entry.EntryType.DefineDir);
+							Entry entry = new Entry(mloc, 0, pos, null, dirName, Entry.EntryType.DefineDir);
 							resultList.add(entry);
 							System.out.println(dirName + ":" + "    at " + pos);
 						}

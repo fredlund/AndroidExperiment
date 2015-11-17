@@ -248,7 +248,7 @@ public class SearchableActivity extends AppCompatActivity {
                                             String files[] = new String[toDownload.size()];
                                             int i = 0;
                                             for (Entry entry : toDownload.values()) {
-                                                files[i++] = entry.dirName + "/" + entry.fileName;
+                                                files[i++] = entry.mloc.root() + "/" + entry.dirName + "/" + entry.fileName;
                                             }
                                             FileTransferRequest ftr = new FileTransferRequest(host, username, result, files);
                                             System.out.println("making intent");
