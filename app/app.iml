@@ -97,6 +97,7 @@
     <orderEntry type="library" exported="" name="appcompat-v7-23.1.0" level="project" />
     <orderEntry type="library" exported="" name="design-23.1.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
-    <orderEntry type="module" module-name="jsch-0.1.53" exported="" />
+    <orderEntry type="module" module-name="jsch" exported="" />
+    <orderEntry type="module" module-name="jzlib" exported="" />
   </component>
 </module>

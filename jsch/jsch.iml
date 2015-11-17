@@ -28,5 +28,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="jzlib" exported="" />
+    <orderEntry type="library" exported="" name="jsch.jsch" level="project" />
   </component>
 </module>
