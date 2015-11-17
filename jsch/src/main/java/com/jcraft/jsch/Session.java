@@ -468,6 +468,8 @@ public class Session implements Runnable{
               }
 	    }
 	    catch(JSchAuthCancelException ee){
+          System.out.println("auth_cancel=true");
+          ee.printStackTrace();
 	      auth_cancel=true;
 	    }
 	    catch(JSchPartialAuthException ee){

@@ -180,7 +180,7 @@ public class ScpFromJava {
 
         @Override
         public String getPassphrase() {
-            return null;
+            return "";
         }
 
         public String getPassword() {
@@ -189,12 +189,12 @@ public class ScpFromJava {
 
         @Override
         public boolean promptPassword(String message) {
-            return false;
+            return true;
         }
 
         @Override
         public boolean promptPassphrase(String message) {
-            return false;
+            return true;
         }
 
         public boolean promptYesNo(String str) {
