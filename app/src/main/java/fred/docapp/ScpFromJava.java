@@ -6,7 +6,12 @@ import java.io.*;
 
 public class ScpFromJava {
     public boolean transfer(Context context, String username, String password, String host, String reqFile) {
+
         JSch jsch = new JSch();
+        JschLogger logger = new JschLogger();
+        logger.setLevel(Logger.INFO);
+        jsch.setLogger(logger);
+        logger.setLevel(Logger.INFO);
         boolean is_ok = false;
 
         FileOutputStream fos = null;
@@ -105,7 +110,8 @@ public class ScpFromJava {
 
             System.exit(0);
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("ScpFromJava: exception "+e);
+            e.printStackTrace();
             try {
                 if (fos != null) fos.close();
             } catch (Exception ee) {
