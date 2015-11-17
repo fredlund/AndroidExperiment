@@ -227,7 +227,7 @@ public class SearchableActivity extends AppCompatActivity {
                         if ((host = find_host(library,libraryPrefs)) != null) {
                             if ((username = find_username(library,libraryPrefs)) != null) {
                                 final String password = find_password(library,libraryPrefs);
-                                if (password == null) {
+                                if (password == null || password.equals("")) {
 
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
 
@@ -269,6 +269,7 @@ public class SearchableActivity extends AppCompatActivity {
                                             dialog.dismiss();
                                         }
                                     });
+                                    AlertDialog dialog = builder.show();
 
                                 } else {
                                     String files[] = new String[toDownload.size()];
