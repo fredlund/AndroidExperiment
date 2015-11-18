@@ -119,7 +119,7 @@ public class MLocate {
 					if (dirPrefix == null) {
 						if (find(m, dirName, true, dirName)) {
 							dirPrefix = dirName;
-							Entry entry = new Entry(mloc, 0, pos, null, dirName, Entry.EntryType.DefineDir);
+							Entry entry = new Entry(this, 0, pos, null, dirName, Entry.EntryType.DefineDir);
 							resultList.add(entry);
 							System.out.println(dirName + ":" + "    at " + pos);
 						}
@@ -156,7 +156,8 @@ public class MLocate {
 			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);
 			List<Entry> result = new ArrayList<Entry>();
-			scan_dir(in, false, true, entry.fileName, result, null);
+			String dirName = entry.dirName+"/"+entry.fileName;
+			scan_dir(in, false, true, dirName, result, null);
 			in.close();
 			return result.toArray(new Entry[result.size()]);
 		} catch (FileNotFoundException exc) { System.out.println("FileNotFound"); return null; }
@@ -188,8 +189,8 @@ public class MLocate {
 				String fileName = getString(in);
 				if (!skipping) {
 					if (exploring || (!skipping && find(m, fileName, false, dirName))) {
-						System.out.println("adding file "+fileName);
-						Entry entry = new Entry(fileSize, pos, dirName, fileName, Entry.EntryType
+						System.out.println("adding file "+fileName+" dirName="+dirName+" root="+root);
+						Entry entry = new Entry(this,fileSize, pos, dirName, fileName, Entry.EntryType
 								.File);
 						System.out.println("in scan_dir: entry: "+entry);
 						resultList.add(entry);
@@ -206,7 +207,7 @@ public class MLocate {
 				long lpointer = bytesToLong(pointer,0,4);
 				if (exploring) {
 					System.out.println("adding directory "+dirRef);
-					Entry entry = new Entry(fileSize, lpointer, dirName, dirRef, Entry.EntryType
+					Entry entry = new Entry(this,fileSize, lpointer, dirName, dirRef, Entry.EntryType
 							.ReferDir);
 					System.out.println("in scan_dir: entry: "+entry);
 					resultList.add(entry);
