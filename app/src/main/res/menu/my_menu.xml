@@ -26,6 +26,10 @@
         android:id="@+id/menu_edit_library"
         app:showAsAction="never"
         android:title="Edit Library"/>
+     <item
+        android:id="@+id/menu_download_library_index"
+        app:showAsAction="never"
+        android:title="Download Library Index"/>
     <item
         android:id="@+id/menu_delete_library"
         app:showAsAction="never"

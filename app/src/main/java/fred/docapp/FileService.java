@@ -2,6 +2,9 @@ package fred.docapp;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
+import java.io.File;
 
 public class FileService extends IntentService {
     public FileService() {
@@ -14,7 +17,20 @@ public class FileService extends IntentService {
         FileTransferRequest ftr = intent.getParcelableExtra("fred.docapp.FileTransferRequest");
         System.out.println("got a file transfer request "+ftr);
         ScpFromJava scp = new ScpFromJava();
-        for (String file : ftr.files)
-             scp.transfer(this,ftr.userName,ftr.passWord,ftr.host,file);
+        boolean failure = false;
+        for (int i=0; i<ftr.files.length && !failure; i++) {
+            String file = ftr.files[i];
+            ScpReturnStatus ret = scp.transfer(this, ftr.userName, ftr.passWord, ftr.host, file);
+            failure = ret.is_ok;
+            Intent statusIntent = new Intent("file_transfer");
+            statusIntent.putExtra("requestNo",ftr.requestNo);
+            statusIntent.putExtra("file",ftr.files[i]);
+            statusIntent.putExtra("status",!failure);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
+        }
+        Intent statusIntent = new Intent("request_transfer");
+        statusIntent.putExtra("requestNo",ftr.requestNo);
+        statusIntent.putExtra("status",!failure);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
     }
 }

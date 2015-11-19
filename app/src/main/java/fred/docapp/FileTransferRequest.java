@@ -8,15 +8,18 @@ public class FileTransferRequest implements Parcelable {
     String userName;
     String passWord;
     String[] files;
+	int requestNo;
 
     public FileTransferRequest(String host,
 			       String userName,
 			       String passWord,
-			       String[] files) {
+			       String[] files,
+							   	int requestNo) {
 	this.host = host;
 	this.userName = userName;
 	this.passWord = passWord;
 	this.files = files;
+		this.requestNo = requestNo;
     }
 
     public FileTransferRequest(Parcel in) {
@@ -26,6 +29,7 @@ public class FileTransferRequest implements Parcelable {
 		passWord = in.readString();
 		files = new String[length];
 		in.readStringArray(files);
+		requestNo = in.readInt();
     }
 
     public int describeContents() {
@@ -38,6 +42,7 @@ public class FileTransferRequest implements Parcelable {
 	dest.writeString(userName);
 	dest.writeString(passWord);
 	dest.writeStringArray(files);
+		dest.writeInt(requestNo);
     }
 
     public static final Parcelable.Creator CREATOR =
@@ -55,7 +60,7 @@ public class FileTransferRequest implements Parcelable {
         StringBuffer fileStr = new StringBuffer();
         for (String file : files)
             fileStr.append(file+";");
-        return "ftr: {" + host + "," + userName + "," + passWord + "," + fileStr + "}";
+        return "ftr: {" + requestNo + "," + host + "," + userName + "," + passWord + "," + fileStr + "}";
     }
 
 }

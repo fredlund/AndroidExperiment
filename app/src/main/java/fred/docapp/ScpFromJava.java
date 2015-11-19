@@ -5,14 +5,14 @@ import com.jcraft.jsch.*;
 import java.io.*;
 
 public class ScpFromJava {
-    public boolean transfer(Context context, String username, String password, String host, String reqFile) {
+    public ScpReturnStatus transfer(Context context, String username, String password, String host, String reqFile) {
 
         JSch jsch = new JSch();
         JschLogger logger = new JschLogger();
         logger.setLevel(Logger.INFO);
         jsch.setLogger(logger);
         logger.setLevel(Logger.INFO);
-        boolean is_ok = false;
+        ScpReturnStatus retStatus = new ScpReturnStatus(true);
 
         FileOutputStream fos = null;
         try {
@@ -23,7 +23,8 @@ public class ScpFromJava {
             session.connect();
 
             // exec 'scp -f rfile' remotely
-            String command = "scp -f " + reqFile;
+            String command = "scp -f " + (" \"" + reqFile + "\"");
+
             Channel channel = session.openChannel("exec");
             ((ChannelExec) channel).setCommand(command);
 
@@ -40,9 +41,10 @@ public class ScpFromJava {
             out.write(buf, 0, 1);
             out.flush();
 
-            while (true) {
+            while (retStatus.is_ok) {
                 int c = checkAck(in);
                 if (c != 'C') {
+                    retStatus.is_ok = false;
                     break;
                 }
 
@@ -86,6 +88,7 @@ public class ScpFromJava {
                     foo = in.read(buf, 0, foo);
                     if (foo < 0) {
                         // error
+                        retStatus.is_ok = false;
                         break;
                     }
                     fos.write(buf, 0, foo);
@@ -94,27 +97,30 @@ public class ScpFromJava {
                 }
                 fos.close();
                 fos = null;
-                is_ok = true;
+                retStatus.is_ok = true;
 
                 if (checkAck(in) != 0) {
-                    System.exit(0);
+                    retStatus.is_ok = false;
                 }
 
-                // send '\0'
-                buf[0] = 0;
-                out.write(buf, 0, 1);
-                out.flush();
+                if (retStatus.is_ok) {
+                    // send '\0'
+                    buf[0] = 0;
+                    out.write(buf, 0, 1);
+                    out.flush();
+                }
             }
             session.disconnect();
         } catch (Exception e) {
             System.out.println("ScpFromJava: exception "+e);
+            retStatus.exc = e;
             e.printStackTrace();
             try {
                 if (fos != null) fos.close();
             } catch (Exception ee) {
             }
         }
-        return is_ok;
+        return retStatus;
     }
 
     static int checkAck(InputStream in) throws IOException {
@@ -142,6 +148,20 @@ public class ScpFromJava {
             }
         }
         return b;
+    }
+}
+
+class ScpReturnStatus {
+    boolean is_ok;
+    Object exc;
+
+    ScpReturnStatus(boolean is_ok) {
+        this.is_ok = is_ok;
+        this.exc = null;
+    }
+
+    void add_exception(Object exc) {
+        this.exc = exc;
     }
 }
 

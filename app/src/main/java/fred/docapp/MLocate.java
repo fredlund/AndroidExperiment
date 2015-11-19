@@ -39,12 +39,12 @@ public class MLocate {
 	Entry[] entries = null;
 	int pos = 0;
 
-	public MLocate() {
-		this.file = "locatedb_pnt";
+	static public String localLibraryFile(String library) {
+		return library+".ldp";
 	}
 
-	public MLocate(String file) {
-		this.file = "locatedb_pnt";
+	public MLocate(String library) {
+		this.file = localLibraryFile(library);
 	}
 
 	public Entry[] open(Entry entry) {
@@ -151,7 +151,7 @@ public class MLocate {
 
 	Entry[] read_dir(Context context, Entry entry) {
 		try {
-			FileOpsClassB in = new FileOpsClassB(context.getFilesDir()+"/locatedb_pnt", "rw");
+			FileOpsClassB in = new FileOpsClassB(context.getFilesDir()+"/this.file", "rw");
 			long seek_pos = entry.pos;
 			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);

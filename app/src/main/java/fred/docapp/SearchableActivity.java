@@ -4,13 +4,16 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +68,21 @@ public class SearchableActivity extends AppCompatActivity {
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
         ui = new UserInfo();
+
+        // Instantiates a new DownloadStateReceiver
+        ResponseReceiver mDownloadStateReceiver =
+                new ResponseReceiver();
+        IntentFilter request_transfer_filter = new IntentFilter(
+                "request_transfer");
+        IntentFilter file_transfer_filter = new IntentFilter(
+                "file_transfer");
+        // Registers the DownloadStateReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mDownloadStateReceiver,
+                request_transfer_filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mDownloadStateReceiver,
+                file_transfer_filter);
 
         // Get the intent, verify the action and get the query
         System.out.println("before intent");
@@ -212,6 +230,41 @@ public class SearchableActivity extends AppCompatActivity {
         return true;
     }
 
+    void doFileRequest(String host, String username, String password) {
+        SharedPreferences appPrefs = getSharedPreferences("appData", 0);
+        int requestNo = appPrefs.getInt("transferCounter", 0);
+        SharedPreferences.Editor edit = appPrefs.edit();
+        edit.putInt("transferCounter",requestNo % 32000);
+        String files[] = new String[toDownload.size()];
+        int i = 0;
+        for (Entry entry : toDownload.values()) {
+            System.out.println("Entry="+entry);
+            files[i++] = entry.mloc.root() + "/" + entry.dirName + "/" + entry.fileName;
+        }
+        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, requestNo);
+        System.out.println("making intent");
+        Intent intent = new Intent(SearchableActivity.this, FileService.class);
+        intent.putExtra("fred.docapp.FileTransferRequest", ftr);
+        System.out.println("intent prepared");
+        startService(intent);
+    }
+
+    void doGetLibraryFile(String library, String host, String location, String username, String password) {
+        System.out.println("doGetLibraryFiles library="+library);
+        String files[] = new String[1];
+        files[0] = location+"/"+MLocate.localLibraryFile(library);
+        SharedPreferences appPrefs = getSharedPreferences("appData", 0);
+        int requestNo = appPrefs.getInt("transferCounter", 0);
+        SharedPreferences.Editor edit = appPrefs.edit();
+        edit.putInt("transferCounter",requestNo % 32000);
+        FileTransferRequest ftr = new FileTransferRequest(host,username,password,files,requestNo);
+        System.out.println("making intent");
+        Intent intent = new Intent(SearchableActivity.this, FileService.class);
+        intent.putExtra("fred.docapp.FileTransferRequest", ftr);
+        System.out.println("intent prepared");
+        startService(intent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -245,18 +298,7 @@ public class SearchableActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int which) {
 
                                             String result = input.getText().toString();
-                                            String files[] = new String[toDownload.size()];
-                                            int i = 0;
-                                            for (Entry entry : toDownload.values()) {
-                                                System.out.println("Entry="+entry);
-                                                files[i++] = entry.mloc.root() + "/" + entry.dirName + "/" + entry.fileName;
-                                            }
-                                            FileTransferRequest ftr = new FileTransferRequest(host, username, result, files);
-                                            System.out.println("making intent");
-                                            Intent intent = new Intent(SearchableActivity.this, FileService.class);
-                                            intent.putExtra("fred.docapp.FileTransferRequest", ftr);
-                                            System.out.println("intent prepared");
-                                            startService(intent);
+                                           doFileRequest(host,username,result);
 
 
                                         }
@@ -273,18 +315,7 @@ public class SearchableActivity extends AppCompatActivity {
                                     AlertDialog dialog = builder.show();
 
                                 } else {
-                                    String files[] = new String[toDownload.size()];
-                                    int i = 0;
-                                    for (Entry entry : toDownload.values()) {
-                                        files[i++] = entry.mloc.root + "/" + entry.dirName + "/" + entry.fileName;
-                                    }
-                                    FileTransferRequest ftr = new FileTransferRequest(host, username, password, files);
-                                    System.out.println("making intent");
-                                    Intent intent = new Intent(SearchableActivity.this, FileService.class);
-                                    intent.putExtra("fred.docapp.FileTransferRequest", ftr);
-                                    System.out.println("intent prepared");
-                                    startService(intent);
-
+                                    doFileRequest(host, username, password);
                                 }
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
@@ -484,6 +515,122 @@ public class SearchableActivity extends AppCompatActivity {
             }
 
             break;
+            case R.id.menu_download_library_index: {
+                SharedPreferences edit_data = getSharedPreferences("appData", 0);
+                Set<String> edit_libraries = edit_data.getStringSet("libraries", new HashSet<String>());
+                final AlertDialog.Builder edit_builder = new AlertDialog.Builder(SearchableActivity.this);
+
+                final String[] edit_librariesString = edit_libraries.toArray(new String[edit_libraries.size()]);
+                System.out.println("have builder");
+                System.out.flush();
+                edit_builder.setTitle("Edit library spec");
+                //builder.setMessage("Library to edit ");
+                //final EditText input = new EditText(SearchableActivity.this);
+                //input.setInputType(InputType.TYPE_CLASS_TEXT);
+                for (String library : edit_libraries)
+                    System.out.println("library: " + library);
+                System.out.println();
+
+                //builder.setView(input);
+                //System.out.println("setView"); System.out.flush();
+
+
+                edit_builder.setItems(edit_librariesString, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("which is " + which);
+                        final String library = edit_librariesString[which];
+                        System.out.println("user_text is " + library);
+                        SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
+                        if (libraryPreferences.contains("is_created")) {
+                            String localLibraryPath = MLocate.localLibraryFile(library);
+                            StringBuffer errors = new StringBuffer();
+                            final String db_host = libraryPreferences.getString("db_host", "");
+                            final String db_location = libraryPreferences.getString("db_location", "");
+                            final String db_user = libraryPreferences.getString("db_username", "");
+                            System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user);
+                            boolean has_error = false;
+                            if (has_error = (db_host.equals(""))) {
+                                errors.append("no db host specified\n");
+                                has_error = true;
+                            }
+                            if (db_location.equals("")) {
+                                errors.append("no db location specified\n");
+                                has_error = true;
+                            }
+                            if (db_user.equals("")) {
+                                errors.append("no db username specified\n");
+                                has_error = true;
+                            }
+                            System.out.println("has_error="+has_error);
+                            if (has_error) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                                builder.setTitle("Error");
+                                builder.setMessage(errors);
+                                builder.setPositiveButton("OK", null);
+                                System.out.println("will show");
+                                AlertDialog aDialog = builder.show();
+                            } else {
+                                String db_password = libraryPreferences.getString("db_password", "");
+                                if (db_password.equals("")) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+
+                                    builder.setTitle("password");
+                                    builder.setMessage("password");
+
+                                    final EditText input = new EditText(SearchableActivity.this);
+
+                                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                    builder.setView(input);
+
+                                    builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            String result = input.getText().toString();
+                                            doGetLibraryFile(library, db_host, db_location, db_user, result);
+                                        }
+
+                                    });
+
+                                    builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                    AlertDialog bDialog = builder.show();
+                                } else {
+                                    doGetLibraryFile(library, db_host, db_location, db_user, db_password);
+                                }
+                            }
+                        }
+                    }
+                });
+
+
+
+                edit_builder.setPositiveButton("cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                System.out.println("cancelling");
+                                return;
+                            }
+                        });
+
+
+                // create alert dialog
+                //AlertDialog alertDialog = alertDialogBuilder.create();
+
+                System.out.println("setbuttons done");
+                System.out.flush();
+                // show it
+                AlertDialog edit_alertDialog = edit_builder.create();
+                edit_alertDialog.show();
+            };
+                break;
             case R.id.menu_set_default_library: {
                 final SharedPreferences data = getSharedPreferences("appData", 0);
                 Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
@@ -790,5 +937,14 @@ public class SearchableActivity extends AppCompatActivity {
             long GB = size / (1024 * 1024 * 1024);
             return GB + " MB";
         } else return "very big";
+    }
+}
+
+// Broadcast receiver for receiving status updates from the IntentService
+class ResponseReceiver extends BroadcastReceiver
+{
+    // Called when the BroadcastReceiver gets an Intent it's registered to receive
+    public void onReceive(Context context, Intent intent) {
+        System.out.println("got an intent "+intent);
     }
 }
