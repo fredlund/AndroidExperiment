@@ -156,12 +156,19 @@ public class MLocate {
 			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);
 			List<Entry> result = new ArrayList<Entry>();
-			String dirName = entry.dirName+"/"+entry.fileName;
+			String dirName = path_compose(entry.dirName,entry.fileName);
 			scan_dir(in, false, true, dirName, result, null);
 			in.close();
 			return result.toArray(new Entry[result.size()]);
 		} catch (FileNotFoundException exc) { System.out.println("FileNotFound"); return null; }
 		catch (IOException exc) { System.out.println("IOException"); return null; }
+	}
+
+	String path_compose(String path1, String path2) {
+		if (path1==null) return path2;
+		if (path2==null) return path1;
+		if (path1.equals("")) return path2;
+		else return path1+"/"+path2;
 	}
 
 	void scan_dir(FileOps in, boolean skipping, boolean exploring, String dirName, List<Entry> resultList, Matcher[] m) throws java.io.IOException {

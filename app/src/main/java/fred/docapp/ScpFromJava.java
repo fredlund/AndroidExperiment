@@ -105,10 +105,7 @@ public class ScpFromJava {
                 out.write(buf, 0, 1);
                 out.flush();
             }
-
             session.disconnect();
-
-            System.exit(0);
         } catch (Exception e) {
             System.out.println("ScpFromJava: exception "+e);
             e.printStackTrace();
@@ -119,29 +116,6 @@ public class ScpFromJava {
         }
         return is_ok;
     }
-
-    public static void main(String[] arg) {
-        if (arg.length != 2) {
-            System.err.println("usage: java ScpFrom user@remotehost:file1 file2");
-            System.exit(-1);
-        }
-
-        FileOutputStream fos = null;
-
-        String user = arg[0].substring(0, arg[0].indexOf('@'));
-        arg[0] = arg[0].substring(arg[0].indexOf('@') + 1);
-        String host = arg[0].substring(0, arg[0].indexOf(':'));
-        String rfile = arg[0].substring(arg[0].indexOf(':') + 1);
-        String lfile = arg[1];
-
-        String prefix = null;
-        if (new File(lfile).isDirectory()) {
-            prefix = lfile + File.separator;
-        }
-
-
-    }
-
 
     static int checkAck(InputStream in) throws IOException {
         int b = in.read();
