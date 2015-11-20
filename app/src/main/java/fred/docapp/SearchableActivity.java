@@ -146,6 +146,8 @@ public class SearchableActivity extends AppCompatActivity {
         inflater.inflate(R.menu.my_menu, menu);
         myself = this;
 
+        //(new SpeedTest()).test1(SearchableActivity.this);
+
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         System.out.println("onCreateOptionsMenu: item is " + menu.findItem(R.id.menu_search));
