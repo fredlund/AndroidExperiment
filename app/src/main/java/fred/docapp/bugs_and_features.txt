@@ -1,0 +1,19 @@
+Bugs
+====
+- does not seem to find host when only db_host is set
+- don't repeat downloads when download is pressed; failed ones are failed and can maybe be continued
+but then when asked for
+- why are file transfers sometimes short?
+
+Features
+========
+- status reports for file transfers
+- specifying port?
+- quicker reading (in memory?)
+- better searching: search insensitive, avoid .-directories, -pattern, etc
+- app info
+- properties info about (last longclicked) file from menu
+- handle device rotate
+
+
+

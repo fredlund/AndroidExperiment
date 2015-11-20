@@ -1,11 +1,13 @@
 package fred.docapp;
 
 import android.content.Context;
+import android.os.Environment;
+
 import com.jcraft.jsch.*;
 import java.io.*;
 
 public class ScpFromJava {
-    public ScpReturnStatus transfer(Context context, String username, String password, String host, String reqFile) {
+    public ScpReturnStatus transfer(Context context, String username, String password, String host, String reqFile, String localDir) {
 
         JSch jsch = new JSch();
         JschLogger logger = new JschLogger();
@@ -77,9 +79,11 @@ public class ScpFromJava {
                 out.write(buf, 0, 1);
                 out.flush();
 
-                // read a content of lfile
-                String localFileName = new File(file).getName();
-                fos = context.openFileOutput(localFileName, 0);
+
+                File myFile = new File(localDir+"/"+file);
+                myFile.setReadable(true,false);
+                System.out.println("will open "+myFile);
+                fos = new FileOutputStream(myFile);
 
                 int foo;
                 while (true) {

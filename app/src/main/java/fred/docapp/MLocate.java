@@ -45,6 +45,7 @@ public class MLocate {
 
 	public MLocate(String library) {
 		this.file = localLibraryFile(library);
+		System.out.println("mlocate: library "+library+" is stored in "+this.file);
 	}
 
 	public Entry[] open(Entry entry) {
@@ -151,7 +152,7 @@ public class MLocate {
 
 	Entry[] read_dir(Context context, Entry entry) {
 		try {
-			FileOpsClassB in = new FileOpsClassB(context.getFilesDir()+"/this.file", "rw");
+			FileOpsClassB in = new FileOpsClassB(context.getFilesDir()+"/"+this.file, "rw");
 			long seek_pos = entry.pos;
 			System.out.println("seeking to "+seek_pos);
 			in.seek(seek_pos);

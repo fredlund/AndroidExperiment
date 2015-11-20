@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
@@ -52,9 +53,8 @@ public class SearchableActivity extends AppCompatActivity {
     OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
     UserInfo ui;
-    String locateDBlocation = null;
     String currentLibrary = null;
-    Map<String, Entry> toDownload = new HashMap<String, Entry>();
+    Map<String, Entry> toDownload;
 
 
     @Override
@@ -64,6 +64,13 @@ public class SearchableActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SharedPreferences appData = getSharedPreferences("appData",0);
         currentLibrary = appData.getString("default_library",null);
+        toDownload = new HashMap<>();
+
+        System.out.println("external storage dir="+ Environment.getExternalStorageDirectory());
+        System.out.println("external public storage dir (downloads)="+ Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
+        System.out.println("pictures="+Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+
+
 
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
@@ -241,7 +248,10 @@ public class SearchableActivity extends AppCompatActivity {
             System.out.println("Entry="+entry);
             files[i++] = entry.mloc.root() + "/" + entry.dirName + "/" + entry.fileName;
         }
-        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, requestNo);
+        File localFile = Environment.getExternalStorageDirectory();
+        File myDir = new File(localFile.getAbsolutePath()+"/Billy/");
+        myDir.mkdir();
+        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, myDir.getAbsolutePath(),requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -256,8 +266,8 @@ public class SearchableActivity extends AppCompatActivity {
         SharedPreferences appPrefs = getSharedPreferences("appData", 0);
         int requestNo = appPrefs.getInt("transferCounter", 0);
         SharedPreferences.Editor edit = appPrefs.edit();
-        edit.putInt("transferCounter",requestNo % 32000);
-        FileTransferRequest ftr = new FileTransferRequest(host,username,password,files,requestNo);
+        edit.putInt("transferCounter", requestNo % 32000);
+        FileTransferRequest ftr = new FileTransferRequest(host,username,password,files,this.getFilesDir().getAbsolutePath(),requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
