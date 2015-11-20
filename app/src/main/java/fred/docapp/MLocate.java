@@ -20,7 +20,7 @@ interface FileOps {
 
 class FileOpsClass extends BufferedInputStream implements FileOps {
 	FileOpsClass(FileInputStream f) {
-		super(f);
+		super(f,1024*1024);
 	}
 }
 
