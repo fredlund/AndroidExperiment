@@ -43,6 +43,25 @@ public class MySlowReader {
         return value;
     }
 
+    boolean bytesMatch(byte[] bytes) throws IOException {
+        long current = current();
+        long maxBytes = fileSize-current;
+        long pos = current;
+        while (pos <= maxBytes) {
+            byte bs;
+            byte bp;
+            int index = 0;
+            do {
+                bs = nextByte();
+                bp = bytes[index++];
+            } while (index < bytes.length && bs != 0 && bs == bp);
+            if (bs == 0) return false;
+            if (bs == bp) return true;
+            seek(++current);
+        }
+        return false;
+    }
+
     void skip(int n) throws IOException {
         seek(current()+n);
     }
@@ -89,6 +108,10 @@ public class MySlowReader {
 
     public long current() {
         return buffers[currentBuf].first+currentPos;
+    }
+
+    public boolean atEOF() {
+        return current()>=fileSize;
     }
 
     public byte nextByte() throws IOException {
