@@ -1,5 +1,7 @@
 package fred.docapp;
 
+import com.jcraft.jsch.IO;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,60 +13,115 @@ public class MySlowReader {
     final int defaultBufSize = 8192;
     FileInputStream in = null;
     int bufSize = 0;
-    Buffer currentBuf;
-    Buffer otherBuf;
+    int fileSize = 0;
+    Buffer buffers[];
+    Buffer currentBuffer;
+    int stringSize = 0;
+    int currentBuf;
+    int currentPos = 0;
 
-    public MySlowReader(String fileName) throws IOException {
-        new MySlowReader(fileName,8192);
+    public MySlowReader(String fileName, int fileSize) throws IOException {
+        new MySlowReader(fileName,fileSize,8192);
     }
 
-    public MySlowReader(String fileName, int bufSize) throws IOException {
+    public MySlowReader(String fileName, int fileSize, int bufSize) throws IOException {
+        if (fileSize <= 0) throw new IOException("empty file");
         File myFile = new File(fileName);
         this.in = new FileInputStream(myFile);
         this.bufSize = bufSize;
-        currentBuf = new Buffer(in, bufSize);
-        otherBuf = new Buffer(in, bufSize);
+        this.fileSize = fileSize;
+        for (int bIndex=0; bIndex<buffers.length; bIndex++)
+            buffers[bIndex] = new Buffer(in,bufSize);
+        currentBuf = 0;
+        buffers[currentBuf].read(Math.min(fileSize,bufSize),0);
     }
 
+    long getLong() throws IOException {
+        long value = 0;
+        for (int i = 0; i < 4; i++)
+                value = (value << 8) + (nextByte() & 0xff);
+        return value;
+    }
 
+    void skip(int n) throws IOException {
+        seek(current()+n);
+    }
 
-    int skip(int n) throws IOException {
-        if (n>bufSize) throw new IOException("bufSize");
-
-        int skipped = 0;
-        int advanced = currentBuf.advance(n);
-        skipped += advanced;
-        if (advanced < n && currentBuf.was_complete()) {
-            int remainingToAdvance = n-advanced;
-            Buffer swap = currentBuf;
-            currentBuf = otherBuf;
-            otherBuf = swap;
-            if (currentBuf.remaining() == 0) {
-                currentBuf.read();
-            }
-            if (currentBuf.remaining() > 0) {
-                advanced = currentBuf.advance(remainingToAdvance);
-                skipped += advanced;
-            }
+    // seeking forwards work (by reading sequentially), seeking backwards only within buffers
+    public void seek(long pos) throws IOException {
+        Buffer currentBuffer = buffers[currentBuf];
+        long first = currentBuffer.first;
+        long last = currentBuffer.last;
+        if (pos >= first && pos <= last) {
+            currentPos = (int) (pos-first);
+            return;
         }
-        return skipped;
+        if (pos > fileSize) return;
+
+        int otherBuf = (currentBuf+1)%buffers.length;
+        Buffer otherBuffer = buffers[otherBuf];
+        long otherFirst = otherBuffer.first;
+        long otherLast = otherBuffer.last;
+        if (pos >= otherFirst && pos <= otherLast) {
+            currentPos = (int) (pos - otherFirst);
+            currentBuf = otherBuf;
+            return;
+        } else if (pos >= last) {
+            do {
+                if (otherFirst < last) {
+                    int toRead;
+                    if (fileSize < (last + 1 + bufSize))
+                        toRead = (int) (fileSize - last);
+                    else
+                        toRead = bufSize;
+                    otherBuffer.read(toRead, last + 1);
+                }
+                currentBuf = otherBuf;
+                currentBuffer = buffers[currentBuf];
+                last = currentBuffer.last;
+                otherBuf = (currentBuf + 1) % buffers.length;
+                otherFirst = otherBuffer.first;
+            } while (pos >= last);
+            currentPos = (int) (pos-currentBuffer.first);
+            return;
+        } else throw new IOException ("seeking backwards");
     }
-}
 
-class StringReader {
-    Buffer first;
-    Buffer last;
+    public long current() {
+        return buffers[currentBuf].first+currentPos;
+    }
 
-    StringReader() {
-        
+    public byte nextByte() throws IOException {
+        Buffer currentBuffer = buffers[currentBuf];
+        long last = currentBuffer.last;
+        byte toReturn = currentBuffer.buf[currentPos];
+        if (last > currentPos) { // normal case, next byte in same buffer
+            currentPos++;
+            return toReturn;
+        } else if (last == fileSize) { // this byte was the last in the file
+            return toReturn;
+        } else {  // last byte in buffer, but file continues
+            int otherBuf = (currentBuf+1)%buffers.length;
+            Buffer otherBuffer = buffers[otherBuf];
+            if (otherBuffer.first != last+1) {    // next buffer does not contain next byte
+                int toRead;
+                if (fileSize < (last + 1 + bufSize))
+                    toRead = (int) (fileSize - last);
+                else
+                    toRead = bufSize;
+                otherBuffer.read(toRead, last + 1);
+            }
+            currentPos = 0;
+            currentBuf = otherBuf;
+            return toReturn;
+        }
     }
 }
 
 class Buffer {
     byte[] buf;
-    int remaining;
-    int pointer;
-    boolean was_complete;
+    long first;
+    long last;
     int bufSize;
     FileInputStream in;
 
@@ -72,30 +129,14 @@ class Buffer {
         this.in = in;
         this.bufSize = bufSize;
         buf = new byte[bufSize];
-        remaining = 0;
-        pointer = 0;
-        was_complete = true;
+        first = 0;
+        last = 0;
     }
 
-    boolean was_complete() {
-        return was_complete;
-    }
-
-    int remaining() {
-       return remaining;
-    }
-
-    int advance(int n) {
-        int advancing = Math.min(remaining, n);
-        pointer += advancing;
-        remaining -= advancing;
-        return advancing;
-    }
-
-    void read() throws IOException {
+    void read(int expectToRead, long first) throws IOException {
         int bytesRead = in.read(buf,0,bufSize);
-        was_complete = (bytesRead < bufSize);
-        pointer = 0;
-        remaining = bytesRead;
+        if (bytesRead < expectToRead) throw new IOException();
+        this.first = first;
+        this.last = first+expectToRead;
     }
 }
