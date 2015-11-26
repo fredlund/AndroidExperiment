@@ -1,5 +1,7 @@
 package fred.docapp;
 
+import android.content.Context;
+
 import java.io.DataInput;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -23,20 +25,22 @@ public class MLocate {
     int pos = 0;
     static byte[] dirSaved = null;
     static byte[] entrySaved = null;
+	Context context;
     
     static public String localLibraryFile(String library) {
 	return library+".ldp";
     }
     
     public MLocate(String library) throws IOException {
-	new MLocate(library,8192);
+	new MLocate(library,8192,context);
     }
     
-    public MLocate(String library, int bufSize) throws IOException {
+    public MLocate(String library, int bufSize, Context context) throws IOException {
 	this.file = localLibraryFile(library);
 	this.bufSize = bufSize;
 	this.dirSaved = new byte[4096];
 	this.entrySaved = new byte[4096];
+		this.context = context;
 	//System.out.println("mlocate: library "+library+" is stored in "+this.file);
     }
     
@@ -59,7 +63,7 @@ public class MLocate {
 	
 	try {
 		System.out.println("bufSize is "+bufSize);
-	    reader = new MySlowReader(file,bufSize);
+	    reader = new MySlowReader(file,bufSize,context);
 	    reader.skip(8);
 	    long configurationBlockSize = reader.getLong();
 	    reader.skip(4);

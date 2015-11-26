@@ -731,7 +731,7 @@ public class SearchableActivity extends AppCompatActivity {
         currentLibrary = find_current_library();
 
         if (currentLibrary != null) {
-            final MLocate mloc = new MLocate(currentLibrary,8192);
+            final MLocate mloc = new MLocate(currentLibrary,8192,SearchableActivity.this);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
             AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 

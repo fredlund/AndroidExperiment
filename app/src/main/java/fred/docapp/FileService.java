@@ -31,6 +31,7 @@ public class FileService extends IntentService {
         Intent statusIntent = new Intent("request_transfer");
         statusIntent.putExtra("requestNo",ftr.requestNo);
         statusIntent.putExtra("status",!failure);
+        System.out.println("status = "+!failure);
         LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
     }
 }

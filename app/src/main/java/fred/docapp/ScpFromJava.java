@@ -72,7 +72,7 @@ public class ScpFromJava {
                     }
                 }
 
-                //System.out.println("filesize="+filesize+", file="+file);
+                System.out.println("filesize="+filesize+", file="+file);
 
                 // send '\0'
                 buf[0] = 0;
@@ -92,6 +92,7 @@ public class ScpFromJava {
                     foo = in.read(buf, 0, foo);
                     if (foo < 0) {
                         // error
+                        System.out.println("scp: read error");
                         retStatus.is_ok = false;
                         break;
                     }
@@ -104,6 +105,7 @@ public class ScpFromJava {
                 retStatus.is_ok = true;
 
                 if (checkAck(in) != 0) {
+                    System.out.println("scp: checkAck(in) failed");
                     retStatus.is_ok = false;
                 }
 
