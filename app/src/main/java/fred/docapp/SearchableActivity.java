@@ -98,40 +98,6 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("after intent");
         System.out.flush();
         handleIntent(intent, listValues);
-
-
-        //prepareData(listValues);
-        /*
-
-        listView = (ListView) findViewById(android.R.id.list);
-
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("item " + position + " was clicked=" + listValues.get(position));
-            }
-
-        });
-
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("item " + position + " was longclicked=" + listValues.get(position));
-                return true;
-            }
-
-        });
-
-        SimpleAdapter adapter =
-                new SimpleAdapter(this, listValues, android.R.layout.simple_list_item_1,
-                        new String[]{"1"}, new int[]{android.R.id.text1});
-        listView.setAdapter(adapter);
-        */
-
-
     }
 
     @Override
@@ -917,23 +883,23 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     String find_host(String library, SharedPreferences prefs) {
-        String location = prefs.getString("library_host", null);
-        if (location == null)
-            location = prefs.getString("db_host", null);
+        String location = prefs.getString("library_host", "");
+        if (location == "")
+            location = prefs.getString("db_host", "");
         return location;
     }
 
     String find_username(String library, SharedPreferences prefs) {
-        String username = prefs.getString("library_username", null);
-        if (username == null)
-            username = prefs.getString("db_username", null);
+        String username = prefs.getString("library_username", "");
+        if (username == "")
+            username = prefs.getString("db_username", "");
         return username;
     }
 
     String find_password(String library, SharedPreferences prefs) {
-        String password = prefs.getString("library_password", null);
-        if (password == null)
-            password = prefs.getString("db_password", null);
+        String password = prefs.getString("library_password", "");
+        if (password == "")
+            password = prefs.getString("db_password", "");
         return password;
     }
 
