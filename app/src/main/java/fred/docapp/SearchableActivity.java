@@ -32,6 +32,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +45,7 @@ public class SearchableActivity extends AppCompatActivity {
 
     private List<Map<String, Object>> listValues;
     private ListView listView = null;
-    Entry found[] = null;
+    List<Entry> found = null;
     private ListView listView1 = null;
     private MenuItem spinnerItem = null;
     private Menu menu;
@@ -717,18 +718,20 @@ public class SearchableActivity extends AppCompatActivity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
-            doMySearch(query, listValues);
+            try {
+                doMySearch(query, listValues);
+            } catch (IOException exc) { }
             //finish();
         }
     }
 
-    void doMySearch(final String query, List<Map<String, Object>> listValues) {
+    void doMySearch(final String query, List<Map<String, Object>> listValues) throws IOException {
         System.out.println("will search for " + query);
         System.out.flush();
         currentLibrary = find_current_library();
 
         if (currentLibrary != null) {
-            final MLocate mloc = new MLocate(currentLibrary);
+            final MLocate mloc = new MLocate(currentLibrary,8192);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
             AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
@@ -743,8 +746,12 @@ public class SearchableActivity extends AppCompatActivity {
 
                 @Override
                 protected Void doInBackground(Void... arg0) {
-                    found = mloc.find(query, SearchableActivity.this);
-                    System.out.println("size of found: " + found.length);
+                    try {
+                        found = mloc.find(query);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("size of found: " + found.size());
                     System.out.flush();
 
         /*for (Entry entry : found) {
@@ -789,16 +796,16 @@ public class SearchableActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             System.out.println("onItemClick position=" + position + " found size=" +
-                                    ((found == null) ? -1 : found.length));
+                                    ((found == null) ? -1 : found.size()));
                             System.out.flush();
-                            Entry entry = found[position];
-                            System.out.println("item " + position + " was clicked=" + found[position]);
+                            Entry entry = found.get(position);
+                            System.out.println("item " + position + " was clicked=" + found.get(position));
                             if (entry.entryType != Entry.EntryType.File) {
                                 System.out.println("will try to read " + entry);
-                                Entry[] dirEntries = mloc.read_dir(SearchableActivity.this, entry);
+                                List<Entry> dirEntries = mloc.read_dir(entry);
                                 if (dirEntries != null) { //&& dirEntries.length > 0) {
                                     found = dirEntries;
-                                    System.out.println("numer of entries are :" + dirEntries.length);
+                                    System.out.println("numer of entries are :" + dirEntries.size());
                                     System.out.flush();
                                     EntryAdapter adapter = new EntryAdapter(myself, R.layout.listview_item_row, dirEntries);
                                     System.out.println("computed new adapter");
@@ -833,7 +840,7 @@ public class SearchableActivity extends AppCompatActivity {
 
                         @Override
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                            Entry entry = found[position];
+                            Entry entry = found.get(position);
                             System.out.println("item " + position + " was longclicked=" + entry);
                             entry.isEnabled = !entry.isEnabled;
                             EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();

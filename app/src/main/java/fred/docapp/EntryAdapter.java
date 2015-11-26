@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,9 +22,9 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
 
     Context context;
     int layoutResourceId;
-    Entry data[] = null;
+    List<Entry> data = null;
 
-    public EntryAdapter(Context context, int layoutResourceId, Entry[] data) {
+    public EntryAdapter(Context context, int layoutResourceId, List<Entry> data) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
@@ -53,7 +54,7 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
             holder = (EntryHolder)row.getTag();
         }
 
-        Entry entry = data[position];
+        Entry entry = data.get(position);
         String value;
         if (entry.entryType != Entry.EntryType.File)
             value = entry.fileName + "/";
