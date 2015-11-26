@@ -32,7 +32,7 @@ public class ScpFromJava {
 
             // get I/O streams for remote scp
             OutputStream out = channel.getOutputStream();
-            InputStream in = channel.getInputStream();
+            BufferedInputStream in = new BufferedInputStream(channel.getInputStream());
 
             channel.connect();
 
@@ -51,25 +51,41 @@ public class ScpFromJava {
                 }
 
                 // read '0644 '
-                in.read(buf, 0, 5);
+                //in.read(buf, 0, 5);
 
                 long filesize = 0L;
+                int pos = 0;
                 while (true) {
-                    if (in.read(buf, 0, 1) < 0) {
-                        // error
-                        break;
+                    if (in.read(buf, pos, 1) < 0) {
+                        retStatus.is_ok = false;
+                        in.close();
+                        out.close();
+                        return retStatus;
                     }
-                    if (buf[0] == ' ') break;
-                    filesize = filesize * 10L + (long) (buf[0] - '0');
+
+                    if (buf[pos] == (byte) 0xa)
+                        break;
+                    ++pos;
                 }
 
-                String file = null;
-                for (int i = 0; ; i++) {
-                    in.read(buf, i, 1);
-                    if (buf[i] == (byte) 0x0a) {
-                        file = new String(buf, 0, i);
-                        break;
-                    }
+                System.out.println("read line "+MySlowReader.printBs(buf,pos));
+
+                int index = 0;
+                while (index < pos && buf[index] != 0x20) ++index;
+                ++index;
+                System.out.println("after skipping mode: index="+index);
+
+                while (index < pos && buf[index] != 0x20) {
+                     filesize = filesize * 10L + (long) (buf[index] - '0');
+                    ++index;
+                }
+                ++index;
+                System.out.println("fileSize = "+filesize+" index="+index);
+
+                String file = "";
+                while (index < pos && buf[index] != 0xa) {
+                    file += ((char) buf[index]);
+                    ++index;
                 }
 
                 System.out.println("filesize="+filesize+", file="+file);
@@ -80,6 +96,7 @@ public class ScpFromJava {
                 out.flush();
 
 
+                System.out.println("local file name is localDir="+localDir+" file="+file);
                 File myFile = new File(localDir+"/"+file);
                 myFile.setReadable(true,false);
                 System.out.println("will open "+myFile);

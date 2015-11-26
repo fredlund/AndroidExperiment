@@ -63,14 +63,13 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
-        SharedPreferences appData = getSharedPreferences("appData",0);
-        currentLibrary = appData.getString("default_library",null);
+        SharedPreferences appData = getSharedPreferences("appData", 0);
+        currentLibrary = appData.getString("default_library", null);
         toDownload = new HashMap<>();
 
-        System.out.println("external storage dir="+ Environment.getExternalStorageDirectory());
-        System.out.println("external public storage dir (downloads)="+ Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
-        System.out.println("pictures="+Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
-
+        System.out.println("external storage dir=" + Environment.getExternalStorageDirectory());
+        System.out.println("external public storage dir (downloads)=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
+        System.out.println("pictures=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
 
 
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
@@ -244,17 +243,17 @@ public class SearchableActivity extends AppCompatActivity {
         SharedPreferences appPrefs = getSharedPreferences("appData", 0);
         int requestNo = appPrefs.getInt("transferCounter", 0);
         SharedPreferences.Editor edit = appPrefs.edit();
-        edit.putInt("transferCounter",requestNo % 32000);
+        edit.putInt("transferCounter", requestNo % 32000);
         String files[] = new String[toDownload.size()];
         int i = 0;
         for (Entry entry : toDownload.values()) {
-            System.out.println("Entry="+entry);
+            System.out.println("Entry=" + entry);
             files[i++] = entry.dirName + "/" + entry.fileName;
         }
         File localFile = Environment.getExternalStorageDirectory();
-        File myDir = new File(localFile.getAbsolutePath()+"/Billy/");
+        File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
         myDir.mkdir();
-        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, myDir.getAbsolutePath(),requestNo);
+        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, myDir.getAbsolutePath(), requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -263,14 +262,14 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     void doGetLibraryFile(String library, String host, String location, String username, String password) {
-        System.out.println("doGetLibraryFiles library="+library);
+        System.out.println("doGetLibraryFiles library=" + library);
         String files[] = new String[1];
-        files[0] = location+"/"+MLocate.localLibraryFile(library);
+        files[0] = location + "/" + MLocate.localLibraryFile(library);
         SharedPreferences appPrefs = getSharedPreferences("appData", 0);
         int requestNo = appPrefs.getInt("transferCounter", 0);
         SharedPreferences.Editor edit = appPrefs.edit();
         edit.putInt("transferCounter", requestNo % 32000);
-        FileTransferRequest ftr = new FileTransferRequest(host,username,password,files,this.getFilesDir().getAbsolutePath(),requestNo);
+        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, this.getFilesDir().getAbsolutePath(), requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -289,10 +288,10 @@ public class SearchableActivity extends AppCompatActivity {
                     final String username;
                     final String host;
                     if (library != null) {
-                        final SharedPreferences libraryPrefs = getSharedPreferences(library,0);
-                        if ((host = find_host(library,libraryPrefs)) != null) {
-                            if ((username = find_username(library,libraryPrefs)) != null) {
-                                final String password = find_password(library,libraryPrefs);
+                        final SharedPreferences libraryPrefs = getSharedPreferences(library, 0);
+                        if ((host = find_host(library, libraryPrefs)) != null) {
+                            if ((username = find_username(library, libraryPrefs)) != null) {
+                                final String password = find_password(library, libraryPrefs);
                                 if (password == null || password.equals("")) {
 
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
@@ -311,7 +310,7 @@ public class SearchableActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int which) {
 
                                             String result = input.getText().toString();
-                                           doFileRequest(host,username,result);
+                                            doFileRequest(host, username, result);
 
 
                                         }
@@ -575,7 +574,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 errors.append("no db username specified\n");
                                 has_error = true;
                             }
-                            System.out.println("has_error="+has_error);
+                            System.out.println("has_error=" + has_error);
                             if (has_error) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                                 builder.setTitle("Error");
@@ -624,7 +623,6 @@ public class SearchableActivity extends AppCompatActivity {
                 });
 
 
-
                 edit_builder.setPositiveButton("cancel",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -642,8 +640,9 @@ public class SearchableActivity extends AppCompatActivity {
                 // show it
                 AlertDialog edit_alertDialog = edit_builder.create();
                 edit_alertDialog.show();
-            };
-                break;
+            }
+            ;
+            break;
             case R.id.menu_set_default_library: {
                 final SharedPreferences data = getSharedPreferences("appData", 0);
                 Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());
@@ -720,7 +719,8 @@ public class SearchableActivity extends AppCompatActivity {
             //use the query to search your data somehow
             try {
                 doMySearch(query, listValues);
-            } catch (IOException exc) { }
+            } catch (IOException exc) {
+            }
             //finish();
         }
     }
@@ -731,7 +731,7 @@ public class SearchableActivity extends AppCompatActivity {
         currentLibrary = find_current_library();
 
         if (currentLibrary != null) {
-            final MLocate mloc = new MLocate(currentLibrary,8192,SearchableActivity.this);
+            final MLocate mloc = new MLocate(currentLibrary, 8192, SearchableActivity.this);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
             AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
@@ -904,15 +904,15 @@ public class SearchableActivity extends AppCompatActivity {
                 data.getStringSet("libraries", new HashSet<String>());
 
         if (currentLibrary != null && currentLibrary != "" && libraries.contains(currentLibrary)) {
-            System.out.println("currentLibrary is "+currentLibrary+" and is contained");
+            System.out.println("currentLibrary is " + currentLibrary + " and is contained");
             return currentLibrary;
         }
         if (libraries.size() == 1) {
             String[] libraryObjects = libraries.toArray(new String[1]);
-            System.out.println("current library does not exist; just one library "+libraryObjects[0]);
+            System.out.println("current library does not exist; just one library " + libraryObjects[0]);
             return libraryObjects[0];
         }
-        System.out.println("currentLibrary "+currentLibrary+" does not exist; size of libraries is "+libraries.size());
+        System.out.println("currentLibrary " + currentLibrary + " does not exist; size of libraries is " + libraries.size());
         return null;
     }
 
@@ -926,14 +926,14 @@ public class SearchableActivity extends AppCompatActivity {
     String find_username(String library, SharedPreferences prefs) {
         String username = prefs.getString("library_username", null);
         if (username == null)
-            username = prefs.getString("db_username",null);
+            username = prefs.getString("db_username", null);
         return username;
     }
 
     String find_password(String library, SharedPreferences prefs) {
         String password = prefs.getString("library_password", null);
         if (password == null)
-            password = prefs.getString("db_password",null);
+            password = prefs.getString("db_password", null);
         return password;
     }
 
@@ -960,10 +960,9 @@ public class SearchableActivity extends AppCompatActivity {
 }
 
 // Broadcast receiver for receiving status updates from the IntentService
-class ResponseReceiver extends BroadcastReceiver
-{
+class ResponseReceiver extends BroadcastReceiver {
     // Called when the BroadcastReceiver gets an Intent it's registered to receive
     public void onReceive(Context context, Intent intent) {
-        System.out.println("got an intent "+intent);
+        System.out.println("got an intent " + intent);
     }
 }

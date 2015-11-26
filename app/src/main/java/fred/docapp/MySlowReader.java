@@ -119,7 +119,7 @@ public class MySlowReader {
 	} while (currentPos > otherBufferLast);
     }
 
-    String printBs(byte[] bytes, int max) {
+    static public String printBs(byte[] bytes, int max) {
 	StringBuilder builder = new StringBuilder();
 	for (int i=0; i<max; i++)
 	    builder.append((char) bytes[i]);
