@@ -960,7 +960,7 @@ public class SearchableActivity extends AppCompatActivity {
 }
 
 // Broadcast receiver for receiving status updates from the IntentService
-class ResponseReceiver extends BroadcastReceiver {
+class TransferResponseReceiver extends BroadcastReceiver {
     // Called when the BroadcastReceiver gets an Intent it's registered to receive
     public void onReceive(Context context, Intent intent) {
         System.out.println("got an intent " + intent);
