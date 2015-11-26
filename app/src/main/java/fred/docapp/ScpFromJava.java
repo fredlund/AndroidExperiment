@@ -102,10 +102,11 @@ public class ScpFromJava {
                 System.out.println("will open "+myFile);
                 fos = new FileOutputStream(myFile);
 
+                long remaining = filesize;
                 int foo;
                 while (true) {
-                    if (buf.length < filesize) foo = buf.length;
-                    else foo = (int) filesize;
+                    if (buf.length < remaining) foo = buf.length;
+                    else foo = (int) remaining;
                     foo = in.read(buf, 0, foo);
                     if (foo < 0) {
                         // error
@@ -114,9 +115,12 @@ public class ScpFromJava {
                         break;
                     }
                     fos.write(buf, 0, foo);
-                    filesize -= foo;
-                    if (filesize == 0L) break;
+                    remaining -= foo;
+                    if (remaining == 0L) break;
                 }
+
+                if (remaining > 0)
+                    System.out.println("file "+file+": could only read "+(filesize-remaining)+" bytes out of "+filesize);
                 fos.close();
                 fos = null;
                 retStatus.is_ok = true;
