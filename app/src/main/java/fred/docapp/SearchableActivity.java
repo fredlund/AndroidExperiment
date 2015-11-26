@@ -249,7 +249,7 @@ public class SearchableActivity extends AppCompatActivity {
         int i = 0;
         for (Entry entry : toDownload.values()) {
             System.out.println("Entry="+entry);
-            files[i++] = entry.mloc.root() + "/" + entry.dirName + "/" + entry.fileName;
+            files[i++] = entry.dirName + "/" + entry.fileName;
         }
         File localFile = Environment.getExternalStorageDirectory();
         File myDir = new File(localFile.getAbsolutePath()+"/Billy/");

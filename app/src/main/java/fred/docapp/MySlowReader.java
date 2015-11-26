@@ -32,19 +32,14 @@ public class MySlowReader {
     // Position in the file, i.e., next position that will be read
     long currentPos = 0;   // 0..
 
-    public MySlowReader(String fileName) throws IOException {
-        new MySlowReader(fileName,8192,context);
-    }
-
-    public MySlowReader(String fileName, int bufSize, Context context) throws IOException {
+    public MySlowReader(String fileName, int bufSize) throws IOException {
 	if (bufSize < 4096) throw new IOException("bufSize must be at least "+4096);
         File myFile = new File(fileName);
 	this.fileSize = myFile.length();
-        //if (fileSize <= 0) throw new IOException(fileName+" is empty");
-        //this.in = new FileInputStream(myFile);
-		this.in = context.openFileInput(fileName);
+        if (fileSize <= 0) throw new IOException(myFile.getName()+" is empty");
+        this.in = new FileInputStream(myFile);
+		//this.in = context.openFileInput(fileName);
         this.bufSize = bufSize;
-        this.fileSize = fileSize;
 		this.context = context;
 	currentBuffer = new Buffer(in,bufSize,fileSize);
 	otherBuffer = new Buffer(in,bufSize,fileSize);

@@ -11,6 +11,35 @@ Features
 - specifying port?
 - quicker reading (in memory?)
 - better searching: search insensitive, avoid .-directories, -pattern, etc
+
+1. A set of must match (and),
+and a set of must not match (not): first evaluate ands (in order),
+      	     	      	    	   then nots (in order)
+.java
+biggles .epub
+biggles -mobi
+src -gradle
+we cannot do:
+biggles :or(.mobi,.epub)
+
+2. A set of must match (and),
+alternatively written :and(t1,...,tn)
+where each must match can be a disjunction :or(simple1,...,simplen)
+and a set of negative terms :not(simple1):
+first evaluate simple positives (if any)
+then evalute composite terms (if any)
+and then evaluate negative terms
+
+order terms (also in subterms)
+execute term-by-term
+return result
+
+3. A completely general one:
+question how to do this efficiently?
+(we distribute not over operators and do positive ones first:
+not(X and Y) => not(X) or not(Y)
+not(X or Y) => not(X) and not(Y)
+
 - app info
 - properties info about (last longclicked) file from menu
 - handle device rotate

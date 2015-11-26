@@ -30,17 +30,18 @@ public class MLocate {
     static public String localLibraryFile(String library) {
 	return library+".ldp";
     }
-    
-    public MLocate(String library) throws IOException {
-	new MLocate(library,8192,context);
+	static public String fullLocalLibraryFile(Context context, String library) {
+	return context.getFilesDir().getAbsolutePath()+"/"+library+".ldp";
     }
-    
+
     public MLocate(String library, int bufSize, Context context) throws IOException {
-	this.file = localLibraryFile(library);
 	this.bufSize = bufSize;
 	this.dirSaved = new byte[4096];
 	this.entrySaved = new byte[4096];
 		this.context = context;
+		this.file = fullLocalLibraryFile(context,library);
+		tmp = new byte[8192];
+		tmp2 = new byte[1];
 	//System.out.println("mlocate: library "+library+" is stored in "+this.file);
     }
     
@@ -63,14 +64,14 @@ public class MLocate {
 	
 	try {
 		System.out.println("bufSize is "+bufSize);
-	    reader = new MySlowReader(file,bufSize,context);
+	    reader = new MySlowReader(file,bufSize);
 	    reader.skip(8);
 	    long configurationBlockSize = reader.getLong();
 	    reader.skip(4);
 	    //System.out.println("current pos is "+reader.current());
 	    String pathName = reader.getString();
-	    //System.out.println("path name is " + pathName);
-	    //System.out.println("current pos is "+reader.current());
+	    System.out.println("path name is " + pathName);
+	    System.out.println("current pos is "+reader.current());
 	    root = pathName;
 	    reader.skip(configurationBlockSize);
 	    
@@ -81,7 +82,7 @@ public class MLocate {
 		int dirSavedLen;
 		if ((dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0)) >= 0) {
 		    String dirName = reader.getString(dirSaved,dirSavedLen);
-		    Entry entry = new Entry(this, 0, pos, null, dirName,Entry.EntryType.DefineDir);
+		    Entry entry = new Entry(this, 0, reader.current(), null, dirName,Entry.EntryType.DefineDir);
 		    resultList.add(entry);
 		    //System.out.println("found dir "+dirName);
 		    skip_dir(reader);
@@ -216,11 +217,12 @@ public class MLocate {
 	try {
 	    RandomAccessFile in = new RandomAccessFile(this.file, "rw");
 	    long seek_pos = entry.pos;
-	    //System.out.println("seeking to "+seek_pos);
+	    System.out.println("seeking to "+seek_pos);
 	    in.seek(seek_pos);
 	    List<Entry> result = new ArrayList<Entry>();
 	    String dirName = path_compose(entry.dirName,entry.fileName);
-	    scan_dir(in, dirName, result);
+		System.out.println("calling scan_dir");
+		scan_dir(in, dirName, result);
 	    in.close();
 	    return result;
 	} catch (FileNotFoundException exc) { System.out.println("FileNotFound"); return null; }
@@ -238,15 +240,16 @@ public class MLocate {
 	
 	boolean in_dir = true;
 	do {
+		System.out.flush();
 	    byte fileType = getByte(in);
 	    final int sizeSize = 4;
 	    byte size[] = new byte[sizeSize];
-	    
+
 	    int result = read(in,size,0,sizeSize);
 	    if (result < sizeSize) {
-		//System.out.println
-		//  ("*** Error: could not read file size at dir "+dirName+" read="+result+" " +
-		//   "should be "+sizeSize+" pos="+pos+" fileType was "+fileType);
+		System.out.println
+		  ("*** Error: could not read file size at dir "+dirName+" read="+result+" " +
+		  "should be "+sizeSize+" pos="+pos+" fileType was "+fileType);
 		throw new RuntimeException();
 	    }
 	    pos += sizeSize;
@@ -277,6 +280,7 @@ public class MLocate {
 		break;
 	    }
 	    default: {
+			System.out.println("wrong fileType="+fileType);
 		throw new IOException("scan_dir");
 	    }
 	    }
