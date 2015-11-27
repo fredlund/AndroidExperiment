@@ -34,4 +34,8 @@
         android:id="@+id/menu_delete_library"
         app:showAsAction="never"
         android:title="Delete Library"/>
+    <item
+        android:id="@+id/menu_transfer_status"
+        app:showAsAction="never"
+        android:title="Transfer Status"/>
 </menu>

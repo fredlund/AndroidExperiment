@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_resume_selected_jobs"
+        app:showAsAction="never"
+        android:title="Resume selected jobs"/>
+    <item
+        android:id="@+id/menu_resume_all_jobs"
+        app:showAsAction="never"
+        android:title="Result all jobs"/>
+    <item
+        android:id="@+id/menu_clear_finished_jobs"
+        app:showAsAction="never"
+        android:title="Clear finished jobs"/>
+    <item
+        android:id="@+id/menu_clear_all_jobs"
+        app:showAsAction="never"
+        android:title="Clear all jobs"/>
+</menu>

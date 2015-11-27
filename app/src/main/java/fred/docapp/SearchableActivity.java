@@ -120,19 +120,13 @@ public class SearchableActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         System.out.println("searchView=" + searchView);
         System.out.flush();
-        //try { wait(200); } catch (InterruptedException exc) {};
         ComponentName cn = new ComponentName(this, SearchableActivity.class);
-        // try { wait(200); } catch (InterruptedException exc) {};
         searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
-        //try { wait(200); } catch (InterruptedException exc) {};
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("before spinning");
         System.out.flush();
-        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("onCreateOptionsMenu: spinner item is " + menu.findItem(R.id.spinner));
         System.out.flush();
-        //try { wait(200); } catch (InterruptedException exc) {};
         if (menu.findItem(R.id.spinner) == null) {
             try {
                 wait(200);
@@ -141,9 +135,7 @@ public class SearchableActivity extends AppCompatActivity {
             ;
             new Exception().printStackTrace();
         }
-        // try { wait(200); } catch (InterruptedException exc) {};
         spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
-        //try { wait(200); } catch (InterruptedException exc) {};
         System.out.println("Spinner is " + spinner + " spinner adapter is " + spinnerAdapter);
         System.out.flush();
         spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
@@ -247,6 +239,11 @@ public class SearchableActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case R.id.menu_transfer_status: {
+                Intent transferStatusIntent = new Intent(this,TransferStatusActivity.class);
+                startActivity(transferStatusIntent);
+                break;
+            }
             case R.id.menu_download: {
                 System.out.println("in download");
                 if (toDownload.size() > 0) {

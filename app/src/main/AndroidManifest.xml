@@ -35,6 +35,8 @@
         </activity>
         <activity android:name=".AddLibrary" >
         </activity>
+        <activity android:name=".TransferStatusActivity" >
+        </activity>
         <service android:name=".FileService">
             <intent-filter><action android:name="fred.docApp.FileTransferRequest"></action>
             </intent-filter>
