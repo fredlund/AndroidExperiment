@@ -77,7 +77,7 @@ import java.util.Set;
 
             setContentView(R.layout.mylist);
             listView1 = (ListView) findViewById(android.R.id.list);
-            EntryAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
+            TransferAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
             System.out.println("computed new adapter");
             System.out.flush();
             listView1.setAdapter(adapter);
@@ -147,15 +147,17 @@ import java.util.Set;
         }
 
     }
-}
+
 
 class Transfer {
         public enum TransferStatus { paused, done, failed, in_progress };
     FileTransferRequest ftr;
+    String file;
     TransferStatus ts;
     long transferred;
 
-    Transfer(FileTransferRequest ftr, TransferStatus ts, long transferred) {
+    Transfer(String file, FileTransferRequest ftr, TransferStatus ts, long transferred) {
+            this.file = file;
         this.ftr = ftr;
             this.ts = ts;
             this.transferred = transferred;
