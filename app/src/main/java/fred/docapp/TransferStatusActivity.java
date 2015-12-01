@@ -150,16 +150,15 @@ import java.util.Set;
 
 
 class Transfer {
-        public enum TransferStatus { paused, done, failed, in_progress };
-    FileTransferRequest ftr;
     String file;
-    TransferStatus ts;
+    int transferStatus;
     long transferred;
+    String library;
 
-    Transfer(String file, FileTransferRequest ftr, TransferStatus ts, long transferred) {
+    Transfer(String file, String library, int transferStatus, long transferred) {
             this.file = file;
-        this.ftr = ftr;
-            this.ts = ts;
+        this.library = library;
+            this.transferStatus = transferStatus;
             this.transferred = transferred;
     }
 }
