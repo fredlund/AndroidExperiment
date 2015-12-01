@@ -65,7 +65,7 @@ public class TransferDB extends SQLiteOpenHelper {
         values.put("status", transfer.transferStatus);
         values.put("transferred", transfer.transferred);
         System.out.println("sql quotes is " + DatabaseUtils.sqlEscapeString(transfer.file));
-        (mInstance.getWritableDatabase()).update("transfers", values, "file = \"" + DatabaseUtils.sqlEscapeString(transfer.file) + "\"", null); ;
+        (mInstance.getWritableDatabase()).update("transfers", values, "file = " + DatabaseUtils.sqlEscapeString(transfer.file), null); ;
     }
 
     public boolean deleteTransfer(Transfer transfer)
