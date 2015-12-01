@@ -3,6 +3,7 @@ package fred.docapp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -61,11 +62,10 @@ public class TransferDB extends SQLiteOpenHelper {
 
     public void updateTransfer(Transfer transfer) {
         ContentValues values = new ContentValues();
-        values.put("file", transfer.file);
-        values.put("library", transfer.library);
         values.put("status", transfer.transferStatus);
         values.put("transferred", transfer.transferred);
-        (mInstance.getWritableDatabase()).update("transfers", values);
+        System.out.println("sql quotes is " + DatabaseUtils.sqlEscapeString(transfer.file));
+        (mInstance.getWritableDatabase()).update("transfers", values, "file = \"" + DatabaseUtils.sqlEscapeString(transfer.file) + "\"", null); ;
     }
 
     public boolean deleteTransfer(Transfer transfer)
