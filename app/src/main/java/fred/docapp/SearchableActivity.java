@@ -72,7 +72,7 @@ public class SearchableActivity extends AppCompatActivity {
         System.out.println("pictures=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
 
 
-        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+        //Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         listValues = new ArrayList<Map<String, Object>>();
         ui = new UserInfo();
 

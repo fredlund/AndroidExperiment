@@ -58,6 +58,7 @@ import java.util.Set;
         protected void onCreate(Bundle savedInstanceState) {
             System.out.println("transfer status activitity was created");
             System.out.flush();
+            myself = TransferStatusActivity.this;
             super.onCreate(savedInstanceState);
 
             // Instantiates a new DownloadStateReceiver
@@ -77,6 +78,7 @@ import java.util.Set;
 
             setContentView(R.layout.mylist);
             listView1 = (ListView) findViewById(android.R.id.list);
+            transfers = TransferDB.getInstance(TransferStatusActivity.this).getAll();
             TransferAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
             System.out.println("computed new adapter");
             System.out.flush();
