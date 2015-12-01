@@ -28,10 +28,11 @@ public class FileService extends IntentService {
         for (int i=0; i<ftr.files.length && !failure; i++) {
             String file = ftr.files[i];
             ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, file);
-            failure = ret.is_ok;
+            failure = !ret.is_ok;
             if (!failure) {
                 transfer = new Transfer(file,ftr.library,Transfer.progressing(),scp.fileSize,0);
                 ret = scp.doTransfer(ftr.localDir);
+                failure = !ret.is_ok;
             } else
                 transfer = new Transfer(file,ftr.library,Transfer.failed(),0,0);
             db.updateTransfer(transfer);
