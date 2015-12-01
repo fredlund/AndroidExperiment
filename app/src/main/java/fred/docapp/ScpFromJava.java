@@ -7,20 +7,34 @@ import com.jcraft.jsch.*;
 import java.io.*;
 
 public class ScpFromJava {
-    public ScpReturnStatus transfer(Context context, String username, String password, String host, String reqFile, String localDir) {
+        JSch jsch;
+        JschLogger logger;
+        ScpReturnStatus retStatus;
+        FileOutputStream fos = null;
+    Session session;
+    MyUserInfo userInfo;
+    byte[] buf;
+    OutputStream out;
+    BufferedInputStream in;
+    String file;
+    long fileSize;
 
-        JSch jsch = new JSch();
-        JschLogger logger = new JschLogger();
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public ScpReturnStatus setupTransfer(String username, String password, String host, String reqFile) {
+        jsch = new JSch();
+        logger = new JschLogger();
         logger.setLevel(Logger.INFO);
         jsch.setLogger(logger);
         logger.setLevel(Logger.INFO);
-        ScpReturnStatus retStatus = new ScpReturnStatus(true);
+        retStatus = new ScpReturnStatus(true);
 
-        FileOutputStream fos = null;
         try {
 
-            Session session = jsch.getSession(username, host, 22);
-            MyUserInfo userInfo = new MyUserInfo(password);
+            session = jsch.getSession(username, host, 22);
+            userInfo = new MyUserInfo(password);
             session.setUserInfo(userInfo);
             session.connect();
 
@@ -31,12 +45,12 @@ public class ScpFromJava {
             ((ChannelExec) channel).setCommand(command);
 
             // get I/O streams for remote scp
-            OutputStream out = channel.getOutputStream();
-            BufferedInputStream in = new BufferedInputStream(channel.getInputStream());
+            out = channel.getOutputStream();
+            in = new BufferedInputStream(channel.getInputStream());
 
             channel.connect();
 
-            byte[] buf = new byte[1024];
+            buf = new byte[1024];
 
             // send '\0'
             buf[0] = 0;
@@ -53,7 +67,7 @@ public class ScpFromJava {
                 // read '0644 '
                 //in.read(buf, 0, 5);
 
-                long filesize = 0L;
+                fileSize = 0L;
                 int pos = 0;
                 while (true) {
                     if (in.read(buf, pos, 1) < 0) {
@@ -68,41 +82,56 @@ public class ScpFromJava {
                     ++pos;
                 }
 
-                System.out.println("read line "+MySlowReader.printBs(buf,pos));
+                System.out.println("read line " + MySlowReader.printBs(buf, pos));
 
                 int index = 0;
                 while (index < pos && buf[index] != 0x20) ++index;
                 ++index;
-                System.out.println("after skipping mode: index="+index);
+                System.out.println("after skipping mode: index=" + index);
 
                 while (index < pos && buf[index] != 0x20) {
-                     filesize = filesize * 10L + (long) (buf[index] - '0');
+                    fileSize = fileSize * 10L + (long) (buf[index] - '0');
                     ++index;
                 }
                 ++index;
-                System.out.println("fileSize = "+filesize+" index="+index);
+                System.out.println("fileSize = " + fileSize + " index=" + index);
 
-                String file = "";
+                file = "";
                 while (index < pos && buf[index] != 0xa) {
                     file += ((char) buf[index]);
                     ++index;
                 }
 
-                System.out.println("filesize="+filesize+", file="+file);
+                System.out.println("filesize=" + fileSize + ", file=" + file);
+                return retStatus;
+            }
+        } catch (Exception e) {
+            System.out.println("ScpFromJava: exception " + e);
+            retStatus.exc = e;
+            e.printStackTrace();
+            try {
+                if (fos != null) fos.close();
+            } catch (Exception ee) {
+            }
+        }
+        return retStatus;
+    }
 
+        public ScpReturnStatus doTransfer(String localDir) {
+            try {
                 // send '\0'
                 buf[0] = 0;
                 out.write(buf, 0, 1);
                 out.flush();
 
 
-                System.out.println("local file name is localDir="+localDir+" file="+file);
-                File myFile = new File(localDir+"/"+file);
-                myFile.setReadable(true,false);
-                System.out.println("will open "+myFile);
+                System.out.println("local file name is localDir=" + localDir + " file=" + file);
+                File myFile = new File(localDir + "/" + file);
+                myFile.setReadable(true, false);
+                System.out.println("will open " + myFile);
                 fos = new FileOutputStream(myFile);
 
-                long remaining = filesize;
+                long remaining = fileSize;
                 int foo;
                 while (true) {
                     if (buf.length < remaining) foo = buf.length;
@@ -120,7 +149,8 @@ public class ScpFromJava {
                 }
 
                 if (remaining > 0)
-                    System.out.println("file "+file+": could only read "+(filesize-remaining)+" bytes out of "+filesize);
+                    System.out.println("file " + file + ": could only read " + (fileSize - remaining) +
+                            " bytes out of " + fileSize);
                 fos.close();
                 fos = null;
                 retStatus.is_ok = true;
@@ -136,7 +166,7 @@ public class ScpFromJava {
                     out.write(buf, 0, 1);
                     out.flush();
                 }
-            }
+
             session.disconnect();
         } catch (Exception e) {
             System.out.println("ScpFromJava: exception "+e);

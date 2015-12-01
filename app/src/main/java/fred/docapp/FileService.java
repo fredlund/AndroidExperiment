@@ -13,22 +13,28 @@ public class FileService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Transfer transfer = null;
+
         System.out.println("handle intent");
         FileTransferRequest ftr = intent.getParcelableExtra("fred.docapp.FileTransferRequest");
         System.out.println("got a file transfer request "+ftr);
         TransferDB db = TransferDB.getInstance(this);
         for (String file : ftr.files) {
-            Transfer transfer = new Transfer(file,ftr.library,Transfer.waiting(),0);
+            transfer = new Transfer(file,ftr.library,Transfer.waiting(),0,0);
             db.storeTransfer(transfer);
         }
         ScpFromJava scp = new ScpFromJava();
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {
             String file = ftr.files[i];
-            Transfer transfer = new Transfer(file,ftr.library,Transfer.progressing(),0);
-            db.updateTransfer(transfer);
-            ScpReturnStatus ret = scp.transfer(this, ftr.userName, ftr.passWord, ftr.host, file, ftr.localDir);
+            ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, file);
             failure = ret.is_ok;
+            if (!failure) {
+                transfer = new Transfer(file,ftr.library,Transfer.progressing(),scp.fileSize,0);
+                ret = scp.doTransfer(ftr.localDir);
+            } else
+                transfer = new Transfer(file,ftr.library,Transfer.failed(),0,0);
+            db.updateTransfer(transfer);
             Intent statusIntent = new Intent("file_transfer");
             statusIntent.putExtra("requestNo", ftr.requestNo);
             statusIntent.putExtra("file", ftr.files[i]);

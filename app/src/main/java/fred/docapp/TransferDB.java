@@ -20,7 +20,7 @@ public class TransferDB extends SQLiteOpenHelper {
     private SQLiteDatabase db;
 
     public TransferDB(Context ctx) {
-        super(ctx, "billyDB", null, 1);
+        super(ctx, "billyDB", null, 2);
         this.mCtx = ctx;
     }
 
@@ -31,7 +31,7 @@ public class TransferDB extends SQLiteOpenHelper {
         return mInstance;
     }
     private static final String CREATE_ENTRIES =
-            "CREATE TABLE transfers ( file TEXT PRIMARY KEY, library TEXT, status INTEGER, transferred INTEGER )";
+            "CREATE TABLE transfers ( file TEXT PRIMARY KEY, library TEXT, status INTEGER, fileSize INTEGER, transferred INTEGER )";
      private static final String DELETE_ENTRIES =
              "DROP TABLE IF EXISTS transfers";
 
@@ -56,6 +56,7 @@ public class TransferDB extends SQLiteOpenHelper {
         values.put("file", transfer.file);
         values.put("library", transfer.library);
         values.put("status", transfer.transferStatus);
+        values.put("fileSize",transfer.fileSize);
         values.put("transferred", transfer.transferred);
         (mInstance.getWritableDatabase()).insert("transfers", "null", values);
     }
@@ -64,6 +65,7 @@ public class TransferDB extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("status", transfer.transferStatus);
         values.put("transferred", transfer.transferred);
+        values.put("fileSize",transfer.fileSize);
         System.out.println("sql quotes is " + DatabaseUtils.sqlEscapeString(transfer.file));
         (mInstance.getWritableDatabase()).update("transfers", values, "file = " + DatabaseUtils.sqlEscapeString(transfer.file), null); ;
     }
@@ -72,6 +74,7 @@ public class TransferDB extends SQLiteOpenHelper {
     {
         return db.delete("transfers", "file" + "=" + transfer.file, null) > 0;
     }
+
     public List<Transfer> getAll() {
         List<Transfer> transfers = new ArrayList<Transfer>();
         String selectQuery = "SELECT  * FROM " + "transfers";
@@ -82,7 +85,8 @@ public class TransferDB extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                Transfer td = new Transfer(c.getString(0), c.getString(1), c.getInt(2), c.getLong(3));
+                Transfer td = new Transfer(c.getString(0), c.getString(1),
+                                            c.getInt(2), c.getLong(3), c.getLong(4));
                 transfers.add(td);
             } while (c.moveToNext());
         }

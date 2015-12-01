@@ -154,13 +154,15 @@ import java.util.Set;
 class Transfer {
     String file;
     int transferStatus;
+    long fileSize;
     long transferred;
     String library;
 
-    Transfer(String file, String library, int transferStatus, long transferred) {
+    Transfer(String file, String library, int transferStatus, long fileSize, long transferred) {
             this.file = file;
         this.library = library;
             this.transferStatus = transferStatus;
+        this.fileSize = fileSize;
             this.transferred = transferred;
     }
 
@@ -174,7 +176,7 @@ class Transfer {
     }
 
     public String toString() {
-        return "{" + file + "," + library + "," + transferStatusToString() + "," + transferred + "}";
+        return "{" + file + "," + library + "," + transferStatusToString() + "," + fileSize + "," + transferred + "}";
     }
 
     static int waiting() {
