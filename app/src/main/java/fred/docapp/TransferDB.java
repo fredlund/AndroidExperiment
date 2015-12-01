@@ -73,7 +73,7 @@ public class TransferDB extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                Transfer td = new Transfer(c.getString(1), c.getString(2), c.getInt(3), c.getLong(4));
+                Transfer td = new Transfer(c.getString(0), c.getString(1), c.getInt(2), c.getLong(3));
                 transfers.add(td);
             } while (c.moveToNext());
         }
