@@ -59,6 +59,15 @@ public class TransferDB extends SQLiteOpenHelper {
         (mInstance.getWritableDatabase()).insert("transfers", "null", values);
     }
 
+    public void updateTransfer(Transfer transfer) {
+        ContentValues values = new ContentValues();
+        values.put("file", transfer.file);
+        values.put("library", transfer.library);
+        values.put("status", transfer.transferStatus);
+        values.put("transferred", transfer.transferred);
+        (mInstance.getWritableDatabase()).update("transfers", values);
+    }
+
     public boolean deleteTransfer(Transfer transfer)
     {
         return db.delete("transfers", "file" + "=" + transfer.file, null) > 0;

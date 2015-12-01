@@ -164,15 +164,29 @@ class Transfer {
             this.transferred = transferred;
     }
 
+
+    public String transferStatusToString() {
+        if (transferStatus == 0) return "waiting";
+        else if (transferStatus == 1) return "progressing";
+        else if (transferStatus == 2) return "failed";
+        else if (transferStatus == 3) return "finished";
+        else return "bad";
+    }
+
+    public String toString() {
+        return "{" + file + "," + library + "," + transferStatusToString() + "," + transferred + "}";
+    }
+
     static int waiting() {
         return 0;
     }
-
     static int progressing() {
         return 1;
     }
-
     static int failed() {
         return 2;
+    }
+    static int finished() {
+        return 3;
     }
 }

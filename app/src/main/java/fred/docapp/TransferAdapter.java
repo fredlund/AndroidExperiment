@@ -49,7 +49,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
 
         Transfer transfer = data.get(position);
         holder.file.setText(transfer.file);
-        holder.status.setText("progressing");
+        holder.status.setText(transfer.transferStatusToString());
         return row;
     }
 
