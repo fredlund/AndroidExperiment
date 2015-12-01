@@ -16,6 +16,11 @@ public class FileService extends IntentService {
         System.out.println("handle intent");
         FileTransferRequest ftr = intent.getParcelableExtra("fred.docapp.FileTransferRequest");
         System.out.println("got a file transfer request "+ftr);
+        TransferDB db = TransferDB.getInstance(this);
+        for (String file : ftr.files) {
+            Transfer transfer = new Transfer(file,ftr.library,Transfer.waiting(),0);
+            db.storeTransfer(transfer);
+        }
         ScpFromJava scp = new ScpFromJava();
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {

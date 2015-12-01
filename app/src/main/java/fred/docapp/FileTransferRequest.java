@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class FileTransferRequest implements Parcelable {
+	String library;
     String host;
     String userName;
     String passWord;
@@ -11,12 +12,14 @@ public class FileTransferRequest implements Parcelable {
 	int requestNo;
 	String localDir;
 
-    public FileTransferRequest(String host,
+    public FileTransferRequest(String library,
+							   String host,
 			       String userName,
 			       String passWord,
 			       String[] files,
 							   String localDir,
 							   	int requestNo) {
+		this.library = library;
 	this.host = host;
 	this.userName = userName;
 	this.passWord = passWord;
@@ -27,6 +30,7 @@ public class FileTransferRequest implements Parcelable {
 
     public FileTransferRequest(Parcel in) {
 		int length = in.readInt();
+		library = in.readString();
 		host = in.readString();
 		userName = in.readString();
 		passWord = in.readString();
@@ -42,6 +46,7 @@ public class FileTransferRequest implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(files.length);
+		dest.writeString(library);
 	dest.writeString(host);
 	dest.writeString(userName);
 	dest.writeString(passWord);
@@ -65,7 +70,7 @@ public class FileTransferRequest implements Parcelable {
         StringBuffer fileStr = new StringBuffer();
         for (String file : files)
             fileStr.append(file+";");
-        return "ftr: {" + requestNo + "," + host + "," + userName + "," + passWord + "," + fileStr + "," + localDir + "}";
+        return "ftr: {" + requestNo + "," +library + "," + host + "," + userName + "," + passWord + "," + fileStr + "," + localDir + "}";
     }
 
 }

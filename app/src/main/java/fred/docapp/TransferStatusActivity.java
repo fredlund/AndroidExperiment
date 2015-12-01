@@ -98,7 +98,7 @@ import java.util.Set;
             return true;
         }
 
-        void doFileRequest(String host, String username, String password) {
+        void doFileRequest(String library, String host, String username, String password) {
             SharedPreferences appPrefs = getSharedPreferences("appData", 0);
             int requestNo = appPrefs.getInt("transferCounter", 0);
             SharedPreferences.Editor edit = appPrefs.edit();
@@ -112,7 +112,7 @@ import java.util.Set;
             File localFile = Environment.getExternalStorageDirectory();
             File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
             myDir.mkdir();
-            FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, myDir.getAbsolutePath(), requestNo);
+            FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, myDir.getAbsolutePath(), requestNo);
             System.out.println("making intent");
             Intent intent = new Intent(TransferStatusActivity.this, FileService.class);
             intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -162,5 +162,17 @@ class Transfer {
         this.library = library;
             this.transferStatus = transferStatus;
             this.transferred = transferred;
+    }
+
+    static int waiting() {
+        return 0;
+    }
+
+    static int progressing() {
+        return 1;
+    }
+
+    static int failed() {
+        return 2;
     }
 }

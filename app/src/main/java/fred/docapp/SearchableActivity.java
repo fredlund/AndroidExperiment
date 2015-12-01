@@ -197,7 +197,7 @@ public class SearchableActivity extends AppCompatActivity {
         return true;
     }
 
-    void doFileRequest(String host, String username, String password) {
+    void doFileRequest(String library, String host, String username, String password) {
         SharedPreferences appPrefs = getSharedPreferences("appData", 0);
         int requestNo = appPrefs.getInt("transferCounter", 0);
         SharedPreferences.Editor edit = appPrefs.edit();
@@ -211,7 +211,7 @@ public class SearchableActivity extends AppCompatActivity {
         File localFile = Environment.getExternalStorageDirectory();
         File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
         myDir.mkdir();
-        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, myDir.getAbsolutePath(), requestNo);
+        FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, myDir.getAbsolutePath(), requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -227,7 +227,7 @@ public class SearchableActivity extends AppCompatActivity {
         int requestNo = appPrefs.getInt("transferCounter", 0);
         SharedPreferences.Editor edit = appPrefs.edit();
         edit.putInt("transferCounter", requestNo % 32000);
-        FileTransferRequest ftr = new FileTransferRequest(host, username, password, files, this.getFilesDir().getAbsolutePath(), requestNo);
+        FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, this.getFilesDir().getAbsolutePath(), requestNo);
         System.out.println("making intent");
         Intent intent = new Intent(SearchableActivity.this, FileService.class);
         intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -273,7 +273,7 @@ public class SearchableActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int which) {
 
                                             String result = input.getText().toString();
-                                            doFileRequest(host, username, result);
+                                            doFileRequest(library, host, username, result);
 
 
                                         }
@@ -290,7 +290,7 @@ public class SearchableActivity extends AppCompatActivity {
                                     AlertDialog dialog = builder.show();
 
                                 } else {
-                                    doFileRequest(host, username, password);
+                                    doFileRequest(library, host, username, password);
                                 }
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
