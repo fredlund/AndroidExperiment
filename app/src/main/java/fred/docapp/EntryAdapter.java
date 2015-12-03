@@ -54,15 +54,28 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
             holder = (EntryHolder)row.getTag();
         }
 
+
         Entry entry = data.get(position);
         String value;
         if (entry.entryType != Entry.EntryType.File)
             value = entry.fileName + "/";
         else
             value = entry.fileName + " ("+size_to_string(entry.size)+")";
+
         holder.txtTitle.setText(value);
-        if (entry.isEnabled)
-            holder.image.setImageResource(R.drawable.ic_done_white);
+
+
+        int backgroundColor;
+        if ((entry.entryType == Entry.EntryType.DefineDir)
+                || (entry.entryType == Entry.EntryType.ReferDir)) {
+            if (entry.isEnabled) backgroundColor = android.R.color.holo_blue_bright;
+            else backgroundColor = android.R.color.holo_blue_light;
+        } else {
+            if (entry.isEnabled) backgroundColor = android.R.color.background_dark;
+            else backgroundColor = android.R.color.background_light;
+        }
+
+        holder.txtTitle.setBackgroundResource(backgroundColor);
         return row;
     }
 
