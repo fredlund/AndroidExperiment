@@ -688,6 +688,7 @@ public class SearchableActivity extends AppCompatActivity {
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                             Entry entry = found.get(position);
                             System.out.println("item " + position + " was longclicked=" + entry);
+                            if (entry.entryType == Entry.EntryType.File) {
                             entry.isEnabled = !entry.isEnabled;
                             EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
                             String fullPath = entry.dirName + "/" + entry.fileName;
@@ -696,11 +697,12 @@ public class SearchableActivity extends AppCompatActivity {
                             else
                                 toDownload.put(fullPath, entry);
                             if (entry.isEnabled)
-                                holder.image.setImageResource(R.drawable.ic_done_white);
+                                holder.txtTitle.setBackgroundResource(android.R.color.holo_blue_light);
                             else
-                                holder.image.setImageBitmap(null);
+                                holder.txtTitle.setBackgroundResource(android.R.color.transparent);
                             System.out.println("ui is " + ui);
                             System.out.flush();
+                            }
 
 
                             return true;

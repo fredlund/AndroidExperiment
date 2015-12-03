@@ -69,10 +69,10 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
         if ((entry.entryType == Entry.EntryType.DefineDir)
                 || (entry.entryType == Entry.EntryType.ReferDir)) {
             if (entry.isEnabled) backgroundColor = android.R.color.holo_blue_bright;
-            else backgroundColor = android.R.color.holo_blue_light;
+            else backgroundColor = android.R.color.background_light;
         } else {
             if (entry.isEnabled) backgroundColor = android.R.color.background_dark;
-            else backgroundColor = android.R.color.background_light;
+            else backgroundColor = android.R.color.transparent;
         }
 
         holder.txtTitle.setBackgroundResource(backgroundColor);
