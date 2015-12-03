@@ -15,15 +15,24 @@ import java.util.Map;
 public class UserInfo {
     Map<UserHost,UserData> userMap = null;
     String password;
+    static UserInfo mInstance = null;
+
+    public static UserInfo getInstance() {
+        if (mInstance==null) {
+            mInstance = new UserInfo();
+        }
+        return mInstance;
+    }
+
     public UserInfo() {
         userMap = new HashMap<UserHost,UserData>();
     }
 
-    public String getPassword(Context context, final UserHost uh) {
+    public void getPassword(Context context, final UserHost uh, final DialogListener dl) {
         System.out.println("username check for "+uh+" usermap is "+userMap+" uh is "+uh);
         System.out.flush();
         if (userMap.containsKey(uh)) {
-            return userMap.get(uh).password;
+            dl.result(userMap.get(uh).password);
         } else {
             System.out.println("nope");
             System.out.flush();
@@ -39,20 +48,20 @@ public class UserInfo {
 
 
 
-                    builder.setNegativeButton("login",
+                    builder.setNegativeButton("ok",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,int id) {
                                     /** DO THE METHOD HERE WHEN PROCEED IS CLICKED*/
                                     password = input.getText().toString();
                                     System.out.println("user_text is "+password);
-                                    return;
+                                    dl.result(password);
+                                    userMap.put(uh, new UserData(uh, password));
                                 }
                             })
                     .setPositiveButton("cancel",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    password = null;
-                                    return;
+                                    dl.result(null);
                                 }
                             });
 
@@ -64,12 +73,6 @@ public class UserInfo {
             builder.show();
             System.out.println("show");
             System.out.flush();
-
-            if (password == null || password.equals(""))
-                return null;
-
-            userMap.put(uh, new UserData(uh, password));
-            return password;
         }
     }
 }

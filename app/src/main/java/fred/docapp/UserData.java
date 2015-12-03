@@ -20,4 +20,8 @@ public class UserData {
         }
         else return false;
     }
+
+    public String toString() {
+        return "{" + password + "," + uh + "}";
+    }
 }

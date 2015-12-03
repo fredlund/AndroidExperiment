@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,18 +62,23 @@ public class TransferDB extends SQLiteOpenHelper {
         (mInstance.getWritableDatabase()).insert("transfers", "null", values);
     }
 
+    public void clearDB() {
+        db.execSQL(DELETE_ENTRIES);
+        db.execSQL(CREATE_ENTRIES);
+    }
     public void updateTransfer(Transfer transfer) {
         ContentValues values = new ContentValues();
         values.put("status", transfer.transferStatus);
         values.put("transferred", transfer.transferred);
         values.put("fileSize",transfer.fileSize);
         System.out.println("sql quotes is " + DatabaseUtils.sqlEscapeString(transfer.file));
-        (mInstance.getWritableDatabase()).update("transfers", values, "file = " + DatabaseUtils.sqlEscapeString(transfer.file), null); ;
+        (mInstance.getWritableDatabase()).update("transfers", values, "file = " + DatabaseUtils.sqlEscapeString(transfer.file), null);
     }
 
     public boolean deleteTransfer(Transfer transfer)
     {
-        return db.delete("transfers", "file" + "=" + transfer.file, null) > 0;
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete("transfers", "file" + "=" + DatabaseUtils.sqlEscapeString(transfer.file), null) > 0;
     }
 
     public List<Transfer> getAll() {

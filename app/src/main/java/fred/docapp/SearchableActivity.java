@@ -132,7 +132,7 @@ public class SearchableActivity extends AppCompatActivity {
                 wait(200);
             } catch (InterruptedException exc) {
             }
-            ;
+
             new Exception().printStackTrace();
         }
         spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
@@ -197,43 +197,6 @@ public class SearchableActivity extends AppCompatActivity {
         return true;
     }
 
-    void doFileRequest(String library, String host, String username, String password) {
-        SharedPreferences appPrefs = getSharedPreferences("appData", 0);
-        int requestNo = appPrefs.getInt("transferCounter", 0);
-        SharedPreferences.Editor edit = appPrefs.edit();
-        edit.putInt("transferCounter", requestNo % 32000);
-        String files[] = new String[toDownload.size()];
-        int i = 0;
-        for (Entry entry : toDownload.values()) {
-            System.out.println("Entry=" + entry);
-            files[i++] = entry.dirName + "/" + entry.fileName;
-        }
-        File localFile = Environment.getExternalStorageDirectory();
-        File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
-        myDir.mkdir();
-        FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, myDir.getAbsolutePath(), requestNo);
-        System.out.println("making intent");
-        Intent intent = new Intent(SearchableActivity.this, FileService.class);
-        intent.putExtra("fred.docapp.FileTransferRequest", ftr);
-        System.out.println("intent prepared");
-        startService(intent);
-    }
-
-    void doGetLibraryFile(String library, String host, String location, String username, String password) {
-        System.out.println("doGetLibraryFiles library=" + library);
-        String files[] = new String[1];
-        files[0] = location + "/" + MLocate.localLibraryFile(library);
-        SharedPreferences appPrefs = getSharedPreferences("appData", 0);
-        int requestNo = appPrefs.getInt("transferCounter", 0);
-        SharedPreferences.Editor edit = appPrefs.edit();
-        edit.putInt("transferCounter", requestNo % 32000);
-        FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, this.getFilesDir().getAbsolutePath(), requestNo);
-        System.out.println("making intent");
-        Intent intent = new Intent(SearchableActivity.this, FileService.class);
-        intent.putExtra("fred.docapp.FileTransferRequest", ftr);
-        System.out.println("intent prepared");
-        startService(intent);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -251,61 +214,13 @@ public class SearchableActivity extends AppCompatActivity {
                     final String username;
                     final String host;
                     if (library != null) {
-                        final SharedPreferences libraryPrefs = getSharedPreferences(library, 0);
-                        if ((host = find_host(library, libraryPrefs)) != null) {
-                            if ((username = find_username(library, libraryPrefs)) != null) {
-                                final String password = find_password(library, libraryPrefs);
-                                if (password == null || password.equals("")) {
-
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-
-                                    builder.setTitle("password");
-                                    builder.setMessage("password");
-
-                                    final EditText input = new EditText(SearchableActivity.this);
-
-                                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                                    builder.setView(input);
-
-                                    builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-
-                                        public void onClick(DialogInterface dialog, int which) {
-
-                                            String result = input.getText().toString();
-                                            doFileRequest(library, host, username, result);
-
-
-                                        }
-
-                                    });
-
-                                    builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                                    AlertDialog dialog = builder.show();
-
-                                } else {
-                                    doFileRequest(library, host, username, password);
-                                }
-                            } else {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-                                builder.setTitle("Error");
-                                builder.setMessage("Don't know which username to use");
-                                builder.setPositiveButton("OK", null);
-                                AlertDialog dialog = builder.show();
-                            }
-                        } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-                            builder.setTitle("Error");
-                            builder.setMessage("Don't know which host to contact");
-                            builder.setPositiveButton("OK", null);
-                            AlertDialog dialog = builder.show();
+                        String files[] = new String[toDownload.size()];
+                        int i = 0;
+                        for (Entry entry : toDownload.values()) {
+                            System.out.println("Entry=" + entry);
+                            files[i++] = entry.dirName + "/" + entry.fileName;
                         }
+                        GetFile.doFileRequest(library,files,SearchableActivity.this);
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                         builder.setTitle("Error");
@@ -398,7 +313,6 @@ public class SearchableActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 System.out.println("cancelling");
-                                return;
                             }
                         });
 
@@ -474,7 +388,6 @@ public class SearchableActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 System.out.println("cancelling");
-                                return;
                             }
                         });
 
@@ -524,7 +437,7 @@ public class SearchableActivity extends AppCompatActivity {
                             final String db_location = libraryPreferences.getString("db_location", "");
                             final String db_user = libraryPreferences.getString("db_username", "");
                             System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user);
-                            boolean has_error = false;
+                            boolean has_error;
                             if (has_error = (db_host.equals(""))) {
                                 errors.append("no db host specified\n");
                                 has_error = true;
@@ -546,51 +459,22 @@ public class SearchableActivity extends AppCompatActivity {
                                 System.out.println("will show");
                                 AlertDialog aDialog = builder.show();
                             } else {
-                                String db_password = libraryPreferences.getString("db_password", "");
-                                if (db_password.equals("")) {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
-
-                                    builder.setTitle("password");
-                                    builder.setMessage("password");
-
-                                    final EditText input = new EditText(SearchableActivity.this);
-
-                                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                                    builder.setView(input);
-
-                                    builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-
-                                        public void onClick(DialogInterface dialog, int which) {
-
-                                            String result = input.getText().toString();
-                                            doGetLibraryFile(library, db_host, db_location, db_user, result);
-                                        }
-
-                                    });
-
-                                    builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                                    AlertDialog bDialog = builder.show();
-                                } else {
-                                    doGetLibraryFile(library, db_host, db_location, db_user, db_password);
-                                }
+                                final String db_password = libraryPreferences.getString("db_password", "");
+                                String files[] = new String[1];
+                                files[0] = db_location + "/" + MLocate.localLibraryFile(library);
+                                GetFile.doFileRequest(SearchableActivity.this, db_host, db_location,
+                                        db_user, db_password,files);
                             }
                         }
                     }
-                });
+
+            });
 
 
                 edit_builder.setPositiveButton("cancel",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 System.out.println("cancelling");
-                                return;
                             }
                         });
 
@@ -604,7 +488,7 @@ public class SearchableActivity extends AppCompatActivity {
                 AlertDialog edit_alertDialog = edit_builder.create();
                 edit_alertDialog.show();
             }
-            ;
+
             break;
             case R.id.menu_set_default_library: {
                 final SharedPreferences data = getSharedPreferences("appData", 0);
@@ -644,7 +528,6 @@ public class SearchableActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 System.out.println("cancelling");
-                                return;
                             }
                         });
 
@@ -818,7 +701,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 holder.image.setImageBitmap(null);
                             System.out.println("ui is " + ui);
                             System.out.flush();
-                            ;
+                            
 
                             return true;
                         }
@@ -866,7 +749,7 @@ public class SearchableActivity extends AppCompatActivity {
         Set<String> libraries =
                 data.getStringSet("libraries", new HashSet<String>());
 
-        if (currentLibrary != null && currentLibrary != "" && libraries.contains(currentLibrary)) {
+        if (currentLibrary != null && !currentLibrary.equals("") && libraries.contains(currentLibrary)) {
             System.out.println("currentLibrary is " + currentLibrary + " and is contained");
             return currentLibrary;
         }
@@ -879,26 +762,6 @@ public class SearchableActivity extends AppCompatActivity {
         return null;
     }
 
-    String find_host(String library, SharedPreferences prefs) {
-        String location = prefs.getString("library_host", "");
-        if (location == "")
-            location = prefs.getString("db_host", "");
-        return location;
-    }
-
-    String find_username(String library, SharedPreferences prefs) {
-        String username = prefs.getString("library_username", "");
-        if (username == "")
-            username = prefs.getString("db_username", "");
-        return username;
-    }
-
-    String find_password(String library, SharedPreferences prefs) {
-        String password = prefs.getString("library_password", "");
-        if (password == "")
-            password = prefs.getString("db_password", "");
-        return password;
-    }
 
     String name(String path) {
         if (path == null) return null;
@@ -915,10 +778,10 @@ public class SearchableActivity extends AppCompatActivity {
         } else if (size < 1024 * 1024 * 1024) {
             long MB = size / (1024 * 1024);
             return MB + " MB";
-        } else if (size < 1024 * 1024 * 1024 * 1024) {
+        } else {
             long GB = size / (1024 * 1024 * 1024);
-            return GB + " MB";
-        } else return "very big";
+            return GB + " GB";
+        }
     }
 }
 

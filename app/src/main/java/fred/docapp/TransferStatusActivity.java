@@ -31,9 +31,11 @@ import android.widget.Spinner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,17 +43,13 @@ import java.util.Set;
     public class TransferStatusActivity extends AppCompatActivity {
 
         private List<Map<String, Object>> listValues;
-        private ListView listView = null;
-        List<Entry> found = null;
         private ListView listView1 = null;
-        private MenuItem spinnerItem = null;
         private Menu menu;
-        ArrayList<DirView> stack = null;
+        Map<String,Transfer> selected = null;
         TransferStatusActivity myself = null;
         UserInfo ui;
         String currentLibrary = null;
-        Map<String, Entry> toDownload;
-        List<Transfer> transfers = new ArrayList<Transfer>();
+        List<Transfer> transfers;
 
 
         @Override
@@ -59,6 +57,8 @@ import java.util.Set;
             System.out.println("transfer status activitity was created");
             System.out.flush();
             myself = TransferStatusActivity.this;
+            transfers = TransferDB.getInstance(TransferStatusActivity.this).getAll();
+            selected = new HashMap<String,Transfer>();
             super.onCreate(savedInstanceState);
 
             // Instantiates a new DownloadStateReceiver
@@ -78,7 +78,34 @@ import java.util.Set;
 
             setContentView(R.layout.mylist);
             listView1 = (ListView) findViewById(android.R.id.list);
-            transfers = TransferDB.getInstance(TransferStatusActivity.this).getAll();
+
+            listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    System.out.println("onItemClick position=" + position + " found size=" +
+                            ((transfers == null) ? -1 : transfers.size()));
+                    System.out.flush();
+                    Transfer transfer = transfers.get(position);
+                    System.out.println("item " + position + " was clicked=" + transfers.get(position));
+                }
+
+            });
+
+            listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Transfer transfer = transfers.get(position);
+                    System.out.println("item " + position + " was longclicked=" + transfer);
+                    if (selected.containsKey(transfer.file))
+                        selected.remove(transfer.file);
+                    else
+                        selected.put(transfer.file,transfer);
+                    return true;
+                }
+
+            });
             TransferAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
             System.out.println("computed new adapter");
             System.out.flush();
@@ -98,37 +125,54 @@ import java.util.Set;
             return true;
         }
 
-        void doFileRequest(String library, String host, String username, String password) {
-            SharedPreferences appPrefs = getSharedPreferences("appData", 0);
-            int requestNo = appPrefs.getInt("transferCounter", 0);
-            SharedPreferences.Editor edit = appPrefs.edit();
-            edit.putInt("transferCounter", requestNo % 32000);
-            String files[] = new String[toDownload.size()];
-            int i = 0;
-            for (Entry entry : toDownload.values()) {
-                System.out.println("Entry=" + entry);
-                files[i++] = entry.dirName + "/" + entry.fileName;
-            }
-            File localFile = Environment.getExternalStorageDirectory();
-            File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
-            myDir.mkdir();
-            FileTransferRequest ftr = new FileTransferRequest(library, host, username, password, files, myDir.getAbsolutePath(), requestNo);
-            System.out.println("making intent");
-            Intent intent = new Intent(TransferStatusActivity.this, FileService.class);
-            intent.putExtra("fred.docapp.FileTransferRequest", ftr);
-            System.out.println("intent prepared");
-            startService(intent);
-        }
-
-
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             // Handle item selection
             switch (item.getItemId()) {
+                case R.id.menu_resume_selected_jobs:
+                {
+                    Collection<Transfer> values = selected.values();
+                    for (Transfer transfer : values) {
+                        GetFile.doFileRequest(transfer.library, transfer.file, TransferStatusActivity.this);
+                        selected.remove(transfer.file);
+                    }
+                }
+                    break;
+                case R.id.menu_resume_failed_jobs:
+                {
+                    for (Transfer transfer : transfers)
+                    if (transfer.transferStatus == Transfer.failed())
+                        GetFile.doFileRequest(transfer.library, transfer.file, TransferStatusActivity.this);
+                }
+                    break;
+                case R.id.menu_clear_all_jobs: {
+                    TransferDB.getInstance(TransferStatusActivity.this).clearDB();
+                    transfers = new ArrayList<Transfer>();
+                    TransferAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
+                    listView1.setAdapter(adapter);
+                }
+                    break;
+                case R.id.menu_clear_finished_jobs:
+                {
+                    TransferDB db = TransferDB.getInstance(TransferStatusActivity.this);
+                    ListIterator<Transfer> it = transfers.listIterator();
+                    while (it.hasNext()) {
+                        Transfer transfer = it.next();
+                        if (transfer.transferStatus == Transfer.finished()) {
+                            db.deleteTransfer(transfer);
+                            selected.remove(transfer.file);
+                            it.remove();
+                        }
+                    }
+                    TransferAdapter adapter = new TransferAdapter(myself, R.layout.listview_item_row_transfer, transfers);
+                    listView1.setAdapter(adapter);
+                }
+                    break;
                 default:
                     return super.onOptionsItemSelected(item);
             }
+            return true;
         }
 
         //@Override

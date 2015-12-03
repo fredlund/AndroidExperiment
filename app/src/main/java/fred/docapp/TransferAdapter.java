@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
         System.out.println("in getView: position=" + position);
         System.out.flush();
         View row = convertView;
-        TransferHolder holder = null;
+        TransferHolder holder;
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -40,6 +41,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
 
             holder = new TransferHolder();
             holder.file = (TextView) row.findViewById(R.id.transferFileText);
+            holder.library = (TextView) row.findViewById(R.id.transferLibrary);
             holder.status = (TextView) row.findViewById(R.id.transferStatus);
 
             row.setTag(holder);
@@ -48,7 +50,8 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
         }
 
         Transfer transfer = data.get(position);
-        holder.file.setText(transfer.file);
+        holder.file.setText((new File(transfer.file)).getName());
+        holder.library.setText(transfer.library);
         holder.status.setText(transfer.transferStatusToString());
         return row;
     }
@@ -62,14 +65,15 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
         } else if (size < 1024 * 1024 * 1024) {
             long MB = size / (1024 * 1024);
             return MB + " MB";
-        } else if (size < 1024 * 1024 * 1024 * 1024) {
+        } else {
             long GB = size / (1024 * 1024 * 1024);
-            return GB + " MB";
-        } else return "very big";
+            return GB + " GB";
+        }
     }
 
     static class TransferHolder {
         TextView file;
+        TextView library;
         TextView status;
     }
 }

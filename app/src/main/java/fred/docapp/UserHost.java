@@ -21,6 +21,11 @@ public class UserHost {
         else return false;
     }
 
+    @Override
+    public int hashCode() {
+        return 37*user.hashCode()+host.hashCode();
+    }
+
     public String toString() {
         return user + "@" + host;
     }
