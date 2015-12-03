@@ -44,7 +44,6 @@ import java.util.Stack;
 public class SearchableActivity extends AppCompatActivity {
 
     private List<Map<String, Object>> listValues;
-    private ListView listView = null;
     List<Entry> found = null;
     private ListView listView1 = null;
     private MenuItem spinnerItem = null;
@@ -220,7 +219,8 @@ public class SearchableActivity extends AppCompatActivity {
                             System.out.println("Entry=" + entry);
                             files[i++] = entry.dirName + "/" + entry.fileName;
                             entry.isEnabled = false;
-                            // How to change color? Where is the item?
+                            EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                            adapter.notifyDataSetChanged();
                         }
                         GetFile.doFileRequest(library,files,SearchableActivity.this);
                     } else {
