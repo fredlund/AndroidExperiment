@@ -28,6 +28,10 @@ public class UserInfo {
         userMap = new HashMap<UserHost,UserData>();
     }
 
+    public void savePassword(final UserHost uh, String password) {
+        userMap.put(uh, new UserData(uh, password));
+    }
+
     public void getPassword(Context context, final UserHost uh, final DialogListener dl) {
         System.out.println("username check for "+uh+" usermap is "+userMap+" uh is "+uh);
         System.out.flush();
@@ -53,9 +57,8 @@ public class UserInfo {
                                 public void onClick(DialogInterface dialog,int id) {
                                     /** DO THE METHOD HERE WHEN PROCEED IS CLICKED*/
                                     password = input.getText().toString();
-                                    System.out.println("user_text is "+password);
+                                    System.out.println("user_text is " + password);
                                     dl.result(password);
-                                    userMap.put(uh, new UserData(uh, password));
                                 }
                             })
                     .setPositiveButton("cancel",

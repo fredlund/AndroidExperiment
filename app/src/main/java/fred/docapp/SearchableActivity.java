@@ -701,7 +701,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 holder.image.setImageBitmap(null);
                             System.out.println("ui is " + ui);
                             System.out.flush();
-                            
+
 
                             return true;
                         }

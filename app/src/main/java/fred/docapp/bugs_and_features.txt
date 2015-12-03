@@ -4,6 +4,7 @@ Bugs
 - don't repeat downloads when download is pressed; failed ones are failed and can maybe be continued
 but then when asked for
 - why are file transfers sometimes short?
+- we should save password only when a file transfer actually works
 
 Features
 ========

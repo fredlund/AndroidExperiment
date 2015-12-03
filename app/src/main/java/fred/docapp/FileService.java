@@ -14,6 +14,7 @@ public class FileService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Transfer transfer = null;
+        boolean savedPassword = false;
 
         System.out.println("handle intent");
         FileTransferRequest ftr = intent.getParcelableExtra("fred.docapp.FileTransferRequest");
@@ -30,6 +31,10 @@ public class FileService extends IntentService {
             ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, file);
             failure = !ret.is_ok;
             if (!failure) {
+                if (!savedPassword) {
+                    UserHost uh = new UserHost(ftr.userName, ftr.host);
+                    UserInfo.getInstance().savePassword(uh,ftr.passWord);
+                }
                 transfer = new Transfer(file,ftr.library,Transfer.progressing(),scp.fileSize,0);
                 ret = scp.doTransfer(ftr.localDir);
                 failure = !ret.is_ok;
