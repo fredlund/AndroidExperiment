@@ -11,7 +11,6 @@ Features
 - status reports for file transfers
 - specifying port?
 - better searching: search insensitive, avoid .-directories
-- app info
 - properties info about (last longclicked) file from menu
 - handle device rotate
 
