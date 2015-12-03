@@ -602,17 +602,6 @@ public class SearchableActivity extends AppCompatActivity {
                     System.out.println("size of found: " + found.size());
                     System.out.flush();
 
-        /*for (Entry entry : found) {
-            String value;
-            Map<String,Object> item = new HashMap<String,Object>();
-            if (entry.isDir)
-                value = entry.dirName + "/";
-            else
-                value = entry.fileName + " ("+size_to_string(entry.size)+")";
-            item.put("1",value);
-            listValues.add(item);
-        }*/
-
                     return null;
                 }
 
@@ -697,7 +686,7 @@ public class SearchableActivity extends AppCompatActivity {
                             if (toDownload.containsKey(fullPath))
                                 toDownload.remove(fullPath);
                             else
-                                toDownload.put(fullPath, entry);
+                                toDownload.put(fullPath,entry);
                             if (entry.isEnabled)
                                 holder.txtTitle.setBackgroundResource(android.R.color.holo_blue_light);
                             else
