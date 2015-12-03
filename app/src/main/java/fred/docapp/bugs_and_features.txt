@@ -10,7 +10,9 @@ Features
 ========
 - status reports for file transfers
 - specifying port?
-- better searching: search insensitive, avoid .-directories
+- better searching:
+    avoid .-directories
+    avoid .-files
 - properties info about (last longclicked) file from menu
 - handle device rotate
 
