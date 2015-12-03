@@ -219,6 +219,8 @@ public class SearchableActivity extends AppCompatActivity {
                         for (Entry entry : toDownload.values()) {
                             System.out.println("Entry=" + entry);
                             files[i++] = entry.dirName + "/" + entry.fileName;
+                            entry.isEnabled = false;
+                            // How to change color? Where is the item?
                         }
                         GetFile.doFileRequest(library,files,SearchableActivity.this);
                     } else {
