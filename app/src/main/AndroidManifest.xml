@@ -7,7 +7,7 @@
     <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-   <android:uses-permission android:name="android.permission.INTERNET" />
+    <android:uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -37,10 +37,17 @@
         </activity>
         <activity android:name=".TransferStatusActivity" >
         </activity>
-        <service android:name=".FileService">
-            <intent-filter><action android:name="fred.docApp.FileTransferRequest"></action>
+
+        <service android:name=".FileService" >
+            <intent-filter>
+                <action android:name="fred.docApp.FileTransferRequest" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>

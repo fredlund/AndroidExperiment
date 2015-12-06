@@ -38,4 +38,8 @@
         android:id="@+id/menu_transfer_status"
         app:showAsAction="never"
         android:title="Transfer Status"/>
+    <item
+        android:id="@+id/menu_settings"
+        app:showAsAction="never"
+        android:title="Settings"/>
 </menu>
