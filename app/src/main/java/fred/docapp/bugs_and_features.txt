@@ -1,11 +1,10 @@
 Bugs
 ====
-- does not seem to find host when only db_host is set
+- wrong color for spinner
 
 Features
 ========
 - status reports for file transfers
-- specifying port?
 - better searching:
     avoid .-directories
     avoid .-files
