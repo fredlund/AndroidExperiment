@@ -10,6 +10,9 @@ Features
     avoid .-files
 - properties info about (last longclicked) file from menu
 - handle device rotate
+- maybe do matching based on file size
+- maybe add file date to locatedb
+
 
 
 

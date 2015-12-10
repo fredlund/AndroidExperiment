@@ -1,6 +1,8 @@
 package fred.docapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.io.DataInput;
 import java.io.FileInputStream;
@@ -26,7 +28,9 @@ public class MLocate {
     static byte[] dirSaved = null;
     static byte[] entrySaved = null;
 	Context context;
-    
+    boolean matchDotDir = false;
+	boolean matchDotFile = false;
+
     static public String localLibraryFile(String library) {
 	return library+".ldp";
     }
@@ -42,6 +46,9 @@ public class MLocate {
 		this.file = fullLocalLibraryFile(context,library);
 		tmp = new byte[8192];
 		tmp2 = new byte[1];
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		matchDotDir = Boolean.parseBoolean(prefs.getString("show_hidden_directories","false"));
+		matchDotFile = Boolean.parseBoolean(prefs.getString("show_hidden_files", "false"));
 	//System.out.println("mlocate: library "+library+" is stored in "+this.file);
     }
     

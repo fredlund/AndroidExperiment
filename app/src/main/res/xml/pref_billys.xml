@@ -6,7 +6,7 @@
         android:title="show hidden directories"
         android:switchTextOff="off"
         android:switchTextOn="on"
-        android:defaultValue="true" />
+        android:defaultValue="false" />
 
     <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->
     <SwitchPreference
