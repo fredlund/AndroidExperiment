@@ -28,7 +28,7 @@ public class FileService extends IntentService {
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {
             String file = ftr.files[i];
-            ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, file);
+            ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, ftr.port, file);
             failure = !ret.is_ok;
             if (!failure) {
                 if (!savedPassword) {

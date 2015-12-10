@@ -370,6 +370,8 @@ public class SearchableActivity extends AppCompatActivity {
                             newIntent.putExtra("libraryName", library);
                             newIntent.putExtra("db_host", libraryPreferences.getString
                                     ("db_host", ""));
+                            newIntent.putExtra("db_port", libraryPreferences.getString
+                                    ("db_port", ""));
                             newIntent.putExtra("db_location", libraryPreferences.getString
                                     ("db_location", ""));
                             newIntent.putExtra("db_username", libraryPreferences.getString
@@ -379,6 +381,9 @@ public class SearchableActivity extends AppCompatActivity {
                             newIntent.putExtra("library_host", libraryPreferences
                                     .getString
                                             ("library_host", ""));
+                            newIntent.putExtra("library_port", libraryPreferences
+                                    .getString
+                                            ("library_port", ""));
                             newIntent.putExtra("library_username", libraryPreferences
                                     .getString
                                             ("library_username", ""));
@@ -443,6 +448,7 @@ public class SearchableActivity extends AppCompatActivity {
                             final String db_host = libraryPreferences.getString("db_host", "");
                             final String db_location = libraryPreferences.getString("db_location", "");
                             final String db_user = libraryPreferences.getString("db_username", "");
+                            final String db_port = libraryPreferences.getString("db_port","22");
                             System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user);
                             boolean has_error;
                             if (has_error = (db_host.equals(""))) {
@@ -469,7 +475,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 final String db_password = libraryPreferences.getString("db_password", "");
                                 String files[] = new String[1];
                                 files[0] = db_location + "/" + MLocate.localLibraryFile(library);
-                                GetFile.doFileRequest(SearchableActivity.this, db_host, db_location,
+                                GetFile.doFileRequest(SearchableActivity.this, db_host, db_port, db_location,
                                         db_user, db_password,files);
                             }
                         }

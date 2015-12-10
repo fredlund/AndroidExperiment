@@ -40,10 +40,12 @@ if (extras != null) {
         if (!is_new) {
             putStringToEditText(extras.getString("libraryName"), R.id.libraryName);
             putStringToEditText(extras.getString("db_host"), R.id.db_host);
+            putStringToEditText(extras.getString("db_port"), R.id.db_port);
             putStringToEditText(extras.getString("db_location"), R.id.db_location);
             putStringToEditText(extras.getString("db_username"), R.id.db_username);
             putStringToEditText(extras.getString("db_password"), R.id.db_password);
             putStringToEditText(extras.getString("library_host"), R.id.library_host);
+            putStringToEditText(extras.getString("library_port"), R.id.library_port);
             putStringToEditText(extras.getString("library_username"), R.id.library_username);
             putStringToEditText(extras.getString("library_password"), R.id.library_password);
         }
@@ -65,10 +67,12 @@ if (extras != null) {
                     editor.clear();
                     editor.putBoolean("is_created", true);
                     editor.putString("db_host", editTextToString(R.id.db_host));
+                    editor.putString("db_port", editTextToString(R.id.db_port));
                     editor.putString("db_location", editTextToString(R.id.db_location));
                     editor.putString("db_username", editTextToString(R.id.db_username));
                     editor.putString("db_password", editTextToString(R.id.db_password));
                     editor.putString("library_host", editTextToString(R.id.library_host));
+                    editor.putString("library_port", editTextToString(R.id.library_port));
                     editor.putString("library_username", editTextToString(R.id.library_username));
                     editor.putString("library_password", editTextToString(R.id.library_password));
                     editor.commit();

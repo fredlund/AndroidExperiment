@@ -23,7 +23,7 @@ public class ScpFromJava {
         return fileSize;
     }
 
-    public ScpReturnStatus setupTransfer(String username, String password, String host, String reqFile) {
+    public ScpReturnStatus setupTransfer(String username, String password, String host, int port, String reqFile) {
         jsch = new JSch();
         logger = new JschLogger();
         logger.setLevel(Logger.INFO);
@@ -33,7 +33,7 @@ public class ScpFromJava {
 
         try {
 
-            session = jsch.getSession(username, host, 22);
+            session = jsch.getSession(username, host, port);
             userInfo = new MyUserInfo(password);
             session.setUserInfo(userInfo);
             session.connect();

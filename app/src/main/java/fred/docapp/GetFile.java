@@ -27,8 +27,8 @@ public class GetFile {
         if ((host = find_host(library, libraryPrefs)) != null) {
             if ((username = find_username(library, libraryPrefs)) != null) {
                 String password = find_password(library, libraryPrefs);
-
-                    doFileRequest(cntxt, library, host, username, password, files);
+                    String port = find_port(library, libraryPrefs);
+                    doFileRequest(cntxt, library, host, port, username, password, files);
 
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(cntxt);
@@ -48,21 +48,23 @@ public class GetFile {
     }
 
 
-    static void doFileRequest(final Context cntxt, final String library, final String hostname, final String username, String password, final String[] files) {
+    static void doFileRequest(final Context cntxt, final String library, final String hostname, final String port, final String username, String password, final String[] files) {
+       final int portNo = Integer.parseInt(port);
+
         if (password == null || password.equals("")) {
             UserHost uh = new UserHost(username, hostname);
             (UserInfo.getInstance()).getPassword(cntxt, uh, new DialogListener() {
                 @Override
                 public void result(Object item) {
                     if (item != null)
-                        doFileRequestWithPassword(cntxt, library, hostname, username, (String) item, files);
+                        doFileRequestWithPassword(cntxt, library, hostname, portNo, username, (String) item, files);
                 }
             });
         }
-        else doFileRequestWithPassword(cntxt, library, hostname, username, password, files);
+        else doFileRequestWithPassword(cntxt, library, hostname, portNo, username, password, files);
     }
 
-    static void doFileRequestWithPassword(Context cntxt, String library, String hostname, String username, String password, String[] files) {
+    static void doFileRequestWithPassword(Context cntxt, String library, String hostname, int portNo, String username, String password, String[] files) {
             if (password != null && !password.equals("")) {
                 SharedPreferences appPrefs = cntxt.getSharedPreferences("appData", 0);
                 int requestNo = appPrefs.getInt("transferCounter", 0);
@@ -71,7 +73,7 @@ public class GetFile {
                 File localFile = Environment.getExternalStorageDirectory();
                 File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
                 myDir.mkdir();
-                FileTransferRequest ftr = new FileTransferRequest(library, hostname, username, password, files, myDir.getAbsolutePath(), requestNo);
+                FileTransferRequest ftr = new FileTransferRequest(library, hostname, portNo, username, password, files, myDir.getAbsolutePath(), requestNo);
                 System.out.println("making intent");
                 Intent intent = new Intent(cntxt, FileService.class);
                 intent.putExtra("fred.docapp.FileTransferRequest", ftr);
@@ -85,6 +87,13 @@ public class GetFile {
         String location = prefs.getString("library_host", "");
         if (location.equals(""))
             location = prefs.getString("db_host", "");
+        return location;
+    }
+
+    static String find_port(String library, SharedPreferences prefs) {
+        String location = prefs.getString("library_port", "");
+        if (location.equals(""))
+            location = prefs.getString("db_port", "22");
         return location;
     }
 

@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class FileTransferRequest implements Parcelable {
 	String library;
     String host;
+	int port;
     String userName;
     String passWord;
     String[] files;
@@ -14,6 +15,7 @@ public class FileTransferRequest implements Parcelable {
 
     public FileTransferRequest(String library,
 							   String host,
+							   int port,
 			       String userName,
 			       String passWord,
 			       String[] files,
@@ -21,6 +23,7 @@ public class FileTransferRequest implements Parcelable {
 							   	int requestNo) {
 		this.library = library;
 	this.host = host;
+		this.port = port;
 	this.userName = userName;
 	this.passWord = passWord;
 	this.files = files;
@@ -32,6 +35,7 @@ public class FileTransferRequest implements Parcelable {
 		int length = in.readInt();
 		library = in.readString();
 		host = in.readString();
+		port = in.readInt();
 		userName = in.readString();
 		passWord = in.readString();
 		files = new String[length];
@@ -48,6 +52,7 @@ public class FileTransferRequest implements Parcelable {
 		dest.writeInt(files.length);
 		dest.writeString(library);
 	dest.writeString(host);
+		dest.writeInt(port);
 	dest.writeString(userName);
 	dest.writeString(passWord);
 	dest.writeStringArray(files);
