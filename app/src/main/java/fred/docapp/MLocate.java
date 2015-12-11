@@ -30,6 +30,7 @@ public class MLocate {
 	Context context;
     boolean matchDotDir = false;
 	boolean matchDotFile = false;
+	Term<byte[]> dirDotMatcher = null;
 
     static public String localLibraryFile(String library) {
 	return library+".ldp";
@@ -61,15 +62,21 @@ public class MLocate {
 	//System.out.println("file is "+file);
 	Term<byte[]> matchTerm = null;
 		String extraArg;
-		if (!matchDotDir && !matchDotFile)
-			extraArg = "- ^ . ";
-		else if (!matchDotDir)
-			extraArg = "- dir ^ . ";
+		try {
+		if (!matchDotDir) {
+			dirDotMatcher = LogicMatcher.convert(Term.parse("^ ."));
+			System.out.println("dirDotMatcher is "+dirDotMatcher);
+			if (!matchDotFile)
+				extraArg = "- ^ . ";
+			else
+				extraArg = "- dir ^ . ";
+		}
 		else if (!matchDotFile)
 			extraArg = "- file ^ . ";
 		else
 			extraArg = "";
-	try { matchTerm = LogicMatcher.convert(Term.parse(extraArg+arg)); }
+
+	 matchTerm = LogicMatcher.convert(Term.parse(extraArg+arg)); }
 	catch (ParseException exc) {
 	    System.out.println("could not parse "+arg+" due to: "+exc);
 	    throw new IOException();
@@ -109,8 +116,16 @@ public class MLocate {
 		    reader_scan_dir(reader, dirSaved,Math.abs(dirSavedLen), resultList, matchTerm);
 		}
 		*/
-			dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0);
-			reader_scan_dir(reader, dirSaved,Math.abs(dirSavedLen), resultList, matchTerm);
+			if (dirDotMatcher != null) {
+				dirSavedLen = LogicMatcher.match(reader, dirDotMatcher, dirSaved, true, null, 0);
+				if (dirSavedLen>0) {
+					System.out.println("skipping directory...");
+					skip_dir(reader);
+				} else reader_scan_dir(reader, dirSaved, Math.abs(dirSavedLen), resultList, matchTerm);
+			} else {
+					dirSavedLen = LogicMatcher.match(reader, matchTerm, dirSaved, true, null, 0);
+				reader_scan_dir(reader, dirSaved, Math.abs(dirSavedLen), resultList, matchTerm);
+			}
 
 	    } 
 	    return resultList;
