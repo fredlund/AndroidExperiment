@@ -47,8 +47,9 @@ public class MLocate {
 		tmp = new byte[8192];
 		tmp2 = new byte[1];
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		matchDotDir = prefs.getBoolean("show_hidden_directories",false);
+		matchDotDir = prefs.getBoolean("show_hidden_dirs",false);
 		matchDotFile = prefs.getBoolean("show_hidden_files", false);
+		System.out.println("matchDotDir="+matchDotDir+" matchDotFile="+matchDotFile);
 	//System.out.println("mlocate: library "+library+" is stored in "+this.file);
     }
     
@@ -59,7 +60,16 @@ public class MLocate {
 	
 	//System.out.println("file is "+file);
 	Term<byte[]> matchTerm = null;
-	try { matchTerm = LogicMatcher.convert(Term.parse(arg)); }
+		String extraArg;
+		if (!matchDotDir && !matchDotFile)
+			extraArg = "- ^ . ";
+		else if (!matchDotDir)
+			extraArg = "- dir ^ . ";
+		else if (!matchDotFile)
+			extraArg = "- file ^ . ";
+		else
+			extraArg = "";
+	try { matchTerm = LogicMatcher.convert(Term.parse(extraArg+arg)); }
 	catch (ParseException exc) {
 	    System.out.println("could not parse "+arg+" due to: "+exc);
 	    throw new IOException();
