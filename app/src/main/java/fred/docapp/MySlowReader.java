@@ -119,12 +119,51 @@ public class MySlowReader {
 	} while (currentPos > otherBufferLast);
     }
 
-    static public String printBs(byte[] bytes, int max) {
+
+	static public String printBs(byte[] bytes, int max) {
 	StringBuilder builder = new StringBuilder();
 	for (int i=0; i<max; i++)
 	    builder.append((char) bytes[i]);
 	return builder.toString();
     }
+
+
+	// copies a string to a byte buffer; returns size of string copied
+	int isDotDir(byte toBuf[]) throws IOException {
+		int toIndex = 0;
+		boolean hasDot = false;
+		boolean beginDir = false;
+
+		for (int round = 0; round < 2; round++) {
+			byte[] buf = currentBuffer.buf;
+			int index = (int) (currentPos-currentBuffer.first);
+			long last = currentBuffer.last;
+
+			while (currentPos <= last) {
+				byte bs = buf[index];
+				++currentPos;
+				if (bs == 0) {
+					if (currentPos > last) moveToCurrentBuffer();
+					if (hasDot) return toIndex;
+					else return -toIndex;
+				} else {
+					toBuf[toIndex++] = bs;
+					++index;
+					if (bs == '/') {
+						hasDot = false;
+						beginDir = true;
+					} else if (beginDir && bs == '.') {
+						hasDot = true;
+						beginDir = false;
+					}
+					else
+						beginDir = false;
+				}
+			}
+			moveToCurrentBuffer();
+		}
+		throw new IOException("copyStringToBuf");
+	}
 
     int bytesMatch(byte[] bytes, boolean doSave, byte[] save, int bsMax, boolean caseConvert, boolean startAt0, boolean finishAtEnd) throws IOException {
 	//System.out.println("pos is "+current());
