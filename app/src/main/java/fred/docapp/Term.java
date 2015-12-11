@@ -64,8 +64,12 @@ class Term<LIT> implements Comparator<Term<LIT>> {
     }
 
     public String toString() {
-	if (type == TermType.LITERAL) 
-	    return "\""+literal+"\"";
+	if (type == TermType.LITERAL) {
+		if (literal instanceof byte[]) {
+			byte[] buf = (byte[]) literal;
+			return "\"" + LogicMatcher.printByteArray(buf,buf.length) + "\"";
+		} else return "\"" + literal + "\"";
+	}
 	else if (type == TermType.EXACT)
 	    return "^ $ "+terms.get(0);
 	else if (type == TermType.BEGIN)
@@ -269,7 +273,7 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	    if (type == Scan.TokenType.WORD)
 		return new Term<String>(value);
 	    else if (type == Scan.TokenType.QUOTEDWORD)
-		return new Term<String>(value.replace("\"",""));
+		return new Term<String>(value.replace("\"", ""));
 	    else
 		throw new ParseException("type "+type+" is not a word");
     }
