@@ -41,7 +41,8 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
 
             holder = new SpinnerHolder();
             //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);
-            holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
+            //holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
+            holder.txtTitle = (TextView)row.findViewById(R.id.spinnerTxt);
 
             row.setTag(holder);
         }
@@ -71,7 +72,8 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
 
             holder = new SpinnerHolder();
             //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);
-            holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
+            //holder.txtTitle = (TextView)row.findViewById(android.R.id.text1);
+            holder.txtTitle = (TextView)row.findViewById(R.id.spinnerTxt);
 
             row.setTag(holder);
         }

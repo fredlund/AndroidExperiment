@@ -162,7 +162,8 @@ public class SearchableActivity extends AppCompatActivity {
                                                       found = dv.entries;
                                                       Log.i("setOnItemSelected", "new spinneradapter");
                                                       spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                                                              android.R.layout.simple_spinner_item,
+                                                              //android.R.layout.simple_spinner_item,
+                                                              R.layout.spinner_item,
                                                               //R.layout.spinner_item_row,
                                                               //R.id.spinnerText,
                                                               stack);
@@ -669,7 +670,8 @@ public class SearchableActivity extends AppCompatActivity {
                                     System.out.flush();
 
                                     spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                                            android.R.layout.simple_spinner_item,
+                                            //android.R.layout.simple_spinner_item,
+                                            R.layout.spinner_item,
                                             //R.layout.spinner_item_row,
                                             //R.id.spinnerText,
                                             stack);
@@ -717,7 +719,8 @@ public class SearchableActivity extends AppCompatActivity {
                     System.out.flush();
 
                     spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                            android.R.layout.simple_spinner_item,
+                            //android.R.layout.simple_spinner_item,
+                            R.layout.spinner_item,
                             //R.id.spinnerText,
                             //R.layout.spinner_item_row,
                             stack);
