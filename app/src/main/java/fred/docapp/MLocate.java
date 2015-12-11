@@ -47,8 +47,8 @@ public class MLocate {
 		tmp = new byte[8192];
 		tmp2 = new byte[1];
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		matchDotDir = Boolean.parseBoolean(prefs.getString("show_hidden_directories","false"));
-		matchDotFile = Boolean.parseBoolean(prefs.getString("show_hidden_files", "false"));
+		matchDotDir = prefs.getBoolean("show_hidden_directories",false);
+		matchDotFile = prefs.getBoolean("show_hidden_files", false);
 	//System.out.println("mlocate: library "+library+" is stored in "+this.file);
     }
     
@@ -87,6 +87,7 @@ public class MLocate {
 		reader.skip(8+4+4);
 
 		int dirSavedLen;
+			/*
 		if ((dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0)) >= 0) {
 		    String dirName = reader.getString(dirSaved,dirSavedLen);
 		    Entry entry = new Entry(this, 0, reader.current(), null, dirName,Entry.EntryType.DefineDir);
@@ -97,6 +98,10 @@ public class MLocate {
 		    //System.out.println("no match for "+reader.getString(dirSaved,Math.abs(dirSavedLen)));
 		    reader_scan_dir(reader, dirSaved,Math.abs(dirSavedLen), resultList, matchTerm);
 		}
+		*/
+			dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0);
+			reader_scan_dir(reader, dirSaved,Math.abs(dirSavedLen), resultList, matchTerm);
+
 	    } 
 	    return resultList;
 	} finally {
@@ -138,8 +143,21 @@ public class MLocate {
 		//System.out.println("fileType 1: pos = "+reader.current()+" will skip dir "
 				   //+reader.getString());
 		//		   );
-		reader.skipString();
-		reader.skip(4);
+		//reader.skipString();
+			int entrySavedLen;
+			if ((entrySavedLen = LogicMatcher.match(reader,matchTerm,entrySaved,true,dirNameBytes,dirNameLen)) >= 0) {
+				String fileName =
+						reader.getString(entrySaved,entrySavedLen);
+				if (dirName == null)
+					dirName = reader.getString(dirNameBytes, dirNameLen);
+
+				//System.out.println("adding file "+fileName+" dirName="+dirName+" root="+root);
+
+				long pos = reader.getLong();
+				Entry entry = new Entry(this,0, pos, dirName, fileName, Entry.EntryType.ReferDir);
+				resultList.add(entry);
+			} else reader.skip(4);
+		//reader.skip(4);
 		break;
 	    }
 	    case 2: {

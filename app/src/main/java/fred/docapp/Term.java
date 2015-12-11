@@ -12,10 +12,15 @@ import java.util.Arrays;
 
 
 class Term<LIT> implements Comparator<Term<LIT>> {
-    enum TermType { LITERAL, AND, OR, NOT, FILE, DIR, PATH, CSI };
+    enum TermType { LITERAL, AND, OR, NOT, FILE, DIR, PATH, CSI, TRUE, FALSE, BEGIN, END, EXACT };
     TermType type;
     LIT literal = null;
     List<Term<LIT>> terms = null;
+
+    Term(boolean b) {
+	if (b) this.type = TermType.TRUE;
+	else this.type = TermType.FALSE;
+    }
 
     Term(LIT s) {
 	this.type = TermType.LITERAL;
@@ -27,6 +32,9 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	if (
 	    type==TermType.NOT
 	    || type==TermType.FILE
+	    || type==TermType.BEGIN
+	    || type==TermType.END
+	    || type==TermType.EXACT
 	    || type==TermType.DIR
 	    || type==TermType.PATH
 	    || type==TermType.CSI
@@ -58,20 +66,30 @@ class Term<LIT> implements Comparator<Term<LIT>> {
     public String toString() {
 	if (type == TermType.LITERAL) 
 	    return "\""+literal+"\"";
+	else if (type == TermType.EXACT)
+	    return "^ $ "+terms.get(0);
+	else if (type == TermType.BEGIN)
+	    return "^ "+terms.get(0);
+	else if (type == TermType.END)
+	    return "$ "+terms.get(0);
 	else if (type == TermType.FILE)
-	    return "file "+terms.get(0);
+	    return "file ("+terms.get(0) + ")";
 	else if (type == TermType.DIR)
-	    return "dir "+terms.get(0);
+	    return "dir ("+terms.get(0) + ")";
 	else if (type == TermType.PATH)
-	    return "path "+terms.get(0);
+	    return "path ("+terms.get(0) + ")";
 	else if (type == TermType.CSI)
-	    return "csi "+terms.get(0);
+	    return "csi ("+terms.get(0) + ")";
 	else if (type == TermType.NOT)
-	    return "-"+terms.get(0);
+	    return "not ("+terms.get(0) + ")";
 	else if (type == TermType.OR)
-	    return "(" +printTerms(terms)+ ")";
+	    return "or (" +printTerms(terms)+ ")";
 	else if (type == TermType.AND)
-	    return printTerms(terms);
+	    return "and (" + printTerms(terms) + ")";
+	else if (type == TermType.TRUE)
+	    return "tt";
+	else if (type == TermType.FALSE)
+	    return "ff";
 	else
 	    throw new RuntimeException();
     }
@@ -90,6 +108,11 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	else if (type == TermType.PATH) return 4;
 	else if (type == TermType.OR) return 5;
 	else if (type == TermType.NOT) return 6;
+	else if (type == TermType.BEGIN) return 7;
+	else if (type == TermType.END) return 8;
+	else if (type == TermType.TRUE) return 9;
+	else if (type == TermType.FALSE) return 10;
+	else if (type == TermType.EXACT) return 11;
 	else throw new RuntimeException();
     }
 
@@ -128,14 +151,34 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	    tokens.remove(0);
 	    //System.out.println("Token="+type+" value="+value);
 
-	    if (type == Scan.TokenType.LEFTPAR)
-		ands.add(parse_paren(tokens));
+	    if (type == Scan.TokenType.TRUE)
+		ands.add(new Term<String>(true));
+	    else if (type == Scan.TokenType.FALSE)
+		ands.add(new Term<String>(false));
+	    else if (type == Scan.TokenType.LEFTPAR)
+		ands.add(parse_paren(tokens,true));
 	    else if (type == Scan.TokenType.NEG)
-		ands.add(new Term<String>(TermType.NOT,parse_qualified(tokens)));
+		ands.add(new Term<String>(TermType.NOT,parse_not(tokens)));
+	    else if (type == Scan.TokenType.BEGIN) {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.END) {
+		    tokens.remove(0);
+		    ands.add(new Term<String>(TermType.EXACT,parse_csi_word(tokens)));
+		} else 
+		    ands.add(new Term<String>(TermType.BEGIN,parse_csi_word(tokens)));
+	    }
+	    else if (type == Scan.TokenType.END)  {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.BEGIN) {
+		    tokens.remove(0);
+		    ands.add(new Term<String>(TermType.EXACT,parse_csi_word(tokens)));
+		} else 
+		    ands.add(new Term<String>(TermType.END,parse_csi_word(tokens)));
+	    }
 	    else if (type == Scan.TokenType.FILE)
-		ands.add(new Term<String>(TermType.FILE,parse_csi_word(tokens)));
+		ands.add(new Term<String>(TermType.FILE,parse_csi_anchor_word(tokens)));
 	    else if (type == Scan.TokenType.DIR)
-		ands.add(new Term<String>(TermType.DIR,parse_csi_word(tokens)));
+		ands.add(new Term<String>(TermType.DIR,parse_csi_anchor_word(tokens)));
 	    else if (type == Scan.TokenType.PATH)
 		ands.add(new Term<String>(TermType.PATH,parse_csi_word(tokens)));
 	    else if (type == Scan.TokenType.CSI)
@@ -152,8 +195,13 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	return ands;
     }
 
-    static Term<String> parse_paren(List<Pair<Scan.TokenType,String>> tokens)
+    static Term<String> parse_paren(List<Pair<Scan.TokenType,String>> tokens,
+				    boolean isOr)
 	throws ParseException {
+	TermType t;
+	if (isOr) t = TermType.OR;
+	else t = TermType.AND;
+
 	List<Term<String>> terms = parse_tokens(tokens);
 	
 	Pair<Scan.TokenType,String> pair = tokens.get(0);
@@ -165,22 +213,40 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	    if (terms.size() == 1)
 		return terms.get(0);
 	    else if (terms.size() > 1) {
-		return new Term<String>(TermType.OR, terms);
+		return new Term<String>(t, terms);
 	    } else
 		throw new ParseException("empty disjuncion");
 	} else throw new ParseException("right parenthesis missing");
     }
 
-    static Term<String> parse_qualified(List<Pair<Scan.TokenType,String>> tokens)	throws ParseException {
+    static Term<String> parse_not(List<Pair<Scan.TokenType,String>> tokens)	throws ParseException {
 	    Pair<Scan.TokenType,String> pair = tokens.get(0);
 	    Scan.TokenType type = pair.left;
 	    String value = pair.right;
 	    tokens.remove(0);
 
-	    if (type == Scan.TokenType.FILE) 
-		return new Term<String>(TermType.FILE,parse_csi_word(tokens));
+	    if (type == Scan.TokenType.BEGIN) {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.END) {
+		    tokens.remove(0);
+		    return new Term<String>(TermType.EXACT,parse_csi_word(tokens));
+		} else 
+		    return new Term<String>(TermType.BEGIN,parse_csi_word(tokens));
+	    }
+	    else if (type == Scan.TokenType.END) {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.BEGIN) {
+		    tokens.remove(0);
+		    return new Term<String>(TermType.EXACT,parse_csi_word(tokens));
+		} else 
+		    return new Term<String>(TermType.END,parse_csi_word(tokens));
+	    }
+	    else if (type == Scan.TokenType.FILE) 
+		return new Term<String>(TermType.FILE,parse_csi_anchor_word(tokens));
+	    else if (type == Scan.TokenType.LEFTPAR) 
+		return parse_paren(tokens,false);
 	    else if (type == Scan.TokenType.DIR)
-		return new Term<String>(TermType.DIR,parse_csi_word(tokens));
+		return new Term<String>(TermType.DIR,parse_csi_anchor_word(tokens));
 	    else if (type == Scan.TokenType.PATH)
 		return new Term<String>(TermType.PATH,parse_csi_word(tokens));
 	    else if (type == Scan.TokenType.CSI)
@@ -216,6 +282,41 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 	    tokens.remove(0);
 
 	    if (type == Scan.TokenType.WORD)
+		return new Term<String>(value);
+	    else if (type == Scan.TokenType.QUOTEDWORD)
+		return new Term<String>(value.replace("\"",""));
+	    else if (type == Scan.TokenType.CSI) {
+		Term<String> word = parse_word(tokens);
+		return new Term<String>(TermType.CSI,word);
+	    }
+	    else
+		throw new ParseException("type "+type+" is not a word");
+    }
+
+    static Term<String> parse_csi_anchor_word(List<Pair<Scan.TokenType,String>> tokens)
+	throws ParseException {
+	    Pair<Scan.TokenType,String> pair = tokens.get(0);
+	    Scan.TokenType type = pair.left;
+	    String value = pair.right;
+	    tokens.remove(0);
+
+	    if (type == Scan.TokenType.BEGIN) {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.END) {
+		    tokens.remove(0);
+		    return new Term<String>(TermType.EXACT,parse_csi_word(tokens));
+		} else 
+		    return new Term<String>(TermType.BEGIN,parse_csi_word(tokens));
+	    }
+	    else if (type == Scan.TokenType.END) {
+		Pair<Scan.TokenType,String> newPair = tokens.get(0);
+		if (newPair.left == Scan.TokenType.BEGIN) {
+		    tokens.remove(0);
+		    return new Term<String>(TermType.EXACT,parse_csi_word(tokens));
+		} else 
+		    return new Term<String>(TermType.END,parse_csi_word(tokens));
+	    }
+	    else if (type == Scan.TokenType.WORD)
 		return new Term<String>(value);
 	    else if (type == Scan.TokenType.QUOTEDWORD)
 		return new Term<String>(value.replace("\"",""));

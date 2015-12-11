@@ -126,7 +126,7 @@ public class MySlowReader {
 	return builder.toString();
     }
 
-    int bytesMatch(byte[] bytes, boolean doSave, byte[] save, int bsMax, boolean caseConvert) throws IOException {
+    int bytesMatch(byte[] bytes, boolean doSave, byte[] save, int bsMax, boolean caseConvert, boolean startAt0, boolean finishAtEnd) throws IOException {
 	//System.out.println("pos is "+current());
 	if (doSave) bsMax = copyStringToBuf(save);
 	//System.out.println("bsMax is "+bsMax+": "+printBs(save,bsMax));
@@ -152,8 +152,15 @@ public class MySlowReader {
             } 
 	    
 	    if ((caseConvert && !compare(bs,bp))
-		|| (!caseConvert && bs != bp)) ++bsStart;
-	    else return bsMax;
+		|| (!caseConvert && bs != bp)) {
+					if (startAt0) return -bsMax;
+					else ++bsStart;
+				    }
+			    else {
+					if (!finishAtEnd || bsIndex==bsMax) return bsMax;
+					else return -bsMax;
+				    }
+
 	}
 	return -bsMax;
     }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.regex.*;
 
 public class Scan {
-    enum TokenType { LEFTPAR, RIGHTPAR, NEG, FILE, PATH, DIR, WORD, CSI, QUOTEDWORD };
+    enum TokenType { LEFTPAR, RIGHTPAR, NEG, FILE, PATH, DIR, WORD, CSI, QUOTEDWORD, BEGIN, END, TRUE, FALSE };
 
     List<Pair<TokenType,Pattern>> patterns = null;
     
@@ -17,6 +17,10 @@ public class Scan {
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.LEFTPAR, Pattern.compile("^\\s*(\\()")));
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.RIGHTPAR, Pattern.compile("^\\s*(\\))")));
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.NEG, Pattern.compile("^\\s*(\\-)")));
+	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.BEGIN, Pattern.compile("^\\s*(\\^)")));
+	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.END, Pattern.compile("^\\s*(\\$)")));
+	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.TRUE, Pattern.compile("^\\s*(tt)")));
+	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.FALSE, Pattern.compile("^\\s*(ff)")));
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.FILE, Pattern.compile("^\\s*(file)")));
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.DIR, Pattern.compile("^\\s*(dir)")));
 	this.patterns.add(new Pair<TokenType,Pattern>(TokenType.PATH, Pattern.compile("^\\s*(path)")));

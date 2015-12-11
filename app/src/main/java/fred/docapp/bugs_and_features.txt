@@ -1,6 +1,10 @@
 Bugs
 ====
 - wrong color for spinner
+- to match /..../dirname we should do dir dirname path /....
+We should probably do the match not on the directory define but on the directory ref,
+otherwise matching at the beginning (e.g., - ( dir ^ .) does not work).
+And we have path for matching against the path.
 
 Features
 ========
@@ -12,6 +16,13 @@ Features
 - handle device rotate
 - maybe do matching based on file size
 - maybe add file date to locatedb
+- hide hidden dirs:
+    - ( dir ^. )
+- hide hidden files:
+    - ( file ^ . )
+- hide both:
+    - ^ .
+
 
 
 

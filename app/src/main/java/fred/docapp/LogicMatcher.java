@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class LogicMatcher {
+    static byte[] always = null;
+
     static public Term<byte[]> convert(Term<String> stringTerm) {
-	if (stringTerm.terms == null) {
+	if (stringTerm.terms == null && stringTerm.type==Term.TermType.LITERAL) {
 	    try {
 		byte[] bytes = stringTerm.literal.getBytes("UTF-8");
 		return new Term<byte[]>(bytes);
@@ -29,7 +31,7 @@ public class LogicMatcher {
 			    boolean isDir,
 			    byte[] path,
 			    int pathMax) throws IOException {
-	return match(reader,term,save,isDir,true,0,path,pathMax);
+	return match(reader,term,save,isDir,true,0,path,pathMax,false,false);
     }
 
     static public int match(MySlowReader reader,
@@ -39,19 +41,59 @@ public class LogicMatcher {
 			    boolean firstCall,
 			    int bsMax,
 			    byte[] path,
-			    int pathMax) throws IOException {
+			    int pathMax,
+			    boolean startAt0,
+			    boolean finishAtEnd) throws IOException {
+
+	if (always == null) {
+	    always = "e".getBytes("UTF-8");
+	}
 
 	if (bsMax < 0)
 	    throw new RuntimeException();
 
 	if (matchTerm.type == Term.TermType.LITERAL) {
-	    return reader.bytesMatch(matchTerm.literal,firstCall,save,bsMax,true);
+	    return reader.bytesMatch(matchTerm.literal,firstCall,save,bsMax,true,startAt0,finishAtEnd);
 	} else {
+
 	    switch (matchTerm.type) {
+
+	    case BEGIN:
+		{
+		    Term<byte[]> nTerm = matchTerm.terms.get(0);
+		    return match(reader,nTerm,save,isDir,firstCall,bsMax,path,pathMax,true,false);
+		}
+
+	    case END: 
+		{
+		    Term<byte[]> nTerm = matchTerm.terms.get(0);
+		    return match(reader,nTerm,save,isDir,firstCall,bsMax,path,pathMax,false,true);
+		}
+
+	    case EXACT:
+		{
+		    Term<byte[]> nTerm = matchTerm.terms.get(0);
+		    return match(reader,nTerm,save,isDir,firstCall,bsMax,path,pathMax,true,true);
+		}
+
+	    case TRUE:
+		{
+		    if (bsMax > 0) return bsMax;
+		    bsMax = reader.bytesMatch(always,firstCall,save,bsMax,false,false,false);
+		    return Math.abs(bsMax);
+		}
+
+	    case FALSE:
+		{
+		    if (bsMax > 0) return -bsMax;
+		    bsMax = reader.bytesMatch(always,firstCall,save,bsMax,false,false,false);
+		    return -Math.abs(bsMax);
+		}
+
 	    case AND:
 		{
 		    for (Term<byte[]> subTerm : matchTerm.terms) {
-			bsMax = match(reader,subTerm,save,isDir,firstCall,Math.abs(bsMax),path,pathMax);
+			bsMax = match(reader,subTerm,save,isDir,firstCall,Math.abs(bsMax),path,pathMax,false,false);
 			firstCall = false;
 			if (bsMax < 0) return bsMax;
 		    }
@@ -62,7 +104,7 @@ public class LogicMatcher {
 	    case OR:
 		{
 		    for (Term<byte[]> subTerm : matchTerm.terms) {
-			bsMax = match(reader,subTerm,save,isDir,firstCall,Math.abs(bsMax),path,pathMax);
+			bsMax = match(reader,subTerm,save,isDir,firstCall,Math.abs(bsMax),path,pathMax,false,false);
 			firstCall = false;
 			if (bsMax > 0) return bsMax;
 		    }
@@ -72,11 +114,11 @@ public class LogicMatcher {
 
 	    case NOT:
 		Term<byte[]> nTerm = matchTerm.terms.get(0);
-		return -1*match(reader,nTerm,save,isDir,firstCall,bsMax,path,pathMax);
+		return -1*match(reader,nTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false);
 
 	    case CSI: {
 		byte[] literal = matchTerm.terms.get(0).literal;
-		return reader.bytesMatch(literal,firstCall,save,bsMax,false);
+		return reader.bytesMatch(literal,firstCall,save,bsMax,false,startAt0,finishAtEnd);
 	    }
 
 	    case FILE: {
@@ -84,9 +126,9 @@ public class LogicMatcher {
 
 		if (isDir) {
 		    if (firstCall) 
-			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax));
+			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false));
 		    else return neg(bsMax);
-		} else return match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax);
+		} else return match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false);
 	    }
 
 	    case DIR: {
@@ -94,9 +136,9 @@ public class LogicMatcher {
 
 		if (!isDir) {
 		    if (firstCall) 
-			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax));
+			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false));
 		    else return neg(bsMax);
-		} else return match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax);
+		} else return match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false);
 	    }
 
 	    case PATH: {
@@ -104,18 +146,18 @@ public class LogicMatcher {
 
 		if (isDir) {
 		    if (firstCall)
-			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax));
+			return neg(match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false));
 		else
 		    return neg(bsMax);
 		} else {
 		    if (firstCall) 
-			bsMax = match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax);
+			bsMax = match(reader,qTerm,save,isDir,firstCall,bsMax,path,pathMax,false,false);
 		    int pathBsMax = 0;
 		    // We have to check whether there is a CSI node or not
 		    if (qTerm.literal != null)
-			pathBsMax = reader.bytesMatch(qTerm.literal,false,path,pathMax,true);
+			pathBsMax = reader.bytesMatch(qTerm.literal,false,path,pathMax,true,false,false);
 		    else if (qTerm.type == Term.TermType.CSI)
-			pathBsMax = reader.bytesMatch(qTerm.terms.get(0).literal,false,path,pathMax,false);
+			pathBsMax = reader.bytesMatch(qTerm.terms.get(0).literal,false,path,pathMax,false,false,false);
 		    else throw new RuntimeException();
 
 		    if (pathBsMax < 0) return neg(bsMax);
