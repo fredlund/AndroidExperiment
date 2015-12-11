@@ -450,7 +450,7 @@ public class SearchableActivity extends AppCompatActivity {
                             final String db_location = libraryPreferences.getString("db_location", "");
                             final String db_user = libraryPreferences.getString("db_username", "");
                             final String db_port = libraryPreferences.getString("db_port","22");
-                            System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user);
+                            System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user + " db_port="+db_port);
                             boolean has_error;
                             if (has_error = (db_host.equals(""))) {
                                 errors.append("no db host specified\n");
@@ -476,8 +476,8 @@ public class SearchableActivity extends AppCompatActivity {
                                 final String db_password = libraryPreferences.getString("db_password", "");
                                 String files[] = new String[1];
                                 files[0] = db_location + "/" + MLocate.localLibraryFile(library);
-                                GetFile.doFileRequest(SearchableActivity.this, db_host, db_port, db_location,
-                                        db_user, db_password,files);
+                                GetFile.doFileRequest(SearchableActivity.this, library, db_host, db_port, SearchableActivity.this.getFilesDir().getAbsolutePath(),
+                                        db_user, db_password, files);
                             }
                         }
                     }

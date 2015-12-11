@@ -28,7 +28,10 @@ public class GetFile {
             if ((username = find_username(library, libraryPrefs)) != null) {
                 String password = find_password(library, libraryPrefs);
                     String port = find_port(library, libraryPrefs);
-                    doFileRequest(cntxt, library, host, port, username, password, files);
+                File localFile = Environment.getExternalStorageDirectory();
+                File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
+                myDir.mkdir();
+                    doFileRequest(cntxt, library, host, port, myDir.getAbsolutePath(), username, password, files);
 
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(cntxt);
@@ -48,8 +51,11 @@ public class GetFile {
     }
 
 
-    static void doFileRequest(final Context cntxt, final String library, final String hostname, final String port, final String username, String password, final String[] files) {
-       final int portNo = Integer.parseInt(port);
+    static void doFileRequest(final Context cntxt, final String library, final String hostname, final String port, final String localLocation, final String username, String password, final String[] files) {
+       final int portNo;
+
+        if (port.equals("")) portNo = 22;
+        else portNo = Integer.parseInt(port);
 
         if (password == null || password.equals("")) {
             UserHost uh = new UserHost(username, hostname);
@@ -57,23 +63,20 @@ public class GetFile {
                 @Override
                 public void result(Object item) {
                     if (item != null)
-                        doFileRequestWithPassword(cntxt, library, hostname, portNo, username, (String) item, files);
+                        doFileRequestWithPassword(cntxt, library, hostname, portNo,  username, localLocation, (String) item, files);
                 }
             });
         }
-        else doFileRequestWithPassword(cntxt, library, hostname, portNo, username, password, files);
+        else doFileRequestWithPassword(cntxt, library, hostname, portNo, username, localLocation, password, files);
     }
 
-    static void doFileRequestWithPassword(Context cntxt, String library, String hostname, int portNo, String username, String password, String[] files) {
+    static void doFileRequestWithPassword(Context cntxt, String library, String hostname, int portNo, String username, String localLocation, String password, String[] files) {
             if (password != null && !password.equals("")) {
                 SharedPreferences appPrefs = cntxt.getSharedPreferences("appData", 0);
                 int requestNo = appPrefs.getInt("transferCounter", 0);
                 SharedPreferences.Editor edit = appPrefs.edit();
                 edit.putInt("transferCounter", requestNo % 32000);
-                File localFile = Environment.getExternalStorageDirectory();
-                File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
-                myDir.mkdir();
-                FileTransferRequest ftr = new FileTransferRequest(library, hostname, portNo, username, password, files, myDir.getAbsolutePath(), requestNo);
+                FileTransferRequest ftr = new FileTransferRequest(library, hostname, portNo, username, password, files, localLocation, requestNo);
                 System.out.println("making intent");
                 Intent intent = new Intent(cntxt, FileService.class);
                 intent.putExtra("fred.docapp.FileTransferRequest", ftr);
