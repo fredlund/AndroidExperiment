@@ -172,7 +172,10 @@ public class ScpFromJava {
                     buf[0] = 0;
                     out.write(buf, 0, 1);
                     out.flush();
-                    tmpFile.renameTo(myFile);
+                    if (!tmpFile.renameTo(myFile)) {
+                        System.out.println("could not rename "+tmpFile+" to "+myFile);
+                        retStatus.is_ok = false;
+                    };
                 }
 
             session.disconnect();
