@@ -43,8 +43,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
 
             holder = new TransferHolder();
             holder.file = (TextView) row.findViewById(R.id.transferFileText);
-            holder.library = (TextView) row.findViewById(R.id.transferLibrary);
-            holder.status = (TextView) row.findViewById(R.id.transferStatus);
+           holder.status = (TextView) row.findViewById(R.id.transferStatus);
             holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
 
             row.setTag(holder);
@@ -54,11 +53,13 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
 
         Transfer transfer = data.get(position);
         holder.file.setText((new File(transfer.file)).getName());
-        holder.library.setText(transfer.library);
         holder.status.setText(transfer.transferStatusToShortString(transfer.transferStatus));
         if (transfer.transferStatus == Transfer.progressing()) {
             holder.status.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.VISIBLE);
+            holder.progressBar.setMax(100);
+            System.out.println(transfer.file+": transferred="+transfer.transferred+" fileSize="+transfer.fileSize);
+            holder.progressBar.setProgress((int) (100*(((float) transfer.transferred) / ((float) transfer.fileSize))));
         } else {
             holder.status.setVisibility(View.VISIBLE);
             holder.progressBar.setVisibility(View.GONE);
@@ -83,7 +84,6 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
 
     static class TransferHolder {
         TextView file;
-        TextView library;
         TextView status;
         ProgressBar progressBar;
     }

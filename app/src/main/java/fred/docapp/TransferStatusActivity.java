@@ -43,13 +43,13 @@ import java.util.Set;
     public class TransferStatusActivity extends AppCompatActivity {
 
         private List<Map<String, Object>> listValues;
-        private ListView listView1 = null;
+        static ListView listView1 = null;
         private Menu menu;
-        Map<String,Transfer> selected = null;
+        static Map<String,Transfer> selected = null;
         TransferStatusActivity myself = null;
         UserInfo ui;
         String currentLibrary = null;
-        List<Transfer> transfers;
+        static List<Transfer> transfers;
 
         static final int waiting = Transfer.waiting();
         static final int progressing = Transfer.progressing();
@@ -194,14 +194,42 @@ import java.util.Set;
     class ResponseReceiver extends BroadcastReceiver {
         // Called when the BroadcastReceiver gets an Intent it's registered to receive
         public void onReceive(Context context, Intent intent) {
-            System.out.println("got an intent " + intent);
+            System.out.println("transferStatusActivity: got an intent " + intent);
             String file = intent.getStringExtra("file");
+            String library = intent.getStringExtra("library");
             int status = intent.getIntExtra("status", Transfer.waiting());
             long transferred = intent.getLongExtra("transferred", 0);
             long fileSize = intent.getLongExtra("fileSize",0);
             System.out.println("file = "+file+" status = "+Transfer.transferStatusToShortString(status)+" fileSize="+fileSize+" transferred="+transferred);
+            boolean changed = false;
+            //if (status == TransferStatusActivity.progressing) {
+                if (TransferStatusActivity.transfers != null) {
+                    Transfer transfer = findOrAdd(TransferStatusActivity.transfers, file, status, library, fileSize);
+                    if (transfer != null) {
+                            System.out.println("updated transfer");
+                            changed = changed || transfer.transferStatus != status || status == TransferStatusActivity.progressing;
+                            transfer.transferStatus = status;
+                            if (status == TransferStatusActivity.progressing) {
+                                transfer.transferred = transferred;
+                                transfer.fileSize = fileSize;
+                            }
+                    } else System.out.println(file + " not found in transfers");
+                } else System.out.println("transfers is null");
+            //}  else System.out.println("not active");
+            if (changed && TransferStatusActivity.listView1 != null) {
+                TransferAdapter adapter = (TransferAdapter) TransferStatusActivity.listView1.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
         }
 
+        Transfer findOrAdd(List<Transfer> transfers, String searchFor, int status, String library, long fileSize) {
+            for (Transfer transfer : transfers)
+                if (transfer.file.equals(searchFor))
+                    return transfer;
+            Transfer transfer = new Transfer(searchFor, library, status, fileSize, 0);
+            transfers.add(transfer);
+            return transfer;
+        }
     }
 
 
@@ -211,6 +239,20 @@ class Transfer {
     long fileSize;
     long transferred;
     String library;
+
+    @Override
+    public int hashCode() {
+        return this.file.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof Transfer) {
+            Transfer other = (Transfer) o;
+            return this.file.equals(other.file);
+        } else return false;
+    }
 
     Transfer(String file, String library, int transferStatus, long fileSize, long transferred) {
             this.file = file;

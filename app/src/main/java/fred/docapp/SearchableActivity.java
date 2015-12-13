@@ -228,6 +228,7 @@ public class SearchableActivity extends AppCompatActivity {
                             EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                             adapter.notifyDataSetChanged();
                         }
+                        toDownload = new HashMap<>();
                         GetFile.doFileRequest(library,files,SearchableActivity.this);
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);

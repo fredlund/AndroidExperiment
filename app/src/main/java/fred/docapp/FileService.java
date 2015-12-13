@@ -23,14 +23,14 @@ public class FileService extends IntentService {
         ScpFromJava scp = new ScpFromJava(this);
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {
-            failure = false;
             String file = ftr.files[i];
             transfer = new Transfer(file,ftr.library,Transfer.connecting(),0,0);
+            db.storeTransfer(transfer);
             Intent statusIntent = new Intent("file_transfer");
             statusIntent.putExtra("file", file);
+            statusIntent.putExtra("library", ftr.library);
             statusIntent.putExtra("status", transfer.transferStatus);
             LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
-            db.storeTransfer(transfer);
             ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, ftr.port, file);
             System.out.println("ftr "+ftr+" connect returns "+ret);
             failure = !ret.is_ok;
@@ -40,11 +40,12 @@ public class FileService extends IntentService {
                     UserInfo.getInstance().savePassword(uh,ftr.passWord);
                 }
                 transfer = new Transfer(file,ftr.library,Transfer.progressing(),scp.fileSize,0);
+                db.updateTransfer(transfer);
                 statusIntent = new Intent("file_transfer");
                 statusIntent.putExtra("file", file);
+                statusIntent.putExtra("library", ftr.library);
                 statusIntent.putExtra("status", transfer.transferStatus);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
-                db.updateTransfer(transfer);
                 ret = scp.doTransfer(ftr.localDir);
                 System.out.println("ftr "+ftr+" transmit returns "+ret);
                 failure = !ret.is_ok;
@@ -57,6 +58,7 @@ public class FileService extends IntentService {
             db.updateTransfer(transfer);
             statusIntent = new Intent("file_transfer");
             statusIntent.putExtra("file", ftr.files[i]);
+            statusIntent.putExtra("library", ftr.library);
             statusIntent.putExtra("status", transfer.transferStatus);
             LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
         }

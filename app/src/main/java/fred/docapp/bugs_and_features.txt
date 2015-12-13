@@ -1,6 +1,5 @@
 Bugs
 ====
-- wrong color for spinner
 - to match /..../dirname we should do dir dirname path /....
 We should probably do the match not on the directory define but on the directory ref,
 otherwise matching at the beginning (e.g., - ( dir ^ .) does not work).

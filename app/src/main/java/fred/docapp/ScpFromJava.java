@@ -20,6 +20,7 @@ public class ScpFromJava {
     OutputStream out;
     BufferedInputStream in;
     String file;
+    String reqFile;
     long fileSize;
     Context cntxt;
     long lastStatusReport = 0;
@@ -39,6 +40,7 @@ public class ScpFromJava {
         jsch.setLogger(logger);
         logger.setLevel(Logger.INFO);
         retStatus = new ScpReturnStatus(true);
+        this.reqFile = reqFile;
 
         try {
 
@@ -134,6 +136,7 @@ public class ScpFromJava {
                 out.write(buf, 0, 1);
                 out.flush();
 
+                lastStatusReport = 0;
                 tmpFile = File.createTempFile(file, null, new File(localDir));
                 System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
@@ -161,7 +164,7 @@ public class ScpFromJava {
                     if (transferred - lastStatusReport > 1024 * 512) {
                         System.out.println("reporting "+transferred+" bytes transferred");
                         Intent statusIntent = new Intent("file_transfer");
-                        statusIntent.putExtra("file", file);
+                        statusIntent.putExtra("file", reqFile);
                         statusIntent.putExtra("status",Transfer.progressing());
                         statusIntent.putExtra("transferred",transferred);
                         statusIntent.putExtra("fileSize",fileSize);
@@ -171,7 +174,7 @@ public class ScpFromJava {
                 }
 
                 if (remaining > 0)
-                    System.out.println("file " + file + ": could only read " + (fileSize - remaining) +
+                    System.out.println("file " + reqFile + ": could only read " + (fileSize - remaining) +
                             " bytes out of " + fileSize);
                 fos.close();
                 fos = null;
@@ -196,6 +199,7 @@ public class ScpFromJava {
             session.disconnect();
         } catch (Exception e) {
             System.out.println("ScpFromJava: exception "+e);
+                retStatus.is_ok = false;
             retStatus.exc = e;
             e.printStackTrace();
             try {
