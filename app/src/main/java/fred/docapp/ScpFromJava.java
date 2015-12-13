@@ -107,6 +107,7 @@ public class ScpFromJava {
             }
         } catch (Exception e) {
             System.out.println("ScpFromJava: exception " + e);
+            retStatus.is_ok = false;
             retStatus.exc = e;
             e.printStackTrace();
             try {
@@ -211,6 +212,11 @@ public class ScpFromJava {
 class ScpReturnStatus {
     boolean is_ok;
     Object exc;
+
+    @Override
+    public String toString() {
+        return is_ok+" obj="+exc;
+    }
 
     ScpReturnStatus(boolean is_ok) {
         this.is_ok = is_ok;

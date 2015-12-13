@@ -59,7 +59,7 @@ public class TransferDB extends SQLiteOpenHelper {
         values.put("status", transfer.transferStatus);
         values.put("fileSize",transfer.fileSize);
         values.put("transferred", transfer.transferred);
-        (mInstance.getWritableDatabase()).insert("transfers", "null", values);
+        (mInstance.getWritableDatabase()).insertWithOnConflict("transfers", "null", values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public void clearDB() {

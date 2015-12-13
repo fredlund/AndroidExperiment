@@ -8,6 +8,8 @@ And we have path for matching against the path.
 
 Features
 ========
+- show previous default library
+- print library when asking for password
 - status reports for file transfers
 - better searching:
     avoid .-directories

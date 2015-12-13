@@ -142,7 +142,7 @@ import java.util.Set;
                 case R.id.menu_resume_failed_jobs:
                 {
                     for (Transfer transfer : transfers)
-                    if (transfer.transferStatus == Transfer.failed())
+                    if (Transfer.isFailure(transfer.transferStatus))
                         GetFile.doFileRequest(transfer.library, transfer.file, TransferStatusActivity.this);
                 }
                     break;
@@ -216,6 +216,7 @@ class Transfer {
         else if (transferStatus == 1) return "progressing";
         else if (transferStatus == 2) return "failed";
         else if (transferStatus == 3) return "finished";
+        else if (transferStatus == 4) return "failed-connect";
         else return "bad";
     }
 
@@ -235,4 +236,6 @@ class Transfer {
     static int finished() {
         return 3;
     }
+    static int failedConnect() { return 4; }
+    static boolean isFailure(int status) { return status==failed() || status == failedConnect(); }
 }

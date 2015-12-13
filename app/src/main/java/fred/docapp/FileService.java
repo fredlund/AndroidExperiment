@@ -27,8 +27,10 @@ public class FileService extends IntentService {
         ScpFromJava scp = new ScpFromJava();
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {
+            failure = false;
             String file = ftr.files[i];
             ScpReturnStatus ret = scp.setupTransfer(ftr.userName, ftr.passWord, ftr.host, ftr.port, file);
+            System.out.println("ftr "+ftr+" connect returns "+ret);
             failure = !ret.is_ok;
             if (!failure) {
                 if (!savedPassword) {
@@ -37,25 +39,21 @@ public class FileService extends IntentService {
                 }
                 transfer = new Transfer(file,ftr.library,Transfer.progressing(),scp.fileSize,0);
                 ret = scp.doTransfer(ftr.localDir);
+                System.out.println("ftr "+ftr+" transmit returns "+ret);
                 failure = !ret.is_ok;
+                if (!failure)
+                    transfer.transferStatus = Transfer.finished();
+                else
+                    transfer.transferStatus = Transfer.failed();
             } else
-                transfer = new Transfer(file,ftr.library,Transfer.failed(),0,0);
+                transfer = new Transfer(file,ftr.library,Transfer.failedConnect(),0,0);
             db.updateTransfer(transfer);
             Intent statusIntent = new Intent("file_transfer");
             statusIntent.putExtra("requestNo", ftr.requestNo);
             statusIntent.putExtra("file", ftr.files[i]);
             statusIntent.putExtra("status", !failure);
             LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
-            if (!failure)
-                transfer.transferStatus = Transfer.finished();
-            else
-            transfer.transferStatus = Transfer.failed();
             db.updateTransfer(transfer);
         }
-        Intent statusIntent = new Intent("request_transfer");
-        statusIntent.putExtra("requestNo",ftr.requestNo);
-        statusIntent.putExtra("status",!failure);
-        System.out.println("status = "+!failure);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
     }
 }
