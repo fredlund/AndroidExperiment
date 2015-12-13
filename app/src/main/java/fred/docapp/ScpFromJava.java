@@ -11,6 +11,7 @@ public class ScpFromJava {
         JschLogger logger;
         ScpReturnStatus retStatus;
         FileOutputStream fos = null;
+    File tmpFile;
     Session session;
     MyUserInfo userInfo;
     byte[] buf;
@@ -18,6 +19,11 @@ public class ScpFromJava {
     BufferedInputStream in;
     String file;
     long fileSize;
+    Context cntxt;
+
+    public ScpFromJava(Context cntxt) {
+        this.cntxt = cntxt;
+    }
 
     public long getFileSize() {
         return fileSize;
@@ -125,12 +131,12 @@ public class ScpFromJava {
                 out.write(buf, 0, 1);
                 out.flush();
 
-
-                System.out.println("local file name is localDir=" + localDir + " file=" + file);
+                tmpFile = File.createTempFile(file, null, cntxt.getCacheDir());
+                System.out.println("tmpFile is "+tmpFile+" local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
-                fos = new FileOutputStream(myFile);
+                fos = new FileOutputStream(tmpFile);
 
                 long remaining = fileSize;
                 int foo;
@@ -166,6 +172,7 @@ public class ScpFromJava {
                     buf[0] = 0;
                     out.write(buf, 0, 1);
                     out.flush();
+                    tmpFile.renameTo(myFile);
                 }
 
             session.disconnect();

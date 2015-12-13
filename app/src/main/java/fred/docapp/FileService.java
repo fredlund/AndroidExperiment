@@ -24,7 +24,7 @@ public class FileService extends IntentService {
             transfer = new Transfer(file,ftr.library,Transfer.waiting(),0,0);
             db.storeTransfer(transfer);
         }
-        ScpFromJava scp = new ScpFromJava();
+        ScpFromJava scp = new ScpFromJava(this);
         boolean failure = false;
         for (int i=0; i<ftr.files.length && !failure; i++) {
             failure = false;
