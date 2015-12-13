@@ -51,10 +51,15 @@ import java.util.Set;
         String currentLibrary = null;
         List<Transfer> transfers;
 
+        static final int waiting = Transfer.waiting();
+        static final int progressing = Transfer.progressing();
+        static final int finished = Transfer.finished();
+        static final int failed = Transfer.failed();
+        static final int connecting = Transfer.connecting();
+        static final int failedConnect = Transfer.failedConnect();
 
-        @Override
         protected void onCreate(Bundle savedInstanceState) {
-            System.out.println("transfer status activitity was created");
+            System.out.println("transfer status activity was created");
             System.out.flush();
             myself = TransferStatusActivity.this;
             transfers = TransferDB.getInstance(TransferStatusActivity.this).getAll();
@@ -190,6 +195,11 @@ import java.util.Set;
         // Called when the BroadcastReceiver gets an Intent it's registered to receive
         public void onReceive(Context context, Intent intent) {
             System.out.println("got an intent " + intent);
+            String file = intent.getStringExtra("file");
+            int status = intent.getIntExtra("status", Transfer.waiting());
+            long transferred = intent.getLongExtra("transferred", 0);
+            long fileSize = intent.getLongExtra("fileSize",0);
+            System.out.println("file = "+file+" status = "+Transfer.transferStatusToShortString(status)+" fileSize="+fileSize+" transferred="+transferred);
         }
 
     }
@@ -210,18 +220,28 @@ class Transfer {
             this.transferred = transferred;
     }
 
+    static public String transferStatusToShortString(int transferStatus) {
+        if (transferStatus == TransferStatusActivity.waiting) return "wait";
+        else if (transferStatus == TransferStatusActivity.progressing) return "active";
+        else if (transferStatus == TransferStatusActivity.failed) return "fail";
+        else if (transferStatus == TransferStatusActivity.finished) return "ok";
+        else if (transferStatus == TransferStatusActivity.failedConnect) return "confail";
+        else if (transferStatus == TransferStatusActivity.connecting) return "con";
+        else return "??";
+    }
 
-    public String transferStatusToString() {
-        if (transferStatus == 0) return "waiting";
-        else if (transferStatus == 1) return "progressing";
-        else if (transferStatus == 2) return "failed";
-        else if (transferStatus == 3) return "finished";
-        else if (transferStatus == 4) return "failed-connect";
-        else return "bad";
+    static public String transferStatusToString(int transferStatus) {
+        if (transferStatus == TransferStatusActivity.waiting) return "waiting";
+        else if (transferStatus == TransferStatusActivity.progressing) return "progressing";
+        else if (transferStatus == TransferStatusActivity.failed) return "failed";
+        else if (transferStatus == TransferStatusActivity.finished) return "ok";
+        else if (transferStatus == TransferStatusActivity.failedConnect) return "connection failure";
+        else if (transferStatus == TransferStatusActivity.connecting) return "connecting";
+        else return "??";
     }
 
     public String toString() {
-        return "{" + file + "," + library + "," + transferStatusToString() + "," + fileSize + "," + transferred + "}";
+        return "{" + file + "," + library + "," + transferStatusToString(transferStatus) + "," + fileSize + "," + transferred + "}";
     }
 
     static int waiting() {
@@ -237,5 +257,6 @@ class Transfer {
         return 3;
     }
     static int failedConnect() { return 4; }
+    static int connecting() { return 5; }
     static boolean isFailure(int status) { return status==failed() || status == failedConnect(); }
 }

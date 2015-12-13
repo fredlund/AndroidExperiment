@@ -1,7 +1,9 @@
 package fred.docapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.jcraft.jsch.*;
 import java.io.*;
@@ -20,6 +22,7 @@ public class ScpFromJava {
     String file;
     long fileSize;
     Context cntxt;
+    long lastStatusReport = 0;
 
     public ScpFromJava(Context cntxt) {
         this.cntxt = cntxt;
@@ -131,13 +134,14 @@ public class ScpFromJava {
                 out.write(buf, 0, 1);
                 out.flush();
 
-                tmpFile = File.createTempFile(file, null, cntxt.getCacheDir());
+                tmpFile = File.createTempFile(file, null, new File(localDir));
                 System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
                 fos = new FileOutputStream(tmpFile);
 
+                long transferred = 0;
                 long remaining = fileSize;
                 int foo;
                 while (true) {
@@ -151,8 +155,19 @@ public class ScpFromJava {
                         break;
                     }
                     fos.write(buf, 0, foo);
+                    transferred += foo;
                     remaining -= foo;
                     if (remaining == 0L) break;
+                    if (transferred - lastStatusReport > 1024 * 512) {
+                        System.out.println("reporting "+transferred+" bytes transferred");
+                        Intent statusIntent = new Intent("file_transfer");
+                        statusIntent.putExtra("file", file);
+                        statusIntent.putExtra("status",Transfer.progressing());
+                        statusIntent.putExtra("transferred",transferred);
+                        statusIntent.putExtra("fileSize",fileSize);
+                        LocalBroadcastManager.getInstance(cntxt).sendBroadcast(statusIntent);
+                        lastStatusReport = transferred;
+                    }
                 }
 
                 if (remaining > 0)

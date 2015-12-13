@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.File;
@@ -20,6 +21,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
     Context context;
     int layoutResourceId;
     List<Transfer> data = null;
+    ProgressBar progress = null;
 
     TransferAdapter(Context context, int layoutResourceId, List<Transfer> data) {
         super(context, layoutResourceId, data);
@@ -43,6 +45,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
             holder.file = (TextView) row.findViewById(R.id.transferFileText);
             holder.library = (TextView) row.findViewById(R.id.transferLibrary);
             holder.status = (TextView) row.findViewById(R.id.transferStatus);
+            holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
 
             row.setTag(holder);
         } else {
@@ -52,7 +55,14 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
         Transfer transfer = data.get(position);
         holder.file.setText((new File(transfer.file)).getName());
         holder.library.setText(transfer.library);
-        holder.status.setText(transfer.transferStatusToString());
+        holder.status.setText(transfer.transferStatusToShortString(transfer.transferStatus));
+        if (transfer.transferStatus == Transfer.progressing()) {
+            holder.status.setVisibility(View.GONE);
+            holder.progressBar.setVisibility(View.VISIBLE);
+        } else {
+            holder.status.setVisibility(View.VISIBLE);
+            holder.progressBar.setVisibility(View.GONE);
+        }
         return row;
     }
 
@@ -75,6 +85,7 @@ public class TransferAdapter extends ArrayAdapter<Transfer> {
         TextView file;
         TextView library;
         TextView status;
+        ProgressBar progressBar;
     }
 }
 
