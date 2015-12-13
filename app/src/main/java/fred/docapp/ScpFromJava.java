@@ -132,7 +132,7 @@ public class ScpFromJava {
                 out.flush();
 
                 tmpFile = File.createTempFile(file, null, cntxt.getCacheDir());
-                System.out.println("tmpFile is "+tmpFile+" local file name is localDir=" + localDir + " file=" + file);
+                System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
@@ -172,8 +172,8 @@ public class ScpFromJava {
                     buf[0] = 0;
                     out.write(buf, 0, 1);
                     out.flush();
-                    if (!tmpFile.renameTo(myFile)) {
-                        System.out.println("could not rename "+tmpFile+" to "+myFile);
+                    if (!moveFile(tmpFile,myFile)) {
+                        System.out.println("could not move "+tmpFile+" to "+myFile);
                         retStatus.is_ok = false;
                     };
                 }
@@ -189,6 +189,50 @@ public class ScpFromJava {
             }
         }
         return retStatus;
+    }
+
+    static boolean moveFile(File from, File to) {
+        if (!from.renameTo(to)) {
+            InputStream in = null;
+            OutputStream out = null;
+
+            try {
+                in = new FileInputStream(from);
+                out = new FileOutputStream(to);
+                long fileSize = from.length();
+                long remains = fileSize;
+                byte buf[] = new byte[8192];
+
+                while (remains > 0) {
+                    int read = in.read(buf, 0, (int) Math.min(buf.length,remains));
+                    if (read < 0) {
+                        System.out.println("premature eof on "+from);
+                        return false;
+                    }
+                    out.write(buf,0,read);
+                    remains -= read;
+                }
+                in.close();
+                in = null;
+                boolean result = from.delete();
+                if (!result)
+                    System.out.println("Could not delete "+from);
+                return result;
+            } catch (IOException exc) {
+                System.out.println("IOException "+exc);
+                return false;
+            } finally {
+                if (in != null) try {
+                    in.close();
+                } catch (IOException e) {
+                }
+                if (out != null) try {
+                    out.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        return true;
     }
 
     static int checkAck(InputStream in) throws IOException {
