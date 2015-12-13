@@ -72,6 +72,7 @@ public class MySlowReader {
 	int toIndex = 0;
 
 	for (int round = 0; round < 2; round++) {
+		//System.out.println("copyStringToBuf(round="+round+" currentPos="+currentPos+" last="+currentBuffer.last+")");
 	    byte[] buf = currentBuffer.buf;
 	    int index = (int) (currentPos-currentBuffer.first);
 	    long last = currentBuffer.last;
@@ -89,14 +90,15 @@ public class MySlowReader {
 	    }
 	    moveToCurrentBuffer();
 	}
+		System.out.println("could not find 0 byte at pos "+currentPos+" buf "+printBs(toBuf,toIndex));
 	throw new IOException("copyStringToBuf");
     }
 
     void moveToCurrentBuffer() throws IOException {
 	//System.out.println
-	//  ("moveToCurrentBuffer: currentPos="+currentPos+
-	//   " fileSize="+fileSize+" currentBuffer.last="+
-	//     buffers[currentBufferIndex].last);
+	  //("moveToCurrentBuffer: currentPos="+currentPos+
+	   //" fileSize="+fileSize+" currentBuffer.last="+
+	   // currentBuffer.last);
 	if (currentPos >= fileSize) return;
 
 	long otherBufferLast;
