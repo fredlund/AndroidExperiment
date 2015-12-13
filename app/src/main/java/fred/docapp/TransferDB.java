@@ -18,7 +18,6 @@ public class TransferDB extends SQLiteOpenHelper {
 
     private static TransferDB mInstance = null;
     private Context mCtx;
-    private SQLiteDatabase db;
 
     public TransferDB(Context ctx) {
         super(ctx, "billyDB", null, 2);
@@ -39,7 +38,6 @@ public class TransferDB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_ENTRIES);
-        this.db = db;
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -63,6 +61,7 @@ public class TransferDB extends SQLiteOpenHelper {
     }
 
     public void clearDB() {
+        SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(DELETE_ENTRIES);
         db.execSQL(CREATE_ENTRIES);
     }
