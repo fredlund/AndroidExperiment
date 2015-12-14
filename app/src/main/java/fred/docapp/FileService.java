@@ -1,6 +1,9 @@
 package fred.docapp;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -22,6 +25,18 @@ public class FileService extends IntentService {
         TransferDB db = TransferDB.getInstance(this);
         ScpFromJava scp = new ScpFromJava(this);
         boolean failure = false;
+
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder nb = new Notification.Builder(this);
+
+    if (ftr.files.length>0) {
+        nb.setSmallIcon(android.R.drawable.stat_sys_download);
+        nb.setTicker("Billy file transfers");
+          PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                  new Intent(this, TransferStatusActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        nb.setContentIntent(contentIntent);
+        nm.notify(0, nb.build());
+    }
         for (int i=0; i<ftr.files.length && !failure; i++) {
             String file = ftr.files[i];
             transfer = new Transfer(file,ftr.library,Transfer.connecting(),0,0);
@@ -62,5 +77,7 @@ public class FileService extends IntentService {
             statusIntent.putExtra("status", transfer.transferStatus);
             LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
         }
+        if (ftr.files.length > 0) nm.cancel(0);
+
     }
 }
