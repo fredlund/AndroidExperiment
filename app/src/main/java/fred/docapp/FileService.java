@@ -32,6 +32,8 @@ public class FileService extends IntentService {
     if (ftr.files.length>0) {
         nb.setSmallIcon(android.R.drawable.stat_sys_download);
         nb.setTicker("Billy file transfers");
+        nb.setContentTitle("See file transfers");
+        nb.setContentText("Click to see file transfers");
           PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                   new Intent(this, TransferStatusActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         nb.setContentIntent(contentIntent);
