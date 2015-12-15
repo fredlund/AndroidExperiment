@@ -4,10 +4,15 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
+import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import java.io.File;
+import java.net.URLConnection;
 
 public class FileService extends IntentService {
     public FileService() {
@@ -78,8 +83,24 @@ public class FileService extends IntentService {
             statusIntent.putExtra("library", ftr.library);
             statusIntent.putExtra("status", transfer.transferStatus);
             LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
+            if (transfer.transferStatus == TransferStatusActivity.finished && ftr.tryOpen) {
+                File myFile = new File(ftr.localDir + "/" + (new File(file)).getName());
+                Uri uri = Uri.fromFile(myFile);
+                String url = "file:"+myFile.toString();
+                String mimeType = URLConnection.guessContentTypeFromName(url);
+                System.out.println("the mimeType for "+url+" is "+mimeType+" uri is "+uri);
+                if (mimeType == null)
+                    mimeType = "*/*";
+                Intent newIntent = new Intent(Intent.ACTION_VIEW);
+                newIntent.setDataAndType(uri,mimeType);
+                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    this.startActivity(newIntent);
+                } catch (ActivityNotFoundException e) {
+                     System.out.println("No handler for "+mimeType);
+                }
+            }
         }
         if (ftr.files.length > 0) nm.cancel(0);
-
     }
 }

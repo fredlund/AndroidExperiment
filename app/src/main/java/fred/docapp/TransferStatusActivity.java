@@ -139,7 +139,7 @@ import java.util.Set;
                 {
                     Collection<Transfer> values = selected.values();
                     for (Transfer transfer : values) {
-                        GetFile.doFileRequest(transfer.library, transfer.file, TransferStatusActivity.this);
+                        GetFile.doFileRequest(transfer.library, transfer.file, false, TransferStatusActivity.this);
                         selected.remove(transfer.file);
                     }
                 }
@@ -148,7 +148,7 @@ import java.util.Set;
                 {
                     for (Transfer transfer : transfers)
                     if (Transfer.isFailure(transfer.transferStatus))
-                        GetFile.doFileRequest(transfer.library, transfer.file, TransferStatusActivity.this);
+                        GetFile.doFileRequest(transfer.library, transfer.file, false, TransferStatusActivity.this);
                 }
                     break;
                 case R.id.menu_clear_all_jobs: {

@@ -216,8 +216,6 @@ public class SearchableActivity extends AppCompatActivity {
                 System.out.println("in download");
                 if (toDownload.size() > 0) {
                     final String library = find_current_library();
-                    final String username;
-                    final String host;
                     if (library != null) {
                         String files[] = new String[toDownload.size()];
                         int i = 0;
@@ -229,7 +227,7 @@ public class SearchableActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                         }
                         toDownload = new HashMap<>();
-                        GetFile.doFileRequest(library,files,SearchableActivity.this);
+                        GetFile.doFileRequest(library,files,false,SearchableActivity.this);
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                         builder.setTitle("Error");
@@ -478,7 +476,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 String files[] = new String[1];
                                 files[0] = db_location + "/" + MLocate.localLibraryFile(library);
                                 GetFile.doFileRequest(SearchableActivity.this, library, db_host, db_port, SearchableActivity.this.getFilesDir().getAbsolutePath(),
-                                        db_user, db_password, files);
+                                        db_user, db_password, files, false);
                             }
                         }
                     }
@@ -648,7 +646,7 @@ public class SearchableActivity extends AppCompatActivity {
                             System.out.println("onItemClick position=" + position + " found size=" +
                                     ((found == null) ? -1 : found.size()));
                             System.out.flush();
-                            Entry entry = found.get(position);
+                            final Entry entry = found.get(position);
                             System.out.println("item " + position + " was clicked=" + found.get(position));
                             if (entry.entryType != Entry.EntryType.File) {
                                 System.out.println("will try to read " + entry);
@@ -682,6 +680,51 @@ public class SearchableActivity extends AppCompatActivity {
                                     spinner.setSelection(stack.size() - 1);
                                     spinner.setAdapter(spinnerAdapter);
                                 }
+                            } else {
+                                AlertDialog.Builder infoDialog = new AlertDialog.Builder(SearchableActivity.this);
+                                infoDialog.setTitle("File information");
+                                infoDialog.setMessage("Name: " + entry.fileName + "\ndirectory: " + entry.dirName +
+                                        "\nsize: " + size_to_string(entry.size));
+
+                                infoDialog.setNegativeButton("Download", new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (currentLibrary != null) {
+                                            String files[] = new String[1];
+                                            files[0] = entry.dirName + "/" + entry.fileName;
+                                            entry.isEnabled = false;
+                                            EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                                            adapter.notifyDataSetChanged();
+                                            GetFile.doFileRequest(currentLibrary, files, false, SearchableActivity.this);
+                                        }
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                infoDialog.setPositiveButton("Open", new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (currentLibrary != null) {
+                                            String files[] = new String[1];
+                                            files[0] = entry.dirName + "/" + entry.fileName;
+                                            entry.isEnabled = false;
+                                            EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                                            adapter.notifyDataSetChanged();
+                                            GetFile.doFileRequest(currentLibrary, files, true, SearchableActivity.this);
+                                        }
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                infoDialog.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                AlertDialog alert = infoDialog.create();
+                                alert.show();
+
                             }
                         }
 

@@ -12,6 +12,7 @@ public class FileTransferRequest implements Parcelable {
     String[] files;
 	int requestNo;
 	String localDir;
+	boolean tryOpen;
 
     public FileTransferRequest(String library,
 							   String host,
@@ -19,6 +20,7 @@ public class FileTransferRequest implements Parcelable {
 			       String userName,
 			       String passWord,
 			       String[] files,
+							   boolean tryOpen,
 							   String localDir,
 							   	int requestNo) {
 		this.library = library;
@@ -27,6 +29,7 @@ public class FileTransferRequest implements Parcelable {
 	this.userName = userName;
 	this.passWord = passWord;
 	this.files = files;
+		this.tryOpen = tryOpen;
 		this.localDir = localDir;
 		this.requestNo = requestNo;
     }
@@ -40,6 +43,7 @@ public class FileTransferRequest implements Parcelable {
 		passWord = in.readString();
 		files = new String[length];
 		in.readStringArray(files);
+		tryOpen = in.readInt()==0 ? false : true;
 		localDir = in.readString();
 		requestNo = in.readInt();
     }
@@ -56,6 +60,7 @@ public class FileTransferRequest implements Parcelable {
 	dest.writeString(userName);
 	dest.writeString(passWord);
 	dest.writeStringArray(files);
+		dest.writeInt(tryOpen ? 1 : 0);
 		dest.writeString(localDir);
 		dest.writeInt(requestNo);
     }
@@ -75,7 +80,7 @@ public class FileTransferRequest implements Parcelable {
         StringBuffer fileStr = new StringBuffer();
         for (String file : files)
             fileStr.append(file+";");
-        return "ftr: {" + requestNo + "," +library + "," + host + "," + userName + "," + passWord + "," + fileStr + "," + localDir + "}";
+        return "ftr: {" + requestNo + "," +library + "," + host + "," + userName + "," + passWord + "," + fileStr + "," + tryOpen + "," + localDir + "}";
     }
 
 }
