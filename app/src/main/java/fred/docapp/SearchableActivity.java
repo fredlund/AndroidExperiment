@@ -34,6 +34,8 @@ import android.widget.Spinner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -449,7 +451,7 @@ public class SearchableActivity extends AppCompatActivity {
                             final String db_location = libraryPreferences.getString("db_location", "");
                             final String db_user = libraryPreferences.getString("db_username", "");
                             final String db_port = libraryPreferences.getString("db_port","22");
-                            System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user + " db_port="+db_port);
+                            System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user + " db_port=" + db_port);
                             boolean has_error;
                             if (has_error = (db_host.equals(""))) {
                                 errors.append("no db host specified\n");
@@ -503,6 +505,18 @@ public class SearchableActivity extends AppCompatActivity {
             }
 
             break;
+            case R.id.menu_sort_alfa: {
+                EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                List<Entry> entries = adapter.data;
+                Collections.sort(entries, new Comparator<Entry>() {
+                    @Override
+                    public int compare(Entry lhs, Entry rhs) {
+                        return lhs.fileName.compareTo(rhs.fileName);
+                    }
+                });
+                adapter.notifyDataSetChanged();
+                break;
+            }
             case R.id.menu_set_default_library: {
                 final SharedPreferences data = getSharedPreferences("appData", 0);
                 Set<String> libraries = data.getStringSet("libraries", new HashSet<String>());

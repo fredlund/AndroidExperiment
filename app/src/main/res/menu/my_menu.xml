@@ -39,6 +39,10 @@
         app:showAsAction="never"
         android:title="Transfer Status"/>
     <item
+        android:id="@+id/menu_sort_alfa"
+        app:showAsAction="never"
+        android:title="Sort"/>
+    <item
         android:id="@+id/menu_settings"
         app:showAsAction="never"
         android:title="Settings"/>

@@ -3,6 +3,7 @@ package fred.docapp;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.DataInput;
 import java.io.FileInputStream;
@@ -98,31 +99,43 @@ public class MLocate {
 		//System.out.println("dir loop: pos is "+reader.current());
 		reader.skip(8+4+4);
 
-		int dirSavedLen;
-			/*
-		if ((dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0)) >= 0) {
-		    String dirName = reader.getString(dirSaved,dirSavedLen);
-		    Entry entry = new Entry(this, 0, reader.current(), null, dirName,Entry.EntryType.DefineDir);
-		    resultList.add(entry);
-		    //System.out.println("found dir "+dirName);
-		    skip_dir(reader);
-		} else {
-		    //System.out.println("no match for "+reader.getString(dirSaved,Math.abs(dirSavedLen)));
-		    reader_scan_dir(reader, dirSaved,Math.abs(dirSavedLen), resultList, matchTerm);
-		}
-		*/
+		int dirSavedLen = 0;
+			boolean skipping = false;
+            boolean show = false;
+            boolean matched = false;
+
 			if (!matchDotDir) {
 				dirSavedLen = reader.isDotDir(dirSaved);
-				if (dirSavedLen>0) {
-					System.out.println("skipping directory...");
-					skip_dir(reader);
-				} else reader_scan_dir(reader, dirSaved, Math.abs(dirSavedLen), resultList, matchTerm);
-			} else {
-					dirSavedLen = LogicMatcher.match(reader, matchTerm, dirSaved, true, null, 0);
-				reader_scan_dir(reader, dirSaved, Math.abs(dirSavedLen), resultList, matchTerm);
+                matched = true;
+                skipping = (dirSavedLen >= 0);
 			}
 
-	    } 
+			if (matched && !skipping) {
+                int result = LogicMatcher.match(reader, matchTerm, dirSaved, true, false, Math.abs(dirSavedLen), null, 0, false, false);
+                skipping = (result >= 0);
+                show = skipping;
+			} else if (!matched) {
+				dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0);
+				if (dirSavedLen >= 0) {
+                    skipping = true;
+                    show = skipping;
+				}
+			}
+
+            if (show) {
+                String dirName = reader.getString(dirSaved, Math.abs(dirSavedLen));
+                Entry entry = new Entry(this, 0, reader.current(), null, dirName, Entry.EntryType.DefineDir);
+                resultList.add(entry);
+                //System.out.println("found dir "+dirName);
+            }
+
+            if (skipping)
+                skip_dir(reader);
+            else
+				reader_scan_dir(reader, dirSaved, Math.abs(dirSavedLen), resultList, matchTerm);
+        }
+
+
 	    return resultList;
 	} finally {
 	    if (reader != null) {
