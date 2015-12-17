@@ -19,12 +19,10 @@ import java.util.Stack;
  */
 public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerAdapter {//ArrayAdapter<DirView> {
     Context context;
-    int layoutResourceId;
     ArrayList<DirView> dirs = null;
 
-    public OurSpinnerAdapter(Context context, int layoutResourceId, ArrayList<DirView> stack) {
-        super(context, layoutResourceId, stack);
-        this.layoutResourceId = layoutResourceId;
+    public OurSpinnerAdapter(Context context, ArrayList<DirView> stack) {
+        super(context, R.layout.spinner_item, stack);
         this.context = context;
         this.dirs = stack;
     }
@@ -37,7 +35,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
         if(row == null)
         {
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();
-            row = inflater.inflate(layoutResourceId, parent, false);
+            row = inflater.inflate(R.layout.spinner_item, parent, false);
 
             holder = new SpinnerHolder();
             //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);
@@ -68,7 +66,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
         if(row == null)
         {
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();
-            row = inflater.inflate(layoutResourceId, parent, false);
+            row = inflater.inflate(R.layout.spinner_item, parent, false);
 
             holder = new SpinnerHolder();
             //holder.txtTitle = (TextView)row.findViewById(R.id.spinnerText);

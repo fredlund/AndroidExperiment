@@ -45,19 +45,17 @@ import java.util.Stack;
 
 public class SearchableActivity extends AppCompatActivity {
 
-    private List<Map<String, Object>> listValues;
-    List<Entry> found = null;
-    private ListView listView1 = null;
-    private MenuItem spinnerItem = null;
-    private Menu menu;
+    // pointer to GUI list
+    //private ListView listView1 = null;
+
+    List<Entry> entries = null;
     ArrayList<DirView> stack = null;
-    SearchableActivity myself = null;
-    OurSpinnerAdapter spinnerAdapter = null;
+    //SearchableActivity myself = null;
+    //OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
     UserInfo ui;
     String currentLibrary = null;
     Map<String, Entry> toDownload;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +65,7 @@ public class SearchableActivity extends AppCompatActivity {
         SharedPreferences appData = getSharedPreferences("appData", 0);
         currentLibrary = appData.getString("default_library", null);
         toDownload = new HashMap<>();
+        stack = new ArrayList<DirView>();
 
         System.out.println("external storage dir=" + Environment.getExternalStorageDirectory());
         System.out.println("external public storage dir (downloads)=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
@@ -74,7 +73,6 @@ public class SearchableActivity extends AppCompatActivity {
 
 
         //Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-        listValues = new ArrayList<Map<String, Object>>();
         ui = new UserInfo();
 
         // Instantiates a new DownloadStateReceiver
@@ -98,20 +96,16 @@ public class SearchableActivity extends AppCompatActivity {
         Intent intent = getIntent();
         System.out.println("after intent");
         System.out.flush();
-        handleIntent(intent, listValues);
+        handleIntent(intent);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-
-        this.menu = menu;
         System.out.println("onCreateOptionsMenu");
         System.out.flush();
         // Inflate the options menu from XML
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.my_menu, menu);
-        myself = this;
 
         //(new SpeedTest()).test1(SearchableActivity.this);
 
@@ -137,9 +131,10 @@ public class SearchableActivity extends AppCompatActivity {
             new Exception().printStackTrace();
         }
         spinner = (Spinner) menu.findItem(R.id.spinner).getActionView();
-        System.out.println("Spinner is " + spinner + " spinner adapter is " + spinnerAdapter);
+        System.out.println("Spinner is " + spinner);
         System.out.flush();
-        spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
+        getSpinnerAdapter(spinner, stack);
+        //spinner.setAdapter(spinnerAdapter); // set the adapter to provide layout of rows and
         // content
         System.out.println("stack is " + stack);
         System.out.flush();
@@ -160,19 +155,21 @@ public class SearchableActivity extends AppCompatActivity {
                                                       Log.i("setOnItemSelected", "correct position; will get");
                                                       DirView dv = stack.get(position);
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for listview");
+                                                      ListView listView1 = (ListView) findViewById(android.R.id.list);
                                                       listView1.setAdapter(dv.adapter);
-                                                      found = dv.entries;
-                                                      Log.i("setOnItemSelected", "new spinneradapter");
-                                                      spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                                                      entries = dv.entries;
+                                                      Log.i("setOnItemSelected", "before new spinneradapter on create optionsmenu, item selected");
+                                                      //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                                                               //android.R.layout.simple_spinner_item,
-                                                              R.layout.spinner_item,
+                                                              //R.layout.spinner_item,
                                                               //R.layout.spinner_item_row,
                                                               //R.id.spinnerText,
-                                                              stack);
+                                                              //stack);
                                                       Log.i("setOnItemSelected", "setSelection");
                                                       spinner.setSelection(position);
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for spinner");
-                                                      spinner.setAdapter(spinnerAdapter);
+                                                      //spinner.setAdapter(spinnerAdapter);
+                                                      getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
                                                   } else {
                                                       if (stack != null)
                                                           spinner.setSelection(stack.size() - 1);
@@ -215,6 +212,7 @@ public class SearchableActivity extends AppCompatActivity {
                 break;
             }
             case R.id.menu_download: {
+                ListView listView1 = (ListView) findViewById(android.R.id.list);
                 System.out.println("in download");
                 if (toDownload.size() > 0) {
                     final String library = find_current_library();
@@ -506,6 +504,7 @@ public class SearchableActivity extends AppCompatActivity {
 
             break;
             case R.id.menu_sort_alfa: {
+                ListView listView1 = (ListView) findViewById(android.R.id.list);
                 EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                 List<Entry> entries = adapter.data;
                 Collections.sort(entries, new Comparator<Entry>() {
@@ -581,24 +580,24 @@ public class SearchableActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         System.out.println("onNewIntent");
         System.out.flush();
-        handleIntent(intent, listValues);
+        handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent, List<Map<String, Object>> listValues) {
+    private void handleIntent(Intent intent) {
         System.out.println("handleIntent " + intent);
         System.out.flush();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
             try {
-                doMySearch(query, listValues);
+                doMySearch(query);
             } catch (IOException exc) {
             }
             //finish();
         }
     }
 
-    void doMySearch(final String query, List<Map<String, Object>> listValues) throws IOException {
+    void doMySearch(final String query) throws IOException {
         System.out.println("will search for " + query);
         System.out.flush();
         currentLibrary = find_current_library();
@@ -620,11 +619,11 @@ public class SearchableActivity extends AppCompatActivity {
                 @Override
                 protected Void doInBackground(Void... arg0) {
                     try {
-                        found = mloc.find(query);
+                        entries = mloc.find(query);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("size of found: " + found.size());
+                    System.out.println("size of found: " + entries.size());
                     System.out.flush();
 
                     return null;
@@ -637,39 +636,39 @@ public class SearchableActivity extends AppCompatActivity {
 
                     }
                     EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
-                            R.layout.listview_item_row, found);
+                            R.layout.listview_item_row, entries);
 
                     System.out.println("before stack push");
                     System.out.flush();
-                    stack = new ArrayList<DirView>();
+                    stack.clear();
 
                     DirView root = new DirView("---", adapter, null);
                     stack.add(root);
-                    DirView dv = new DirView(name(mloc.root), adapter, found);
+                    DirView dv = new DirView(name(mloc.root), adapter, entries);
                     stack.add(dv);
 
                     System.out.println("after stack push");
                     System.out.flush();
 
                     setContentView(R.layout.mylist);
-                    listView1 = (ListView) findViewById(android.R.id.list);
+                    final ListView listView1 = (ListView) findViewById(android.R.id.list);
                     listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             System.out.println("onItemClick position=" + position + " found size=" +
-                                    ((found == null) ? -1 : found.size()));
+                                    ((entries == null) ? -1 : entries.size()));
                             System.out.flush();
-                            final Entry entry = found.get(position);
-                            System.out.println("item " + position + " was clicked=" + found.get(position));
+                            final Entry entry = entries.get(position);
+                            System.out.println("item " + position + " was clicked=" + entries.get(position));
                             if (entry.entryType != Entry.EntryType.File) {
                                 System.out.println("will try to read " + entry);
                                 List<Entry> dirEntries = mloc.read_dir(entry);
                                 if (dirEntries != null) { //&& dirEntries.length > 0) {
-                                    found = dirEntries;
+                                    entries = dirEntries;
                                     System.out.println("numer of entries are :" + dirEntries.size());
                                     System.out.flush();
-                                    EntryAdapter adapter = new EntryAdapter(myself, R.layout.listview_item_row, dirEntries);
+                                    EntryAdapter adapter = new EntryAdapter(SearchableActivity.this, R.layout.listview_item_row, dirEntries);
                                     System.out.println("computed new adapter");
                                     System.out.flush();
                                     listView1.setAdapter(adapter);
@@ -679,20 +678,21 @@ public class SearchableActivity extends AppCompatActivity {
                                     stack.add(dv);
                                     System.out.println("pushed");
                                     System.out.flush();
-                                    System.out.println("before spinner adapter");
+                                    System.out.println("before new spinner adapter (on item click listener, post execute)");
                                     System.out.flush();
 
-                                    spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                                    //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                                             //android.R.layout.simple_spinner_item,
-                                            R.layout.spinner_item,
+                                            //R.layout.spinner_item,
                                             //R.layout.spinner_item_row,
                                             //R.id.spinnerText,
-                                            stack);
+                                            //stack);
 
                                     System.out.println("after spinner adapter");
                                     System.out.flush();
                                     spinner.setSelection(stack.size() - 1);
-                                    spinner.setAdapter(spinnerAdapter);
+                                    //spinner.setAdapter(spinnerAdapter);
+                                    getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
                                 }
                             } else {
                                 AlertDialog.Builder infoDialog = new AlertDialog.Builder(SearchableActivity.this);
@@ -748,7 +748,7 @@ public class SearchableActivity extends AppCompatActivity {
 
                         @Override
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                            Entry entry = found.get(position);
+                            Entry entry = entries.get(position);
                             System.out.println("item " + position + " was longclicked=" + entry);
                             if (entry.entryType == Entry.EntryType.File) {
                             entry.isEnabled = !entry.isEnabled;
@@ -773,16 +773,16 @@ public class SearchableActivity extends AppCompatActivity {
                     });
                     listView1.setAdapter(adapter);
 
-                    System.out.println("before spinner adapter");
+                    System.out.println("before new spinner adapter (post execute)");
                     System.out.flush();
 
-                    spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                    //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                             //android.R.layout.simple_spinner_item,
-                            R.layout.spinner_item,
+                            //R.layout.spinner_item,
                             //R.id.spinnerText,
                             //R.layout.spinner_item_row,
-                            stack);
-
+                           // stack);
+                    getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
                     System.out.println("after spinner adapter");
                     System.out.flush();
                 }
@@ -806,6 +806,15 @@ public class SearchableActivity extends AppCompatActivity {
             AlertDialog alert = ok.create();
             alert.show();
         }
+    }
+
+    OurSpinnerAdapter getSpinnerAdapter(Spinner spinner, ArrayList<DirView> stack) {
+        OurSpinnerAdapter spinnerAdapter = (OurSpinnerAdapter) spinner.getAdapter();
+        if (spinnerAdapter == null) {
+            spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,stack);
+            spinner.setAdapter(spinnerAdapter);
+        }
+        return spinnerAdapter;
     }
 
     String find_current_library() {

@@ -88,10 +88,10 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
         } else if (size < 1024*1024*1024) {
             long MB = size / (1024 * 1024);
             return MB + " MB";
-        } else if (size < 1024*1024*1024*1024) {
-            long GB= size / (1024 * 1024 * 1024);
+        } else {
+            long GB = size / (1024 * 1024 * 1024);
             return GB + " MB";
-        } else return "very big";
+        } 
     }
 
     static class EntryHolder
