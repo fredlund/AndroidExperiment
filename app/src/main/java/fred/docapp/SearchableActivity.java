@@ -2,35 +2,29 @@ package fred.docapp;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.content.Intent;
 import android.os.Environment;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 
 import java.io.File;
@@ -43,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 class SavedSearchData {
     List<Entry> entries = null;
@@ -103,7 +96,7 @@ public class SearchableActivity extends AppCompatActivity {
             entries = new ArrayList<Entry>();
 
             saveFragment = new SaveFragment();
-            fm.beginTransaction().add(saveFragment,"data").commit();
+            fm.beginTransaction().add(saveFragment, "data").commit();
 
             // Get the intent, verify the action and get the query
             System.out.println("before intent");
@@ -153,7 +146,7 @@ public class SearchableActivity extends AppCompatActivity {
                         System.out.flush();
                         spinner.setSelection(stack.size() - 1);
                         //spinner.setAdapter(spinnerAdapter);
-                        getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
+                        getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
                     }
                 } else {
                     AlertDialog.Builder infoDialog = new AlertDialog.Builder(SearchableActivity.this);
@@ -238,7 +231,6 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onDestroy() {
         System.out.println("onDestroy called");
@@ -317,16 +309,16 @@ public class SearchableActivity extends AppCompatActivity {
                                                       adapter.notifyDataSetChanged();
                                                       Log.i("setOnItemSelected", "before new spinneradapter on create optionsmenu, item selected");
                                                       //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                                                              //android.R.layout.simple_spinner_item,
-                                                              //R.layout.spinner_item,
-                                                              //R.layout.spinner_item_row,
-                                                              //R.id.spinnerText,
-                                                              //stack);
+                                                      //android.R.layout.simple_spinner_item,
+                                                      //R.layout.spinner_item,
+                                                      //R.layout.spinner_item_row,
+                                                      //R.id.spinnerText,
+                                                      //stack);
                                                       Log.i("setOnItemSelected", "setSelection");
                                                       spinner.setSelection(position);
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for spinner");
                                                       //spinner.setAdapter(spinnerAdapter);
-                                                      getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
+                                                      getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
                                                   } else {
                                                       if (stack != null)
                                                           spinner.setSelection(stack.size() - 1);
@@ -359,12 +351,12 @@ public class SearchableActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.menu_settings: {
-                Intent settingsIntent = new Intent(this,SettingsActivity.class);
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 break;
             }
             case R.id.menu_transfer_status: {
-                Intent transferStatusIntent = new Intent(this,TransferStatusActivity.class);
+                Intent transferStatusIntent = new Intent(this, TransferStatusActivity.class);
                 startActivity(transferStatusIntent);
                 break;
             }
@@ -384,7 +376,7 @@ public class SearchableActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                         }
                         toDownload = new HashMap<>();
-                        GetFile.doFileRequest(library,files,false,SearchableActivity.this);
+                        GetFile.doFileRequest(library, files, false, SearchableActivity.this);
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
                         builder.setTitle("Error");
@@ -605,7 +597,7 @@ public class SearchableActivity extends AppCompatActivity {
                             final String db_host = libraryPreferences.getString("db_host", "");
                             final String db_location = libraryPreferences.getString("db_location", "");
                             final String db_user = libraryPreferences.getString("db_username", "");
-                            final String db_port = libraryPreferences.getString("db_port","22");
+                            final String db_port = libraryPreferences.getString("db_port", "22");
                             System.out.println("db_host=" + db_host + " db_location=" + db_location + " db_user=" + db_user + " db_port=" + db_port);
                             boolean has_error;
                             if (has_error = (db_host.equals(""))) {
@@ -638,7 +630,7 @@ public class SearchableActivity extends AppCompatActivity {
                         }
                     }
 
-            });
+                });
 
 
                 edit_builder.setPositiveButton("cancel",
@@ -681,7 +673,7 @@ public class SearchableActivity extends AppCompatActivity {
                 final String[] librariesString = libraries.toArray(new String[libraries.size()]);
                 System.out.println("have builder");
                 System.out.flush();
-                builder.setTitle("Set default library ("+find_current_library()+")");
+                builder.setTitle("Set default library (" + find_current_library() + ")");
                 //builder.setMessage("Library to edit ");
                 //final EditText input = new EditText(SearchableActivity.this);
                 //input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -808,7 +800,7 @@ public class SearchableActivity extends AppCompatActivity {
                     System.out.println("after stack push");
                     System.out.flush();
 
-                    getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
+                    getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
                 }
 
             };
@@ -835,7 +827,7 @@ public class SearchableActivity extends AppCompatActivity {
     OurSpinnerAdapter getSpinnerAdapter(Spinner spinner, ArrayList<DirView> stack) {
         OurSpinnerAdapter spinnerAdapter = (OurSpinnerAdapter) spinner.getAdapter();
         if (spinnerAdapter == null) {
-            spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,stack);
+            spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this, stack);
             spinner.setAdapter(spinnerAdapter);
         }
         return spinnerAdapter;
