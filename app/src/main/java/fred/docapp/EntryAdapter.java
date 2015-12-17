@@ -91,7 +91,7 @@ public class EntryAdapter extends ArrayAdapter<Entry> {
         } else {
             long GB = size / (1024 * 1024 * 1024);
             return GB + " MB";
-        } 
+        }
     }
 
     static class EntryHolder

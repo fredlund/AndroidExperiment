@@ -1,6 +1,7 @@
 package fred.docapp;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -14,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Intent;
 import android.os.Environment;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
@@ -43,37 +45,30 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-public class SearchableActivity extends AppCompatActivity {
+class SavedSearchData {
+    List<Entry> entries = null;
+    ArrayList<DirView> stack;
+    Map<String, Entry> toDownload;
+    MLocate mloc;
+}
 
+public class SearchableActivity extends AppCompatActivity {
     // pointer to GUI list
     //private ListView listView1 = null;
 
     List<Entry> entries = null;
     ArrayList<DirView> stack = null;
-    //SearchableActivity myself = null;
-    //OurSpinnerAdapter spinnerAdapter = null;
     Spinner spinner = null;
-    UserInfo ui;
     String currentLibrary = null;
     Map<String, Entry> toDownload;
+    private SaveFragment saveFragment;
+    private MLocate mloc = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
-        SharedPreferences appData = getSharedPreferences("appData", 0);
-        currentLibrary = appData.getString("default_library", null);
-        toDownload = new HashMap<>();
-        stack = new ArrayList<DirView>();
-
-        System.out.println("external storage dir=" + Environment.getExternalStorageDirectory());
-        System.out.println("external public storage dir (downloads)=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
-        System.out.println("pictures=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
-
-
-        //Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-        ui = new UserInfo();
 
         // Instantiates a new DownloadStateReceiver
         ResponseReceiver mDownloadStateReceiver =
@@ -90,13 +85,172 @@ public class SearchableActivity extends AppCompatActivity {
                 mDownloadStateReceiver,
                 file_transfer_filter);
 
-        // Get the intent, verify the action and get the query
-        System.out.println("before intent");
+        SharedPreferences appData = getSharedPreferences("appData", 0);
+        currentLibrary = appData.getString("default_library", null);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        saveFragment = (SaveFragment) fm.findFragmentByTag("data");
+
+        if (saveFragment == null) {
+            // First time activity is started
+            System.out.println("external storage dir=" + Environment.getExternalStorageDirectory());
+            System.out.println("external public storage dir (downloads)=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
+            System.out.println("pictures=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+
+            toDownload = new HashMap<>();
+            stack = new ArrayList<DirView>();
+            entries = new ArrayList<Entry>();
+
+            saveFragment = new SaveFragment();
+            fm.beginTransaction().add(saveFragment,"data").commit();
+
+            // Get the intent, verify the action and get the query
+            System.out.println("before intent");
+            System.out.flush();
+            Intent intent = getIntent();
+            System.out.println("after intent");
+            System.out.flush();
+            handleIntent(intent);
+        } else {
+            // Activitiy restart (e.g., due to rotation)
+            SavedSearchData sd = saveFragment.getData();
+            toDownload = sd.toDownload;
+            entries = sd.entries;
+            stack = sd.stack;
+            mloc = sd.mloc;
+        }
+
+        setContentView(R.layout.mylist);
+        EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
+                R.layout.listview_item_row, entries);
+        final ListView listView1 = (ListView) findViewById(android.R.id.list);
+        listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("onItemClick position=" + position + " found size=" +
+                        ((entries == null) ? -1 : entries.size()));
+                System.out.flush();
+                final Entry entry = entries.get(position);
+                System.out.println("item " + position + " was clicked=" + entries.get(position));
+                if (entry.entryType != Entry.EntryType.File) {
+                    System.out.println("will try to read " + entry);
+                    List<Entry> dirEntries = mloc.read_dir(entry);
+                    if (dirEntries != null) { //&& dirEntries.length > 0) {
+                        entries = dirEntries;
+                        System.out.println("numer of entries are :" + dirEntries.size());
+                        System.out.flush();
+                        // EntryAdapter adapter = new EntryAdapter(SearchableActivity.this, R.layout.listview_item_row, dirEntries);
+                        EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                        adapter.clear();
+                        adapter.addAll(dirEntries);
+                        adapter.notifyDataSetChanged();
+                        //listView1.setAdapter(adapter);
+                        DirView dv = new DirView(entry.fileName, dirEntries);
+                        stack.add(dv);
+                        System.out.println("pushed");
+                        System.out.flush();
+                        spinner.setSelection(stack.size() - 1);
+                        //spinner.setAdapter(spinnerAdapter);
+                        getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
+                    }
+                } else {
+                    AlertDialog.Builder infoDialog = new AlertDialog.Builder(SearchableActivity.this);
+                    infoDialog.setTitle("File information");
+                    infoDialog.setMessage("Name: " + entry.fileName + "\ndirectory: " + entry.dirName +
+                            "\nsize: " + size_to_string(entry.size));
+
+                    infoDialog.setNegativeButton("Download", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (currentLibrary != null) {
+                                String files[] = new String[1];
+                                files[0] = entry.dirName + "/" + entry.fileName;
+                                entry.isEnabled = false;
+                                EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                                adapter.notifyDataSetChanged();
+                                GetFile.doFileRequest(currentLibrary, files, false, SearchableActivity.this);
+                            }
+                            dialog.dismiss();
+                        }
+                    });
+
+                    infoDialog.setPositiveButton("Open", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (currentLibrary != null) {
+                                String files[] = new String[1];
+                                files[0] = entry.dirName + "/" + entry.fileName;
+                                entry.isEnabled = false;
+                                EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                                adapter.notifyDataSetChanged();
+                                GetFile.doFileRequest(currentLibrary, files, true, SearchableActivity.this);
+                            }
+                            dialog.dismiss();
+                        }
+                    });
+
+                    infoDialog.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    AlertDialog alert = infoDialog.create();
+                    alert.show();
+
+                }
+            }
+
+        });
+
+        listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Entry entry = entries.get(position);
+                System.out.println("item " + position + " was longclicked=" + entry);
+                if (entry.entryType == Entry.EntryType.File) {
+                    entry.isEnabled = !entry.isEnabled;
+                    EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
+                    String fullPath = entry.dirName + "/" + entry.fileName;
+                    if (toDownload.containsKey(fullPath))
+                        toDownload.remove(fullPath);
+                    else
+                        toDownload.put(fullPath, entry);
+                    if (entry.isEnabled)
+                        holder.txtTitle.setBackgroundResource(android.R.color.holo_blue_light);
+                    else
+                        holder.txtTitle.setBackgroundResource(android.R.color.transparent);
+                    System.out.flush();
+                }
+
+
+                return true;
+            }
+
+        });
+
+        listView1.setAdapter(adapter);
+
+
+    }
+
+
+
+    @Override
+    protected void onDestroy() {
+        System.out.println("onDestroy called");
         System.out.flush();
-        Intent intent = getIntent();
-        System.out.println("after intent");
-        System.out.flush();
-        handleIntent(intent);
+        super.onDestroy();
+
+        SavedSearchData sd = new SavedSearchData();
+        sd.entries = entries;
+        sd.stack = stack;
+        sd.toDownload = toDownload;
+        sd.mloc = mloc;
+        saveFragment.setData(sd);
     }
 
     @Override
@@ -156,8 +310,11 @@ public class SearchableActivity extends AppCompatActivity {
                                                       DirView dv = stack.get(position);
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for listview");
                                                       ListView listView1 = (ListView) findViewById(android.R.id.list);
-                                                      listView1.setAdapter(dv.adapter);
+                                                      EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                                                       entries = dv.entries;
+                                                      adapter.clear();
+                                                      adapter.addAll(entries);
+                                                      adapter.notifyDataSetChanged();
                                                       Log.i("setOnItemSelected", "before new spinneradapter on create optionsmenu, item selected");
                                                       //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
                                                               //android.R.layout.simple_spinner_item,
@@ -603,7 +760,7 @@ public class SearchableActivity extends AppCompatActivity {
         currentLibrary = find_current_library();
 
         if (currentLibrary != null) {
-            final MLocate mloc = new MLocate(currentLibrary, 8192, SearchableActivity.this);
+            mloc = new MLocate(currentLibrary, 8192, SearchableActivity.this);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
             AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
@@ -635,156 +792,23 @@ public class SearchableActivity extends AppCompatActivity {
                         pd.dismiss();
 
                     }
-                    EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
-                            R.layout.listview_item_row, entries);
-
                     System.out.println("before stack push");
                     System.out.flush();
                     stack.clear();
-
-                    DirView root = new DirView("---", adapter, null);
+                    final ListView listView1 = (ListView) findViewById(android.R.id.list);
+                    EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                    adapter.clear();
+                    adapter.addAll(entries);
+                    adapter.notifyDataSetChanged();
+                    DirView root = new DirView("---", null);
                     stack.add(root);
-                    DirView dv = new DirView(name(mloc.root), adapter, entries);
+                    DirView dv = new DirView(name(mloc.root), entries);
                     stack.add(dv);
 
                     System.out.println("after stack push");
                     System.out.flush();
 
-                    setContentView(R.layout.mylist);
-                    final ListView listView1 = (ListView) findViewById(android.R.id.list);
-                    listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            System.out.println("onItemClick position=" + position + " found size=" +
-                                    ((entries == null) ? -1 : entries.size()));
-                            System.out.flush();
-                            final Entry entry = entries.get(position);
-                            System.out.println("item " + position + " was clicked=" + entries.get(position));
-                            if (entry.entryType != Entry.EntryType.File) {
-                                System.out.println("will try to read " + entry);
-                                List<Entry> dirEntries = mloc.read_dir(entry);
-                                if (dirEntries != null) { //&& dirEntries.length > 0) {
-                                    entries = dirEntries;
-                                    System.out.println("numer of entries are :" + dirEntries.size());
-                                    System.out.flush();
-                                    EntryAdapter adapter = new EntryAdapter(SearchableActivity.this, R.layout.listview_item_row, dirEntries);
-                                    System.out.println("computed new adapter");
-                                    System.out.flush();
-                                    listView1.setAdapter(adapter);
-                                    System.out.println("set adapter");
-                                    System.out.flush();
-                                    DirView dv = new DirView(entry.fileName, adapter, dirEntries);
-                                    stack.add(dv);
-                                    System.out.println("pushed");
-                                    System.out.flush();
-                                    System.out.println("before new spinner adapter (on item click listener, post execute)");
-                                    System.out.flush();
-
-                                    //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                                            //android.R.layout.simple_spinner_item,
-                                            //R.layout.spinner_item,
-                                            //R.layout.spinner_item_row,
-                                            //R.id.spinnerText,
-                                            //stack);
-
-                                    System.out.println("after spinner adapter");
-                                    System.out.flush();
-                                    spinner.setSelection(stack.size() - 1);
-                                    //spinner.setAdapter(spinnerAdapter);
-                                    getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
-                                }
-                            } else {
-                                AlertDialog.Builder infoDialog = new AlertDialog.Builder(SearchableActivity.this);
-                                infoDialog.setTitle("File information");
-                                infoDialog.setMessage("Name: " + entry.fileName + "\ndirectory: " + entry.dirName +
-                                        "\nsize: " + size_to_string(entry.size));
-
-                                infoDialog.setNegativeButton("Download", new DialogInterface.OnClickListener() {
-
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (currentLibrary != null) {
-                                            String files[] = new String[1];
-                                            files[0] = entry.dirName + "/" + entry.fileName;
-                                            entry.isEnabled = false;
-                                            EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
-                                            adapter.notifyDataSetChanged();
-                                            GetFile.doFileRequest(currentLibrary, files, false, SearchableActivity.this);
-                                        }
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                                infoDialog.setPositiveButton("Open", new DialogInterface.OnClickListener() {
-
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (currentLibrary != null) {
-                                            String files[] = new String[1];
-                                            files[0] = entry.dirName + "/" + entry.fileName;
-                                            entry.isEnabled = false;
-                                            EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
-                                            adapter.notifyDataSetChanged();
-                                            GetFile.doFileRequest(currentLibrary, files, true, SearchableActivity.this);
-                                        }
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                                infoDialog.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                                AlertDialog alert = infoDialog.create();
-                                alert.show();
-
-                            }
-                        }
-
-                    });
-
-                    listView1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-                        @Override
-                        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                            Entry entry = entries.get(position);
-                            System.out.println("item " + position + " was longclicked=" + entry);
-                            if (entry.entryType == Entry.EntryType.File) {
-                            entry.isEnabled = !entry.isEnabled;
-                            EntryAdapter.EntryHolder holder = (EntryAdapter.EntryHolder) view.getTag();
-                            String fullPath = entry.dirName + "/" + entry.fileName;
-                            if (toDownload.containsKey(fullPath))
-                                toDownload.remove(fullPath);
-                            else
-                                toDownload.put(fullPath,entry);
-                            if (entry.isEnabled)
-                                holder.txtTitle.setBackgroundResource(android.R.color.holo_blue_light);
-                            else
-                                holder.txtTitle.setBackgroundResource(android.R.color.transparent);
-                            System.out.println("ui is " + ui);
-                            System.out.flush();
-                            }
-
-
-                            return true;
-                        }
-
-                    });
-                    listView1.setAdapter(adapter);
-
-                    System.out.println("before new spinner adapter (post execute)");
-                    System.out.flush();
-
-                    //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
-                            //android.R.layout.simple_spinner_item,
-                            //R.layout.spinner_item,
-                            //R.id.spinnerText,
-                            //R.layout.spinner_item_row,
-                           // stack);
                     getSpinnerAdapter(spinner,stack).notifyDataSetChanged();
-                    System.out.println("after spinner adapter");
-                    System.out.flush();
                 }
 
             };
