@@ -3,11 +3,8 @@ Bugs
 
 Features
 ========
-- show previous default library
-- print library when asking for password
-- handle device rotate
-- maybe do matching based on file size
 - maybe add file date to locatedb
+- maybe do matching based on file size and file data
 
 
 

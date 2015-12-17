@@ -681,7 +681,7 @@ public class SearchableActivity extends AppCompatActivity {
                 final String[] librariesString = libraries.toArray(new String[libraries.size()]);
                 System.out.println("have builder");
                 System.out.flush();
-                builder.setTitle("Set default library");
+                builder.setTitle("Set default library ("+find_current_library()+")");
                 //builder.setMessage("Library to edit ");
                 //final EditText input = new EditText(SearchableActivity.this);
                 //input.setInputType(InputType.TYPE_CLASS_TEXT);
