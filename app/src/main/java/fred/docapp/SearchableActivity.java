@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -652,6 +653,13 @@ public class SearchableActivity extends AppCompatActivity {
             }
 
             break;
+            case R.id.menu_about: {
+                final AlertDialog.Builder billy_builder = new AlertDialog.Builder(SearchableActivity.this);
+                LayoutInflater inflater = this.getLayoutInflater();
+                billy_builder.setView(inflater.inflate(R.layout.billy, null));
+                billy_builder.show();
+                break;
+            }
             case R.id.menu_sort_alfa: {
                 ListView listView1 = (ListView) findViewById(android.R.id.list);
                 EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();

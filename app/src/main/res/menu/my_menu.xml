@@ -46,4 +46,8 @@
         android:id="@+id/menu_settings"
         app:showAsAction="never"
         android:title="Settings"/>
+    <item
+        android:id="@+id/menu_about"
+        app:showAsAction="never"
+        android:title="Information"/>
 </menu>
