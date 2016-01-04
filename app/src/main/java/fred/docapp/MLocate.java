@@ -102,24 +102,22 @@ public class MLocate {
 		int dirSavedLen = 0;
 			boolean skipping = false;
             boolean show = false;
-            boolean matched = false;
+            boolean haveRunMatch = false;
 
 			if (!matchDotDir) {
 				dirSavedLen = reader.isDotDir(dirSaved);
-                matched = true;
+                haveRunMatch = true;
                 skipping = (dirSavedLen >= 0);
 			}
 
-			if (matched && !skipping) {
+			if (haveRunMatch && !skipping) {
                 int result = LogicMatcher.match(reader, matchTerm, dirSaved, true, false, Math.abs(dirSavedLen), null, 0, false, false);
                 skipping = (result >= 0);
                 show = skipping;
-			} else if (!matched) {
+			} else if (!haveRunMatch) {
 				dirSavedLen = LogicMatcher.match(reader,matchTerm,dirSaved,true,null,0);
-				if (dirSavedLen >= 0) {
-                    skipping = true;
-                    show = skipping;
-				}
+				skipping = (dirSavedLen >= 0);
+				show = skipping;
 			}
 
             if (show) {
