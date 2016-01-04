@@ -573,7 +573,7 @@ public class SearchableActivity extends AppCompatActivity {
                 final String[] edit_librariesString = edit_libraries.toArray(new String[edit_libraries.size()]);
                 System.out.println("have builder");
                 System.out.flush();
-                edit_builder.setTitle("Edit library spec");
+                edit_builder.setTitle("Download library index");
                 //builder.setMessage("Library to edit ");
                 //final EditText input = new EditText(SearchableActivity.this);
                 //input.setInputType(InputType.TYPE_CLASS_TEXT);
