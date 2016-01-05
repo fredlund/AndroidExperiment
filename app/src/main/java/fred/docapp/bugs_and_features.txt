@@ -5,6 +5,8 @@ Features
 ========
 - maybe add file date to locatedb
 - maybe do matching based on file size and file data
+- maybe create a new activity upon enter directory, to allow the back button to work,
+or add an explicit back button at the bottom of the page.
 
 
 

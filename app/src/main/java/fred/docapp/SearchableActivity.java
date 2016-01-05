@@ -272,7 +272,7 @@ public class SearchableActivity extends AppCompatActivity {
         if (menu.findItem(R.id.spinner) == null) {
             try {
                 wait(200);
-            } catch (InterruptedException exc) {
+            } catch (InterruptedException ignored) {
             }
 
             new Exception().printStackTrace();
@@ -442,10 +442,10 @@ public class SearchableActivity extends AppCompatActivity {
                                 copiedLibraries.remove(library);
                                 appDataEditor.remove("libraries");
                                 appDataEditor.putStringSet("libraries", copiedLibraries);
-                                appDataEditor.commit();
+                                appDataEditor.apply();
                                 SharedPreferences.Editor libraryEditor = libraryPreferences.edit();
                                 libraryEditor.clear();
-                                libraryEditor.commit();
+                                libraryEditor.apply();
                                 dialog.dismiss();
                             }
 
@@ -701,7 +701,7 @@ public class SearchableActivity extends AppCompatActivity {
                         System.out.println("user_text is " + library);
                         SharedPreferences.Editor edit = data.edit();
                         edit.putString("default_library", library);
-                        edit.commit();
+                        edit.apply();
                         currentLibrary = library;
                     }
                 });
@@ -748,7 +748,7 @@ public class SearchableActivity extends AppCompatActivity {
             //use the query to search your data somehow
             try {
                 doMySearch(query);
-            } catch (IOException exc) {
+            } catch (IOException ignored) {
             }
             //finish();
         }

@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by fred on 17/11/15.
+ *
  */
 public class JschLogger implements com.jcraft.jsch.Logger {
         private Map<Integer, Level> levels = new HashMap<Integer, Level>();

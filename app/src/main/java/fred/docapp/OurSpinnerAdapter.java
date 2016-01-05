@@ -6,16 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Stack;
 
 /**
  * Created by fred on 2/11/15.
+ *
  */
 public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerAdapter {//ArrayAdapter<DirView> {
     Context context;

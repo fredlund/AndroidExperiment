@@ -1,50 +1,31 @@
 package fred.docapp;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Spinner;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 
-    public class TransferStatusActivity extends AppCompatActivity {
+public class TransferStatusActivity extends AppCompatActivity {
 
         private List<Map<String, Object>> listValues;
         static ListView listView1 = null;
-        private Menu menu;
         static Map<String,Transfer> selected = null;
         TransferStatusActivity myself = null;
         UserInfo ui;
@@ -120,7 +101,7 @@ import java.util.Set;
 
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
-            this.menu = menu;
+            Menu menu1 = menu;
             System.out.println("onCreateOptionsMenu");
             System.out.flush();
             // Inflate the options menu from XML

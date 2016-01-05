@@ -2,17 +2,15 @@ package fred.docapp;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.text.InputType;
-import android.widget.EditText;
 
 import java.io.File;
 
 /**
  * Created by fred on 2/12/15.
+ *
  */
 public class GetFile {
     static void doFileRequest(String library, String file, boolean tryOpen, Context cntxt) {
@@ -76,6 +74,7 @@ public class GetFile {
                 int requestNo = appPrefs.getInt("transferCounter", 0);
                 SharedPreferences.Editor edit = appPrefs.edit();
                 edit.putInt("transferCounter", requestNo % 32000);
+                edit.apply();
                 FileTransferRequest ftr = new FileTransferRequest(library, hostname, portNo, username, password, files, tryOpen, localLocation, requestNo);
                 System.out.println("making intent");
                 Intent intent = new Intent(cntxt, FileService.class);

@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Arrays;
 
 
 class Term<LIT> implements Comparator<Term<LIT>> {
-    enum TermType { LITERAL, AND, OR, NOT, FILE, DIR, PATH, CSI, TRUE, FALSE, BEGIN, END, EXACT };
-    TermType type;
+    enum TermType { LITERAL, AND, OR, NOT, FILE, DIR, PATH, CSI, TRUE, FALSE, BEGIN, END, EXACT }
+
+	TermType type;
     LIT literal = null;
     List<Term<LIT>> terms = null;
 
@@ -332,6 +332,7 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 		throw new ParseException("type "+type+" is not a word");
     }
 
+	@SuppressWarnings("InfiniteLoopStatement")
     static public void main(String args[]) {
 	try {
 	    Scan scan = new Scan();
@@ -349,6 +350,6 @@ class Term<LIT> implements Comparator<Term<LIT>> {
 		}
 	    } while(true);
 	}
-	catch (IOException exc) { };
-    }
+	catch (IOException ignored) { }
+	}
 }

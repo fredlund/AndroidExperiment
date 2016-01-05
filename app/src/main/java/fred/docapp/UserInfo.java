@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * Created by fred on 8/11/15.
+ *
  */
 public class UserInfo {
     Map<UserHost,UserData> userMap = null;

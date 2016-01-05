@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.regex.*;
 
 public class Scan {
-    enum TokenType { LEFTPAR, RIGHTPAR, NEG, FILE, PATH, DIR, WORD, CSI, QUOTEDWORD, BEGIN, END, TRUE, FALSE };
+    enum TokenType { LEFTPAR, RIGHTPAR, NEG, FILE, PATH, DIR, WORD, CSI, QUOTEDWORD, BEGIN, END, TRUE, FALSE }
 
-    List<Pair<TokenType,Pattern>> patterns = null;
+	List<Pair<TokenType,Pattern>> patterns = null;
     
     public Scan() {
 	this.patterns = new ArrayList<Pair<TokenType,Pattern>>();
@@ -57,6 +57,7 @@ public class Scan {
 	return null;
     }
 
+	@SuppressWarnings("InfiniteLoopStatement")
     static public void main(String args[]) {
 	try {
 	    Scan scan = new Scan();
@@ -70,6 +71,6 @@ public class Scan {
 		List<Pair<TokenType,String>> tokens = scan.tokens(input);
 		System.out.println("Tokens: "+tokens);
 	    } while(true);
-	} catch (IOException exc) { };
-    }
+	} catch (IOException ignored) { }
+	}
 }

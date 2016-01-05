@@ -8,6 +8,7 @@ import java.io.IOException;
 
 /**
  * Created by fred on 20/11/15.
+ *
  */
 public class SpeedTest {
     public void test1(Context context) {
@@ -45,14 +46,13 @@ public class SpeedTest {
             System.out.println(read+" bytes read");
             System.out.println("read speed: "+((size / (1024.0*1024.0)) / ((System.currentTimeMillis() - startTime) / 1000.0)) + "MB/sec");
         } catch (IOException e) {
-            System.out.println("exception "+e); e.printStackTrace(); return;
+            System.out.println("exception "+e); e.printStackTrace();
         } finally {
             if (fbuf != null) {
                 try {
                     fbuf.close();
-                } catch (Exception exc) {
+                } catch (Exception ignored) {
                 }
-                ;
             }
         }
     }

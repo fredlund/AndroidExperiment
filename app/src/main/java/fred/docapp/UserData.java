@@ -2,6 +2,7 @@ package fred.docapp;
 
 /**
  * Created by fred on 8/11/15.
+ *
  */
 public class UserData {
     UserHost uh;

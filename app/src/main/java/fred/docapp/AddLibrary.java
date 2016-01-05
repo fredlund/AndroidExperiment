@@ -75,7 +75,7 @@ if (extras != null) {
                     editor.putString("library_port", editTextToString(R.id.library_port));
                     editor.putString("library_username", editTextToString(R.id.library_username));
                     editor.putString("library_password", editTextToString(R.id.library_password));
-                    editor.commit();
+                    editor.apply();
                     SharedPreferences appData = getSharedPreferences("appData",0);
                     Set<String> libraries = appData.getStringSet("libraries", new
                             HashSet<String>());
@@ -84,7 +84,7 @@ if (extras != null) {
                     appDataEditor.remove("libraries");
                     copiedLibraries.add(library);
                     appDataEditor.putStringSet("libraries",copiedLibraries);
-                    appDataEditor.commit();
+                    appDataEditor.apply();
                     finish();
                 }
             }

@@ -43,7 +43,7 @@ public class FileTransferRequest implements Parcelable {
 		passWord = in.readString();
 		files = new String[length];
 		in.readStringArray(files);
-		tryOpen = in.readInt()==0 ? false : true;
+		tryOpen = in.readInt() != 0;
 		localDir = in.readString();
 		requestNo = in.readInt();
     }
@@ -77,7 +77,7 @@ public class FileTransferRequest implements Parcelable {
 	};
 
     public String toString() {
-        StringBuffer fileStr = new StringBuffer();
+        StringBuilder fileStr = new StringBuilder();
         for (String file : files)
             fileStr.append(file+";");
         return "ftr: {" + requestNo + "," +library + "," + host + "," + userName + "," + passWord + "," + fileStr + "," + tryOpen + "," + localDir + "}";

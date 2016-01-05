@@ -4,7 +4,7 @@ public class Entry {
 
 
     public enum EntryType {
-        DefineDir, File, ReferDir;
+        DefineDir, File, ReferDir
     }
 
     long size;

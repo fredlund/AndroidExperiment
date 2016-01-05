@@ -3,19 +3,12 @@ package fred.docapp;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
-import java.io.DataInput;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.io.File;
 import java.util.Stack;
 
 public class MLocate {
@@ -137,7 +130,7 @@ public class MLocate {
 	    return resultList;
 	} finally {
 	    if (reader != null) {
-		try { reader.close(); } catch (Exception exc) { }
+		try { reader.close(); } catch (Exception ignored) { }
 	    }
 	}
     }

@@ -6,22 +6,21 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by fred on 30/11/15.
+ *
  */
 public class TransferDB extends SQLiteOpenHelper {
 
     private static TransferDB mInstance = null;
-    private Context mCtx;
 
     public TransferDB(Context ctx) {
         super(ctx, "billyDB", null, 2);
-        this.mCtx = ctx;
+        Context mCtx = ctx;
     }
 
     public static TransferDB getInstance(Context ctx) {

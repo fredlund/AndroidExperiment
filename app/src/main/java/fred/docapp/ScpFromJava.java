@@ -2,7 +2,6 @@ package fred.docapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.jcraft.jsch.*;
@@ -68,11 +67,11 @@ public class ScpFromJava {
             out.write(buf, 0, 1);
             out.flush();
 
-            while (retStatus.is_ok) {
+            if (retStatus.is_ok) {
                 int c = checkAck(in);
                 if (c != 'C') {
                     retStatus.is_ok = false;
-                    break;
+                    return retStatus;
                 }
 
                 // read '0644 '
@@ -123,7 +122,7 @@ public class ScpFromJava {
             e.printStackTrace();
             try {
                 if (fos != null) fos.close();
-            } catch (Exception ee) {
+            } catch (Exception ignored) {
             }
         }
         return retStatus;
@@ -193,7 +192,7 @@ public class ScpFromJava {
                     if (!moveFile(tmpFile,myFile)) {
                         System.out.println("could not move "+tmpFile+" to "+myFile);
                         retStatus.is_ok = false;
-                    };
+                    }
                 }
 
             session.disconnect();
@@ -204,7 +203,7 @@ public class ScpFromJava {
             e.printStackTrace();
             try {
                 if (fos != null) fos.close();
-            } catch (Exception ee) {
+            } catch (Exception ignored) {
             }
         }
         return retStatus;
@@ -218,8 +217,7 @@ public class ScpFromJava {
             try {
                 in = new FileInputStream(from);
                 out = new FileOutputStream(to);
-                long fileSize = from.length();
-                long remains = fileSize;
+                long remains = from.length();
                 byte buf[] = new byte[8192];
 
                 while (remains > 0) {
@@ -243,11 +241,11 @@ public class ScpFromJava {
             } finally {
                 if (in != null) try {
                     in.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
                 if (out != null) try {
                     out.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -264,7 +262,7 @@ public class ScpFromJava {
         if (b == -1) return b;
 
         if (b == 1 || b == 2) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             int c;
             do {
                 c = in.read();

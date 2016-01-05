@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Created by fred on 20/11/15.
+ *
  */
 public class MySlowReader {
     final int defaultBufSize = 8192;
@@ -209,12 +210,10 @@ public class MySlowReader {
     boolean compare(byte bs, byte bp) {
 	if (bs == bp) return true;
 	if ((bs & 0b10000000) == 0b00000000) {
-	    if (bs >= 65 && bs <= 90)
-		return (bs+32 == bp);
-	    else if (bs >= 97 && bs <= 122)
-		return (bs-32 == bp);
-	    else 
-		return false;
+		if (bs >= 65 && bs <= 90)
+			return (bs + 32 == bp);
+		else
+			return bs >= 97 && bs <= 122 && (bs - 32 == bp);
 	} else return false;
     }
 
