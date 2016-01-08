@@ -11,6 +11,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +27,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -119,6 +123,42 @@ public class SearchableActivity extends AppCompatActivity {
         EntryAdapter adapter = new EntryAdapter(SearchableActivity.this,
                 R.layout.listview_item_row, entries);
         final ListView listView1 = (ListView) findViewById(android.R.id.list);
+        final ImageButton backButton = (ImageButton) findViewById(R.id.backButton);
+        setImageButtonEnabled(SearchableActivity.this, false, backButton, R.mipmap.ic_navigate_before);
+        backButton.setOnClickListener(new AdapterView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("back button clicked");
+                int position = stack.size()-2;
+                System.out.println("backButton: position="+position);
+                Log.i("setOnItemSelected", "correct position; will get");
+                DirView dv = stack.get(position);
+                Log.i("setOnItemSelected", "correct position; will setAdapter for listview");
+                ListView listView1 = (ListView) findViewById(android.R.id.list);
+                EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                entries = dv.entries;
+                adapter.clear();
+                adapter.addAll(entries);
+                adapter.notifyDataSetChanged();
+                Log.i("setOnItemSelected", "before new spinneradapter on create optionsmenu, item selected");
+                //spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this,
+                //android.R.layout.simple_spinner_item,
+                //R.layout.spinner_item,
+                //R.layout.spinner_item_row,
+                //R.id.spinnerText,
+                //stack);
+                Log.i("setOnItemSelected", "setSelection");
+                spinner.setSelection(position);
+                Log.i("setOnItemSelected", "correct position; will setAdapter for spinner");
+                //spinner.setAdapter(spinnerAdapter);
+                getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
+                final ImageButton backButton = (ImageButton) findViewById(R.id.backButton);
+                System.out.println("Stack size is "+stack.size());
+                boolean enabled = stack.size() > 2;
+                setImageButtonEnabled(SearchableActivity.this,enabled,backButton,R.mipmap.ic_navigate_before);
+            }
+        });
+
         listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -146,6 +186,7 @@ public class SearchableActivity extends AppCompatActivity {
                         System.out.println("pushed");
                         System.out.flush();
                         spinner.setSelection(stack.size() - 1);
+                        setImageButtonEnabled(SearchableActivity.this, true, backButton, R.mipmap.ic_navigate_before);
                         //spinner.setAdapter(spinnerAdapter);
                         getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
                     }
@@ -231,6 +272,22 @@ public class SearchableActivity extends AppCompatActivity {
 
     }
 
+public static void setImageButtonEnabled(Context ctxt, boolean enabled, ImageButton item,
+        int iconResId) {
+    item.setEnabled(enabled);
+    Drawable originalIcon = ctxt.getResources().getDrawable(iconResId);
+    Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
+    item.setImageDrawable(icon);
+}
+
+public static Drawable convertDrawableToGrayScale(Drawable drawable) {
+    if (drawable == null) {
+        return null;
+    }
+    Drawable res = drawable.mutate();
+    res.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+    return res;
+}
 
     @Override
     protected void onDestroy() {
@@ -320,6 +377,10 @@ public class SearchableActivity extends AppCompatActivity {
                                                       Log.i("setOnItemSelected", "correct position; will setAdapter for spinner");
                                                       //spinner.setAdapter(spinnerAdapter);
                                                       getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
+                                                      final ImageButton backButton = (ImageButton) findViewById(R.id.backButton);
+                                                      System.out.println("Stack size is "+stack.size());
+                                                      boolean enabled = stack.size() > 2;
+                                                      setImageButtonEnabled(SearchableActivity.this,enabled,backButton,R.mipmap.ic_navigate_before);
                                                   } else {
                                                       if (stack != null)
                                                           spinner.setSelection(stack.size() - 1);
