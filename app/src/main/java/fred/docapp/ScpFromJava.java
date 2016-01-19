@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.StreamCopier;
+import net.schmizz.sshj.xfer.FileSystemFile;
 import net.schmizz.sshj.xfer.LocalDestFile;
 import net.schmizz.sshj.xfer.TransferListener;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
@@ -42,11 +43,11 @@ public class ScpFromJava {
 
         try {
             ssh = new SSHClient();
-            ssh.loadKnownHosts();
+            //ssh.loadKnownHosts();
             ssh.connect(host, port);
             ssh.authPassword(username, password);
             tr = ssh.newSCPFileTransfer();
-            tr.setTransferListener(new SCPDownloadListener(cntxt));
+            tr.setTransferListener(new SCPDownloadListener(reqFile,cntxt));
         } catch (IOException exc) {
             System.out.println("ssh connection failure: "+exc);
             exc.printStackTrace();
@@ -64,8 +65,7 @@ public class ScpFromJava {
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
-
-                tr.newSCPDownloadClient().copy(reqFile, tmpFile);
+                tr.newSCPDownloadClient().copy(reqFile, new FileSystemFile(tmpFile));
                 if (!moveFile(tmpFile, myFile)) {
                     System.out.println("could not move " + tmpFile + " to " + myFile);
                     retStatus.is_ok = false;
@@ -156,9 +156,11 @@ class SCPDownloadListener implements TransferListener, StreamCopier.Listener {
         long transferred;
         long lastStatusReport;
         Context cntxt;
+    String reqFile;
 
-        public SCPDownloadListener(Context cntxt) {
+        public SCPDownloadListener(String reqFile, Context cntxt) {
             this.cntxt = cntxt;
+            this.reqFile = reqFile;
         }
 
         @Override
@@ -188,7 +190,7 @@ class SCPDownloadListener implements TransferListener, StreamCopier.Listener {
             statusIntent.putExtra("file", reqFile);
             statusIntent.putExtra("status",Transfer.progressing());
             statusIntent.putExtra("transferred",transferred);
-            statusIntent.putExtra("fileSize",fileSize);
+            statusIntent.putExtra("fileSize",size);
             LocalBroadcastManager.getInstance(cntxt).sendBroadcast(statusIntent);
             lastStatusReport = this.transferred;
         }
