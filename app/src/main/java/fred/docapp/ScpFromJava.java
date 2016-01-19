@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.common.StreamCopier;
+import net.schmizz.sshj.xfer.LocalDestFile;
+import net.schmizz.sshj.xfer.TransferListener;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 
 import java.io.*;
 
@@ -21,6 +25,7 @@ public class ScpFromJava {
     long lastStatusReport = 0;
 
     SSHClient ssh;
+    SCPFileTransfer tr;
 
     public ScpFromJava(Context cntxt) {
         this.cntxt = cntxt;
@@ -38,90 +43,39 @@ public class ScpFromJava {
         try {
             ssh = new SSHClient();
             ssh.loadKnownHosts();
-            ssh.connect(host,port);
-            ssh.authPassword(username,password);
+            ssh.connect(host, port);
+            ssh.authPassword(username, password);
+            tr = ssh.newSCPFileTransfer();
+            tr.setTransferListener(new SCPDownloadListener(cntxt));
+        } catch (IOException exc) {
+            System.out.println("ssh connection failure: "+exc);
+            exc.printStackTrace();
+            retStatus.is_ok=false;
+            retStatus.add_exception(exc);
+        };
 
         return retStatus;
     }
 
         public ScpReturnStatus doTransfer(String localDir) {
             try {
-                // send '\0'
-                buf[0] = 0;
-                out.write(buf, 0, 1);
-                out.flush();
-
-                lastStatusReport = 0;
                 tmpFile = File.createTempFile(file, null, new File(localDir));
                 System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
-                fos = new FileOutputStream(tmpFile);
 
-                long transferred = 0;
-                long remaining = fileSize;
-                int foo;
-                while (true) {
-                    if (buf.length < remaining) foo = buf.length;
-                    else foo = (int) remaining;
-                    foo = in.read(buf, 0, foo);
-                    if (foo < 0) {
-                        // error
-                        System.out.println("scp: read error");
-                        retStatus.is_ok = false;
-                        break;
-                    }
-                    fos.write(buf, 0, foo);
-                    transferred += foo;
-                    remaining -= foo;
-                    if (remaining == 0L) break;
-                    if (transferred - lastStatusReport > 1024 * 512) {
-                        System.out.println("reporting "+transferred+" bytes transferred");
-                        Intent statusIntent = new Intent("file_transfer");
-                        statusIntent.putExtra("file", reqFile);
-                        statusIntent.putExtra("status",Transfer.progressing());
-                        statusIntent.putExtra("transferred",transferred);
-                        statusIntent.putExtra("fileSize",fileSize);
-                        LocalBroadcastManager.getInstance(cntxt).sendBroadcast(statusIntent);
-                        lastStatusReport = transferred;
-                    }
-                }
-
-                if (remaining > 0)
-                    System.out.println("file " + reqFile + ": could only read " + (fileSize - remaining) +
-                            " bytes out of " + fileSize);
-                fos.close();
-                fos = null;
-                retStatus.is_ok = true;
-
-                if (checkAck(in) != 0) {
-                    System.out.println("scp: checkAck(in) failed");
+                tr.newSCPDownloadClient().copy(reqFile, tmpFile);
+                if (!moveFile(tmpFile, myFile)) {
+                    System.out.println("could not move " + tmpFile + " to " + myFile);
                     retStatus.is_ok = false;
-                }
-
-                if (retStatus.is_ok) {
-                    // send '\0'
-                    buf[0] = 0;
-                    out.write(buf, 0, 1);
-                    out.flush();
-                    if (!moveFile(tmpFile,myFile)) {
-                        System.out.println("could not move "+tmpFile+" to "+myFile);
-                        retStatus.is_ok = false;
-                    }
-                }
-
-            session.disconnect();
-        } catch (Exception e) {
-            System.out.println("ScpFromJava: exception "+e);
-                retStatus.is_ok = false;
-            retStatus.exc = e;
-            e.printStackTrace();
-            try {
-                if (fos != null) fos.close();
-            } catch (Exception ignored) {
+                } else retStatus.is_ok = true;
+            } catch (IOException exc) {
+                 System.out.println("ssh transfer failure: "+exc);
+            exc.printStackTrace();
+            retStatus.is_ok=false;
+            retStatus.add_exception(exc);
             }
-        }
         return retStatus;
     }
 
@@ -193,6 +147,51 @@ public class ScpFromJava {
             }
         }
         return b;
+    }
+}
+
+class SCPDownloadListener implements TransferListener, StreamCopier.Listener {
+        String name;
+        long size;
+        long transferred;
+        long lastStatusReport;
+        Context cntxt;
+
+        public SCPDownloadListener(Context cntxt) {
+            this.cntxt = cntxt;
+        }
+
+        @Override
+        public TransferListener directory(String name) {
+            return null;
+        }
+
+        @Override
+        public StreamCopier.Listener file(String name, long size) {
+            this.name = name;
+            this.size = size;
+            this.transferred = 0;
+            this.lastStatusReport = 0;
+            return this;
+        }
+
+        public long getSize() {
+            return size;
+        }
+
+    @Override
+    public void reportProgress(long transferred) throws IOException {
+        this.transferred += transferred;
+        if (transferred - lastStatusReport > 1024 * 512) {
+            System.out.println("reporting "+transferred+" bytes transferred");
+            Intent statusIntent = new Intent("file_transfer");
+            statusIntent.putExtra("file", reqFile);
+            statusIntent.putExtra("status",Transfer.progressing());
+            statusIntent.putExtra("transferred",transferred);
+            statusIntent.putExtra("fileSize",fileSize);
+            LocalBroadcastManager.getInstance(cntxt).sendBroadcast(statusIntent);
+            lastStatusReport = this.transferred;
+        }
     }
 }
 
