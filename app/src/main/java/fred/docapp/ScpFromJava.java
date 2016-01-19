@@ -9,7 +9,6 @@ import java.io.*;
 
 public class ScpFromJava {
         JSch jsch;
-        JschLogger logger;
         ScpReturnStatus retStatus;
         FileOutputStream fos = null;
     File tmpFile;
@@ -34,10 +33,6 @@ public class ScpFromJava {
 
     public ScpReturnStatus setupTransfer(String username, String password, String host, int port, String reqFile) {
         jsch = new JSch();
-        logger = new JschLogger();
-        logger.setLevel(Logger.INFO);
-        jsch.setLogger(logger);
-        logger.setLevel(Logger.INFO);
         retStatus = new ScpReturnStatus(true);
         this.reqFile = reqFile;
 
@@ -299,38 +294,5 @@ class ScpReturnStatus {
     }
 }
 
-    class MyUserInfo implements com.jcraft.jsch.UserInfo {
-        private String password;
 
-        MyUserInfo(String password) {
-            this.password = password;
-        }
-
-        @Override
-        public String getPassphrase() {
-            return "";
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        @Override
-        public boolean promptPassword(String message) {
-            return true;
-        }
-
-        @Override
-        public boolean promptPassphrase(String message) {
-            return true;
-        }
-
-        public boolean promptYesNo(String str) {
-             return true;
-         }
-
-        @Override
-        public void showMessage(String message) {
-        }
-    }
 

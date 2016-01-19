@@ -1,1 +1,1 @@
-include ':app', ':jsch', ':jzlib'
+include ':app', ':jzlib'
