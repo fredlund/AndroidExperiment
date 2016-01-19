@@ -3,17 +3,14 @@ package fred.docapp;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import net.schmizz.sshj.SSHClient;
 
-import com.jcraft.jsch.*;
 import java.io.*;
 
 public class ScpFromJava {
-        JSch jsch;
         ScpReturnStatus retStatus;
         FileOutputStream fos = null;
     File tmpFile;
-    Session session;
-    MyUserInfo userInfo;
     byte[] buf;
     OutputStream out;
     BufferedInputStream in;
@@ -22,6 +19,8 @@ public class ScpFromJava {
     long fileSize;
     Context cntxt;
     long lastStatusReport = 0;
+
+    SSHClient ssh;
 
     public ScpFromJava(Context cntxt) {
         this.cntxt = cntxt;
@@ -32,23 +31,13 @@ public class ScpFromJava {
     }
 
     public ScpReturnStatus setupTransfer(String username, String password, String host, int port, String reqFile) {
-        jsch = new JSch();
+        SSHClient ssh = null;
         retStatus = new ScpReturnStatus(true);
         this.reqFile = reqFile;
 
         try {
-
-            session = jsch.getSession(username, host, port);
-            userInfo = new MyUserInfo(password);
-            session.setUserInfo(userInfo);
-            session.connect();
-
-            // exec 'scp -f rfile' remotely
-            String command = "scp -f " + (" \"" + reqFile + "\"");
-
-            Channel channel = session.openChannel("exec");
-            ((ChannelExec) channel).setCommand(command);
-
+            ssh = new SSHClient();
+            
             // get I/O streams for remote scp
             out = channel.getOutputStream();
             in = new BufferedInputStream(channel.getInputStream());
