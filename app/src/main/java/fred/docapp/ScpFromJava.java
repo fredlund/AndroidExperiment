@@ -37,78 +37,10 @@ public class ScpFromJava {
 
         try {
             ssh = new SSHClient();
-            
-            // get I/O streams for remote scp
-            out = channel.getOutputStream();
-            in = new BufferedInputStream(channel.getInputStream());
+            ssh.loadKnownHosts();
+            ssh.connect(host,port);
+            ssh.authPassword(username,password);
 
-            channel.connect();
-
-            buf = new byte[1024];
-
-            // send '\0'
-            buf[0] = 0;
-            out.write(buf, 0, 1);
-            out.flush();
-
-            if (retStatus.is_ok) {
-                int c = checkAck(in);
-                if (c != 'C') {
-                    retStatus.is_ok = false;
-                    return retStatus;
-                }
-
-                // read '0644 '
-                //in.read(buf, 0, 5);
-
-                fileSize = 0L;
-                int pos = 0;
-                while (true) {
-                    if (in.read(buf, pos, 1) < 0) {
-                        retStatus.is_ok = false;
-                        in.close();
-                        out.close();
-                        return retStatus;
-                    }
-
-                    if (buf[pos] == (byte) 0xa)
-                        break;
-                    ++pos;
-                }
-
-                System.out.println("read line " + MySlowReader.printBs(buf, pos));
-
-                int index = 0;
-                while (index < pos && buf[index] != 0x20) ++index;
-                ++index;
-                System.out.println("after skipping mode: index=" + index);
-
-                while (index < pos && buf[index] != 0x20) {
-                    fileSize = fileSize * 10L + (long) (buf[index] - '0');
-                    ++index;
-                }
-                ++index;
-                System.out.println("fileSize = " + fileSize + " index=" + index);
-
-                file = "";
-                while (index < pos && buf[index] != 0xa) {
-                    file += ((char) buf[index]);
-                    ++index;
-                }
-
-                System.out.println("filesize=" + fileSize + ", file=" + file);
-                return retStatus;
-            }
-        } catch (Exception e) {
-            System.out.println("ScpFromJava: exception " + e);
-            retStatus.is_ok = false;
-            retStatus.exc = e;
-            e.printStackTrace();
-            try {
-                if (fos != null) fos.close();
-            } catch (Exception ignored) {
-            }
-        }
         return retStatus;
     }
 
