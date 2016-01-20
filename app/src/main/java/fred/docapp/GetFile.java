@@ -28,7 +28,7 @@ public class GetFile {
                     String port = find_port(library, libraryPrefs);
                 File localFile = Environment.getExternalStorageDirectory();
                 File myDir = new File(localFile.getAbsolutePath() + "/Billy/");
-                myDir.mkdir();
+                myDir.mkdir();http://espn.go.com/
                     doFileRequest(cntxt, library, host, port, myDir.getAbsolutePath(), username, password, files, tryOpen);
 
             } else {

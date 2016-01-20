@@ -30,6 +30,12 @@ dependencies {
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    compile 'org.slf4j:slf4j-api:+'
+    compile 'org.slf4j:slf4j-simple:+'
+    compile 'com.madgag.spongycastle:core:+'
+    compile 'com.madgag.spongycastle:prov:+'
+    compile 'com.madgag.spongycastle:pkix:+'
+    compile 'com.madgag.spongycastle:pg:+'
     compile 'com.hierynomus:sshj:+'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'

@@ -42,7 +42,7 @@ public class ScpFromJava {
         this.reqFile = reqFile;
 
         try {
-            ssh = new SSHClient();
+            ssh = new SSHClient(new MyAndroidConfig());
             //ssh.loadKnownHosts();
             ssh.connect(host, port);
             ssh.authPassword(username, password);
