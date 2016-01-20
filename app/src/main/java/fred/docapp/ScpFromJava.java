@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.StreamCopier;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.xfer.FileSystemFile;
 import net.schmizz.sshj.xfer.LocalDestFile;
 import net.schmizz.sshj.xfer.TransferListener;
@@ -16,15 +17,12 @@ public class ScpFromJava {
         ScpReturnStatus retStatus;
         FileOutputStream fos = null;
     File tmpFile;
-    byte[] buf;
     OutputStream out;
     BufferedInputStream in;
     String file;
     String reqFile;
     long fileSize;
     Context cntxt;
-    long lastStatusReport = 0;
-
     SSHClient ssh;
     SCPFileTransfer tr;
 
@@ -37,13 +35,14 @@ public class ScpFromJava {
     }
 
     public ScpReturnStatus setupTransfer(String username, String password, String host, int port, String reqFile) {
-        SSHClient ssh = null;
+        ssh = null;
         retStatus = new ScpReturnStatus(true);
         this.reqFile = reqFile;
 
         try {
             ssh = new SSHClient(new MyAndroidConfig());
             //ssh.loadKnownHosts();
+            ssh.addHostKeyVerifier(new PromiscuousVerifier());
             ssh.connect(host, port);
             ssh.authPassword(username, password);
             tr = ssh.newSCPFileTransfer();
