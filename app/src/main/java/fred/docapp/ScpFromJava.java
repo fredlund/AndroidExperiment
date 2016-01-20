@@ -56,9 +56,10 @@ public class ScpFromJava {
         public ScpReturnStatus doTransfer(String localDir) {
             try {
                 File file = new File(reqFile);
-                tmpFile = File.createTempFile(file.getName(), null, new File(localDir));
-                System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
-                File myFile = new File(localDir + "/" + file);
+                String name = file.getName();
+                tmpFile = File.createTempFile(name, null, new File(localDir));
+                System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + name);
+                File myFile = new File(localDir + "/" + name);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
                 tr.newSCPDownloadClient().copy(reqFile, new FileSystemFile(tmpFile));
@@ -117,33 +118,6 @@ public class ScpFromJava {
         }
         return true;
     }
-
-    static int checkAck(InputStream in) throws IOException {
-        int b = in.read();
-        // b may be 0 for success,
-        //          1 for error,
-        //          2 for fatal error,
-        //          -1
-        if (b == 0) return b;
-        if (b == -1) return b;
-
-        if (b == 1 || b == 2) {
-            StringBuilder sb = new StringBuilder();
-            int c;
-            do {
-                c = in.read();
-                sb.append((char) c);
-            }
-            while (c != '\n');
-            if (b == 1) { // error
-                System.out.print(sb.toString());
-            }
-            if (b == 2) { // fatal error
-                System.out.print(sb.toString());
-            }
-        }
-        return b;
-    }
 }
 
 class SCPDownloadListener implements TransferListener, StreamCopier.Listener {
@@ -180,12 +154,12 @@ class SCPDownloadListener implements TransferListener, StreamCopier.Listener {
     @Override
     public void reportProgress(long transferred) throws IOException {
         this.transferred += transferred;
-        if (transferred - lastStatusReport > 1024 * 512) {
-            System.out.println("reporting "+transferred+" bytes transferred");
+        if (this.transferred - lastStatusReport > 1024 * 512) {
+            System.out.println("reporting "+this.transferred+" bytes transferred");
             Intent statusIntent = new Intent("file_transfer");
             statusIntent.putExtra("file", reqFile);
             statusIntent.putExtra("status",Transfer.progressing());
-            statusIntent.putExtra("transferred",transferred);
+            statusIntent.putExtra("transferred",this.transferred);
             statusIntent.putExtra("fileSize",size);
             LocalBroadcastManager.getInstance(cntxt).sendBroadcast(statusIntent);
             lastStatusReport = this.transferred;
