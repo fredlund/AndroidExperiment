@@ -10,6 +10,7 @@ import net.schmizz.sshj.xfer.FileSystemFile;
 import net.schmizz.sshj.xfer.LocalDestFile;
 import net.schmizz.sshj.xfer.TransferListener;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
+import net.schmizz.sshj.xfer.scp.ScpCommandLine;
 
 import java.io.*;
 
@@ -62,7 +63,7 @@ public class ScpFromJava {
                 File myFile = new File(localDir + "/" + name);
                 myFile.setReadable(true, false);
                 System.out.println("will open " + myFile);
-                tr.newSCPDownloadClient().copy(reqFile, new FileSystemFile(tmpFile));
+                tr.newSCPDownloadClient().copy(reqFile, new FileSystemFile(tmpFile), ScpCommandLine.EscapeMode.SingleQuote);
                 if (!moveFile(tmpFile, myFile)) {
                     System.out.println("could not move " + tmpFile + " to " + myFile);
                     retStatus.is_ok = false;
