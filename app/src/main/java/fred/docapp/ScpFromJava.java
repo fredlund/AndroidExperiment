@@ -15,11 +15,7 @@ import java.io.*;
 
 public class ScpFromJava {
         ScpReturnStatus retStatus;
-        FileOutputStream fos = null;
     File tmpFile;
-    OutputStream out;
-    BufferedInputStream in;
-    String file;
     String reqFile;
     long fileSize;
     Context cntxt;
@@ -59,7 +55,8 @@ public class ScpFromJava {
 
         public ScpReturnStatus doTransfer(String localDir) {
             try {
-                tmpFile = File.createTempFile(file, null, new File(localDir));
+                File file = new File(reqFile);
+                tmpFile = File.createTempFile(file.getName(), null, new File(localDir));
                 System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
                 File myFile = new File(localDir + "/" + file);
                 myFile.setReadable(true, false);
