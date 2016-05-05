@@ -1,8 +1,13 @@
 Bugs
 ====
+- Wrong MB count for large (video) files
+- Transfer status does not seem to work
+- Hanging transfers blocks everything, never times out?
 
 Features
 ========
+- permit different ip addresses for the same service, to permit both
+local and remote access to file server
 - maybe add file date to locatedb
 - maybe do matching based on file size and file data
 
