@@ -55,36 +55,27 @@ if (extras != null) {
             public void onClick(View v) {
 
                 String library = editTextToString(R.id.libraryName);
-                SharedPreferences libraryPreferences = getSharedPreferences(library, 0);
-                if (is_new && libraryPreferences.contains("is_created")) {
+
+                boolean result =
+                        AddLibraryInformation.add(AddLibrary.this,is_new,
+                                editTextToString(R.id.libraryName),
+                                editTextToString(R.id.db_host),
+                                editTextToString(R.id.db_port),
+                                editTextToString(R.id.db_location),
+                                editTextToString(R.id.db_username),
+                                editTextToString(R.id.db_password),
+                                editTextToString(R.id.library_host),
+                                editTextToString(R.id.library_port),
+                                editTextToString(R.id.library_username),
+                                editTextToString(R.id.library_password));
+
+                if (!result) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(AddLibrary.this);
                     builder.setTitle("Error");
-                    builder.setMessage("Library " + library + " already exists");
+                    builder.setMessage("Could not add library "+library);
                     builder.setPositiveButton("OK", null);
                     AlertDialog dialog = builder.show();
                 } else {
-                    SharedPreferences.Editor editor = libraryPreferences.edit();
-                    editor.clear();
-                    editor.putBoolean("is_created", true);
-                    editor.putString("db_host", editTextToString(R.id.db_host));
-                    editor.putString("db_port", editTextToString(R.id.db_port));
-                    editor.putString("db_location", editTextToString(R.id.db_location));
-                    editor.putString("db_username", editTextToString(R.id.db_username));
-                    editor.putString("db_password", editTextToString(R.id.db_password));
-                    editor.putString("library_host", editTextToString(R.id.library_host));
-                    editor.putString("library_port", editTextToString(R.id.library_port));
-                    editor.putString("library_username", editTextToString(R.id.library_username));
-                    editor.putString("library_password", editTextToString(R.id.library_password));
-                    editor.apply();
-                    SharedPreferences appData = getSharedPreferences("appData",0);
-                    Set<String> libraries = appData.getStringSet("libraries", new
-                            HashSet<String>());
-                    Set<String> copiedLibraries = new HashSet<String>(libraries);
-                    SharedPreferences.Editor appDataEditor = appData.edit();
-                    appDataEditor.remove("libraries");
-                    copiedLibraries.add(library);
-                    appDataEditor.putStringSet("libraries",copiedLibraries);
-                    appDataEditor.apply();
                     finish();
                 }
             }

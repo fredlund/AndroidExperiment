@@ -35,6 +35,10 @@
         app:showAsAction="never"
         android:title="Delete Library"/>
     <item
+        android:id="@+id/menu_download_library_definitions"
+        app:showAsAction="never"
+        android:title="Get Library Definitions"/>
+    <item
         android:id="@+id/menu_transfer_status"
         app:showAsAction="never"
         android:title="Transfer Status"/>

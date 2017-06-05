@@ -1,5 +1,6 @@
 package fred.docapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
@@ -11,15 +12,20 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,11 +33,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 
+import org.json.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,17 +64,52 @@ public class SearchableActivity extends AppCompatActivity {
 
     List<Entry> entries = null;
     ArrayList<DirView> stack = null;
-    Spinner spinner = null;
+    static Spinner spinner = null;
     String currentLibrary = null;
     Map<String, Entry> toDownload;
     private SaveFragment saveFragment;
     private MLocate mloc = null;
+
+    final int PERMISSION_REQUEST_CODE = 111;
+
+    private boolean checkReadExternalStoragePermission() {
+        int result = ContextCompat.checkSelfPermission(SearchableActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkWriteExternalStoragePermission() {
+        int result = ContextCompat.checkSelfPermission(SearchableActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE},
+                PERMISSION_REQUEST_CODE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("search activitity was created");
         System.out.flush();
         super.onCreate(savedInstanceState);
+
+        final int PERMISSION_REQUEST_CODE = 111;
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!checkWriteExternalStoragePermission() || !checkReadExternalStoragePermission()) {
+                requestPermission();
+            }
+        }
 
         // Instantiates a new DownloadStateReceiver
         ResponseReceiver mDownloadStateReceiver =
@@ -455,6 +498,31 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 }
             }
             break;
+            case R.id.menu_download_library_definitions: {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(SearchableActivity.this);
+                builder.setMessage("password");
+                final EditText input = new EditText(SearchableActivity.this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                builder.setView(input);
+
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        String password = input.getText().toString();
+                        new DownloadLibraryInformationTask().execute(password);
+                    }
+
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog dialog = builder.show();
+            }
+            break;
             case R.id.menu_add_library: {
                 System.out.println("creating new intent");
                 Intent intent = new Intent(this, AddLibrary.class);
@@ -808,6 +876,7 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
             try {
+                System.out.println("spinner in handleIntent is "+spinner);
                 doMySearch(query);
             } catch (IOException ignored) {
             }
@@ -823,7 +892,8 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
         if (currentLibrary != null) {
             mloc = new MLocate(currentLibrary, 8192, SearchableActivity.this);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
-            AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            AsyncTask<Spinner, Void, Void> task = new AsyncTask<Spinner, Void, Void>() {
+                Spinner spin;
 
                 @Override
                 protected void onPreExecute() {
@@ -835,7 +905,9 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 }
 
                 @Override
-                protected Void doInBackground(Void... arg0) {
+                protected Void doInBackground(Spinner... spinners) {
+                    System.out.println("doInBackground: spinners[0]="+spinners[0]);
+                    spin = spinners[0];
                     try {
                         entries = mloc.find(query);
                     } catch (IOException e) {
@@ -869,11 +941,13 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                     System.out.println("after stack push");
                     System.out.flush();
 
-                    getSpinnerAdapter(spinner, stack).notifyDataSetChanged();
+                        System.out.println("spinner in asynctask is "+spin);
+                    getSpinnerAdapter(spin, stack).notifyDataSetChanged();
                 }
 
             };
-            task.execute((Void[]) null);
+            System.out.println("spinner when executing is "+spinner);
+            task.execute(spinner);
 
         } else {
             AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
@@ -894,6 +968,7 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
     }
 
     OurSpinnerAdapter getSpinnerAdapter(Spinner spinner, ArrayList<DirView> stack) {
+        if (spinner == null) System.out.println("spinner is null -- about to crash!");
         OurSpinnerAdapter spinnerAdapter = (OurSpinnerAdapter) spinner.getAdapter();
         if (spinnerAdapter == null) {
             spinnerAdapter = new OurSpinnerAdapter(SearchableActivity.this, stack);
@@ -942,6 +1017,94 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
             return GB + " GB";
         }
     }
+
+    class DownloadLibraryInformationTask extends AsyncTask<String,Void,String> {
+        protected String doInBackground(String... strings) {
+            String password = strings[0];
+
+            StringBuffer sbuf = new StringBuffer();
+            ScpFromJava scp = new ScpFromJava(SearchableActivity.this);
+            ScpReturnStatus retStatus = scp.setupTransfer("fred", password, "tabitha.ls.fi.upm.es", 22, "/home/fred/private/locates/libraries.json");
+            if (retStatus.is_ok) {
+                retStatus = scp.doTransfer(sbuf);
+            }
+
+            if (!retStatus.is_ok) return null;
+            else return sbuf.toString();
+        }
+
+        protected void onPostExecute(String result) {
+            String errorString = null;
+            JSONObject json = null;
+
+            if (result != null) {
+                try {
+                    json = new JSONObject(result);
+                } catch (JSONException exc) {
+                    errorString = "cannot parse\n"+result;
+                }
+            } else errorString = "cannot download library information file";
+
+            if (result == null || json == null) {
+                AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
+                ok.setTitle("Download library information error");
+                ok.setMessage("result = " + result);
+                ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+
+                });
+                AlertDialog alert = ok.create();
+                alert.show();
+            } else {
+                try {
+                    String library = null;
+                    String db_host = null;
+                    String db_port = null;
+                    String db_location = null;
+                    String db_username = null;
+                    String db_password = null;
+                    String host = null;
+                    String port = null;
+                    String username = null;
+                    String password = null;
+
+                    JSONArray arr = json.getJSONArray("libraries");
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject def = arr.getJSONObject(i);
+                        if (def.has("name")) library = def.getString("name");
+                        if (def.has("db_host")) db_host = def.getString("db_host");
+                        if (def.has("db_port")) db_port = String.valueOf(def.getInt("db_port"));
+                        if (def.has("db_username")) db_username = def.getString("db_username");
+                        if (def.has("db_location")) db_location = def.getString("db_location");
+                        if (def.has("db_password")) db_password = def.getString("db_password");
+                        if (def.has("host")) host = def.getString("host");
+                        if (def.has("port")) port = String.valueOf(def.getInt("port"));
+                        if (def.has("username")) username = def.getString("username");
+                        if (def.has("password")) password = def.getString("password");
+                        AddLibraryInformation.add(SearchableActivity.this, true, library,
+                                db_host, db_port, db_location, db_username, db_password, host, port, username,
+                                password);
+                    }
+                } catch (JSONException e) {
+                    AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
+                    ok.setTitle("Could not parse JSON data");
+                    ok.setMessage("json data: " + json.toString());
+                    ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+
+                    });
+                    AlertDialog alert = ok.create();
+                    alert.show();
+                }
+            }
+        }
+    }
 }
 
 // Broadcast receiver for receiving status updates from the IntentService
@@ -951,3 +1114,4 @@ class TransferResponseReceiver extends BroadcastReceiver {
         System.out.println("got an intent " + intent);
     }
 }
+

@@ -3,6 +3,8 @@ package fred.docapp;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.jcraft.jsch.*;
 import java.io.*;
@@ -11,7 +13,6 @@ public class ScpFromJava {
         JSch jsch;
         JschLogger logger;
         ScpReturnStatus retStatus;
-        FileOutputStream fos = null;
     File tmpFile;
     Session session;
     MyUserInfo userInfo;
@@ -23,6 +24,7 @@ public class ScpFromJava {
     long fileSize;
     Context cntxt;
     long lastStatusReport = 0;
+    FileOutputStream fos = null;
 
     public ScpFromJava(Context cntxt) {
         this.cntxt = cntxt;
@@ -128,7 +130,47 @@ public class ScpFromJava {
         return retStatus;
     }
 
+
+    public ScpReturnStatus doTransfer(StringBuffer sbuf) {
+        return getFile(sbuf);
+    }
+
         public ScpReturnStatus doTransfer(String localDir) {
+            ScpReturnStatus retStatus = new ScpReturnStatus(true);
+            try {
+                System.out.println("file="+file+" localDir="+localDir);
+                tmpFile = File.createTempFile(file, null, new File(localDir));
+                System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
+                File myFile = new File(localDir + "/" + file);
+                myFile.setReadable(true, false);
+                System.out.println("will open " + myFile);
+                fos = new FileOutputStream(tmpFile);
+            retStatus = getFile(fos);
+                fos.close();
+                fos = null;
+                if (retStatus.is_ok && !moveFile(tmpFile, myFile)) {
+                    System.out.println("could not move " + tmpFile + " to " + myFile);
+                    retStatus.is_ok = false;
+                }
+            } catch (Exception e) {
+                System.out.println("ScpFromJava: exception "+e);
+                retStatus.is_ok = false;
+                retStatus.exc = e;
+                e.printStackTrace();
+                try {
+                    if (fos != null) fos.close();
+                } catch (Exception ignored) { }
+            }
+            return retStatus;
+        }
+
+        ScpReturnStatus getFile(Object obj) {
+            boolean toStringBuffer = obj instanceof StringBuffer;
+            StringBuffer sbuf = null;
+            FileOutputStream fos = null;
+            if (!toStringBuffer) fos = (FileOutputStream) obj;
+            else sbuf = (StringBuffer) obj;
+
             try {
                 // send '\0'
                 buf[0] = 0;
@@ -136,12 +178,7 @@ public class ScpFromJava {
                 out.flush();
 
                 lastStatusReport = 0;
-                tmpFile = File.createTempFile(file, null, new File(localDir));
-                System.out.println("tmpFile is " + tmpFile + " local file name is localDir=" + localDir + " file=" + file);
-                File myFile = new File(localDir + "/" + file);
-                myFile.setReadable(true, false);
-                System.out.println("will open " + myFile);
-                fos = new FileOutputStream(tmpFile);
+
 
                 long transferred = 0;
                 long remaining = fileSize;
@@ -156,7 +193,11 @@ public class ScpFromJava {
                         retStatus.is_ok = false;
                         break;
                     }
-                    fos.write(buf, 0, foo);
+                    if (!toStringBuffer)
+                      fos.write(buf, 0, foo);
+                    else
+                       sbuf.append(new String(buf,0,foo, StandardCharsets.UTF_8));
+
                     transferred += foo;
                     remaining -= foo;
                     if (remaining == 0L) break;
@@ -173,10 +214,8 @@ public class ScpFromJava {
                 }
 
                 if (remaining > 0)
-                    System.out.println("file " + reqFile + ": could only read " + (fileSize - remaining) +
-                            " bytes out of " + fileSize);
-                fos.close();
-                fos = null;
+                    System.out.println("file " + reqFile + ": could only read " + (fileSize - remaining) + "bytes");
+
                 retStatus.is_ok = true;
 
                 if (checkAck(in) != 0) {
@@ -189,10 +228,6 @@ public class ScpFromJava {
                     buf[0] = 0;
                     out.write(buf, 0, 1);
                     out.flush();
-                    if (!moveFile(tmpFile,myFile)) {
-                        System.out.println("could not move "+tmpFile+" to "+myFile);
-                        retStatus.is_ok = false;
-                    }
                 }
 
             session.disconnect();
@@ -201,10 +236,6 @@ public class ScpFromJava {
                 retStatus.is_ok = false;
             retStatus.exc = e;
             e.printStackTrace();
-            try {
-                if (fos != null) fos.close();
-            } catch (Exception ignored) {
-            }
         }
         return retStatus;
     }
