@@ -49,6 +49,7 @@ public class OurSpinnerAdapter extends ArrayAdapter<DirView> implements SpinnerA
         }
 
         DirView dirView = dirs.get(position);
+        if (dirView == null) System.out.println("dirView is null -- we will crash");
         File f = new File(dirView.dirName);
         String str = f.getName();
         str = str.substring(0,Math.min(str.length(),20));

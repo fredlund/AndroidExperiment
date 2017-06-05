@@ -892,7 +892,7 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
         if (currentLibrary != null) {
             mloc = new MLocate(currentLibrary, 8192, SearchableActivity.this);
             final ProgressDialog pd = new ProgressDialog(SearchableActivity.this);
-            AsyncTask<Spinner, Void, Void> task = new AsyncTask<Spinner, Void, Void>() {
+            AsyncTask<Spinner, Void, Boolean> task = new AsyncTask<Spinner, Void, Boolean>() {
                 Spinner spin;
 
                 @Override
@@ -905,43 +905,60 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 }
 
                 @Override
-                protected Void doInBackground(Spinner... spinners) {
+                protected Boolean doInBackground(Spinner... spinners) {
                     System.out.println("doInBackground: spinners[0]="+spinners[0]);
                     spin = spinners[0];
                     try {
                         entries = mloc.find(query);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        return false;
                     }
                     System.out.println("size of found: " + entries.size());
                     System.out.flush();
 
-                    return null;
+                    return true;
                 }
 
                 @Override
-                protected void onPostExecute(Void result) {
+                protected void onPostExecute(Boolean result) {
                     if (pd != null) {
                         pd.dismiss();
-
                     }
-                    System.out.println("before stack push");
-                    System.out.flush();
-                    stack.clear();
-                    final ListView listView1 = (ListView) findViewById(android.R.id.list);
-                    EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
-                    adapter.clear();
-                    adapter.addAll(entries);
-                    adapter.notifyDataSetChanged();
-                    DirView root = new DirView("---", null);
-                    stack.add(root);
-                    DirView dv = new DirView(name(mloc.root), entries);
-                    stack.add(dv);
+                    if (result == true) {
+                        System.out.println("before stack push");
+                        System.out.flush();
+                        stack.clear();
+                        final ListView listView1 = (ListView) findViewById(android.R.id.list);
+                        EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
+                        adapter.clear();
+                        adapter.addAll(entries);
+                        adapter.notifyDataSetChanged();
+                        DirView root = new DirView("---", null);
+                        stack.add(root);
+                        DirView dv = new DirView(name(mloc.root), entries);
+                        stack.add(dv);
 
-                    System.out.println("after stack push");
-                    System.out.flush();
+                        System.out.println("after stack push");
+                        System.out.flush();
 
-                        System.out.println("spinner in asynctask is "+spin);
+                        System.out.println("spinner in asynctask is " + spin);
+                    } else {
+                        AlertDialog.Builder ok = new AlertDialog.Builder(SearchableActivity.this);
+                        ok.setTitle("Missing Library Index");
+                        ok.setMessage("The library index is missing; please download it");
+
+                        ok.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+
+                        });
+
+                        AlertDialog alert = ok.create();
+                        alert.show();
+                    }
                     getSpinnerAdapter(spin, stack).notifyDataSetChanged();
                 }
 
