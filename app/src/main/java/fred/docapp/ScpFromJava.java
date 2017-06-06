@@ -48,7 +48,7 @@ public class ScpFromJava {
             session = jsch.getSession(username, host, port);
             userInfo = new MyUserInfo(password);
             session.setUserInfo(userInfo);
-            session.connect();
+            session.connect(3000);
 
             // exec 'scp -f rfile' remotely
             String command = "scp -f " + (" \"" + reqFile + "\"");
