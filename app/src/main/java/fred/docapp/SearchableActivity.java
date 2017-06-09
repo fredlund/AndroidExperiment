@@ -796,7 +796,9 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 Collections.sort(entries, new Comparator<Entry>() {
                     @Override
                     public int compare(Entry lhs, Entry rhs) {
-                        return lhs.fileName.compareTo(rhs.fileName);
+                        String n1 = NameNormalizer.normalizeFileName(lhs.fileName);
+                        String n2 = NameNormalizer.normalizeFileName(rhs.fileName);
+                        return n1.compareTo(n2);
                     }
                 });
                 adapter.notifyDataSetChanged();
