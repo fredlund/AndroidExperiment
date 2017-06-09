@@ -3,6 +3,9 @@ Bugs
 - if we get confail the transfer status is still ongoing
 - maybe the big back button should work from transfer status too
 - maybe a notification if confail
+- sorting files probably, use sort BD code from other project
+- have sort as an option, default true
+- maybe have bd sort as an option, default true
 
 Features
 ========

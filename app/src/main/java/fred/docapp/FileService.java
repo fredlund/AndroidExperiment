@@ -102,6 +102,9 @@ public class FileService extends IntentService {
                 }
             }
         }
-        if (ftr.files.length > 0) nm.cancel(0);
+        if (ftr.files.length > 0) {
+            System.out.println("cancelling nm 0");
+            nm.cancel(0);
+        }
     }
 }
