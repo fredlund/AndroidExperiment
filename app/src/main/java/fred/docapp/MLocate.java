@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.io.File;
 
 public class MLocate {
     
@@ -115,7 +116,8 @@ public class MLocate {
 
             if (show) {
                 String dirName = reader.getString(dirSaved, Math.abs(dirSavedLen));
-                Entry entry = new Entry(this, 0, reader.current(), null, dirName, Entry.EntryType.DefineDir);
+				String fileName = new File(dirName).getName();
+                Entry entry = new Entry(this, 0, reader.current(), dirName, fileName, Entry.EntryType.DefineDir);
                 resultList.add(entry);
                 //System.out.println("found dir "+dirName);
             }
