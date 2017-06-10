@@ -1,16 +1,20 @@
 Bugs
 ====
-- if we get confail the transfer status is still ongoing
-- maybe the big back button should work from transfer status too
-- maybe a notification if confail
-- sorting files probably, use sort BD code from other project
-- have sort as an option, default true
-- maybe have bd sort as an option, default true
+- sometimes the directory name is shown
 
 Features
 ========
 - maybe add file date to locatedb
 - maybe do matching based on file size and file data
+- maybe the big back button should work from transfer status too
+- maybe a notification if confail
+- sorting files probably, use sort BD code from other project
+- have sort as an option, default true
+- maybe have bd sort as an option, default true
+- maybe include some tags in the filename, as the isbn in isbnq.
+For instance __lang=eng __lang=esp __author=barks__lang=eng --
+and the possibility to search for these strings.
+
 
 
 
