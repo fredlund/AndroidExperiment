@@ -11,6 +11,7 @@ public class Entry {
     long pos;
     String fileName;
     String dirName;
+    String normalizedName;
     boolean isEnabled = false;
     MLocate mloc;
     EntryType entryType;
@@ -23,6 +24,7 @@ public class Entry {
 	this.pos = pos;
 	this.fileName = fileName;
         this.dirName = dirName;
+        this.normalizedName = NameNormalizer.normalizeFileName(fileName);
     }
 
     public String toString() {

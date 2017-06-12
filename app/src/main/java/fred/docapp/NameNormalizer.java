@@ -15,7 +15,7 @@ public class NameNormalizer {
 
         StringBuilder builder = new StringBuilder(origString.toLowerCase());
 
-        for (int i=builder.length(); i> 0; i--) {
+        for (int i=builder.length()-1; i>=0; i--) {
             int ch = (int) builder.charAt(i);
             if ((ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122))
                 continue;

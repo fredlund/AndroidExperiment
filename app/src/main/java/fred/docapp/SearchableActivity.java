@@ -180,6 +180,12 @@ public class SearchableActivity extends AppCompatActivity {
                 ListView listView1 = (ListView) findViewById(android.R.id.list);
                 EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                 entries = dv.entries;
+                Collections.sort(entries, new Comparator<Entry>() {
+                    @Override
+                    public int compare(Entry lhs, Entry rhs) {
+                        return lhs.normalizedName.compareTo(rhs.normalizedName);
+                    }
+                });
                 adapter.clear();
                 adapter.addAll(entries);
                 adapter.notifyDataSetChanged();
@@ -221,6 +227,12 @@ public class SearchableActivity extends AppCompatActivity {
                         // EntryAdapter adapter = new EntryAdapter(SearchableActivity.this, R.layout.listview_item_row, dirEntries);
                         EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                         adapter.clear();
+                        Collections.sort(dirEntries, new Comparator<Entry>() {
+                            @Override
+                            public int compare(Entry lhs, Entry rhs) {
+                                return lhs.normalizedName.compareTo(rhs.normalizedName);
+                            }
+                        });
                         adapter.addAll(dirEntries);
                         adapter.notifyDataSetChanged();
                         //listView1.setAdapter(adapter);
@@ -405,6 +417,12 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                                                       ListView listView1 = (ListView) findViewById(android.R.id.list);
                                                       EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                                                       entries = dv.entries;
+                                                      Collections.sort(entries, new Comparator<Entry>() {
+                                                          @Override
+                                                          public int compare(Entry lhs, Entry rhs) {
+                                                              return lhs.normalizedName.compareTo(rhs.normalizedName);
+                                                          }
+                                                      });
                                                       adapter.clear();
                                                       adapter.addAll(entries);
                                                       adapter.notifyDataSetChanged();
@@ -796,9 +814,7 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 Collections.sort(entries, new Comparator<Entry>() {
                     @Override
                     public int compare(Entry lhs, Entry rhs) {
-                        String n1 = NameNormalizer.normalizeFileName(lhs.fileName);
-                        String n2 = NameNormalizer.normalizeFileName(rhs.fileName);
-                        return n1.compareTo(n2);
+                        return lhs.normalizedName.compareTo(rhs.normalizedName);
                     }
                 });
                 adapter.notifyDataSetChanged();
@@ -934,6 +950,12 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                         final ListView listView1 = (ListView) findViewById(android.R.id.list);
                         EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                         adapter.clear();
+                        Collections.sort(entries, new Comparator<Entry>() {
+                            @Override
+                            public int compare(Entry lhs, Entry rhs) {
+                                return lhs.normalizedName.compareTo(rhs.normalizedName);
+                            }
+                        });
                         adapter.addAll(entries);
                         adapter.notifyDataSetChanged();
                         DirView root = new DirView("---", null);
