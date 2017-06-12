@@ -798,7 +798,7 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                     public int compare(Entry lhs, Entry rhs) {
                         String n1 = NameNormalizer.normalizeFileName(lhs.fileName);
                         String n2 = NameNormalizer.normalizeFileName(rhs.fileName);
-                        return n1.toLowerCase().compareTo(n2.toLowerCase());
+                        return n1.compareTo(n2);
                     }
                 });
                 adapter.notifyDataSetChanged();
