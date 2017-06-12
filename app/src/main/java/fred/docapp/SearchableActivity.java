@@ -180,12 +180,12 @@ public class SearchableActivity extends AppCompatActivity {
                 ListView listView1 = (ListView) findViewById(android.R.id.list);
                 EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                 entries = dv.entries;
-                Collections.sort(entries, new Comparator<Entry>() {
-                    @Override
-                    public int compare(Entry lhs, Entry rhs) {
-                        return lhs.normalizedName.compareTo(rhs.normalizedName);
-                    }
-                });
+                //Collections.sort(entries, new Comparator<Entry>() {
+                 //   @Override
+                 //   public int compare(Entry lhs, Entry rhs) {
+                 //       return lhs.normalizedName.compareTo(rhs.normalizedName);
+                  //  }
+                //});
                 adapter.clear();
                 adapter.addAll(entries);
                 adapter.notifyDataSetChanged();
@@ -371,7 +371,9 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         System.out.println("onCreateOptionsMenu: item is " + menu.findItem(R.id.menu_search));
-        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+         MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
+        searchMenuItem.expandActionView();
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
         System.out.println("searchView=" + searchView);
         System.out.flush();
         ComponentName cn = new ComponentName(this, SearchableActivity.class);
@@ -417,12 +419,12 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                                                       ListView listView1 = (ListView) findViewById(android.R.id.list);
                                                       EntryAdapter adapter = (EntryAdapter) listView1.getAdapter();
                                                       entries = dv.entries;
-                                                      Collections.sort(entries, new Comparator<Entry>() {
-                                                          @Override
-                                                          public int compare(Entry lhs, Entry rhs) {
-                                                              return lhs.normalizedName.compareTo(rhs.normalizedName);
-                                                          }
-                                                      });
+                                                      //Collections.sort(entries, new Comparator<Entry>() {
+                                                       //   @Override
+                                                       //   public int compare(Entry lhs, Entry rhs) {
+                                                        //      return lhs.normalizedName.compareTo(rhs.normalizedName);
+                                                        //  }
+                                                      //});
                                                       adapter.clear();
                                                       adapter.addAll(entries);
                                                       adapter.notifyDataSetChanged();
