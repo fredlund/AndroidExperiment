@@ -14,7 +14,7 @@ public class NameNormalizer {
         boolean changed;
 
         String strippedString = stripSymbols(origString);
-        System.out.println("origString="+origString+" strippedString="+strippedString);
+        //System.out.println("origString="+origString+" strippedString="+strippedString);
         do {
             changed = false;
             for (String removeString : removes) {
@@ -26,7 +26,7 @@ public class NameNormalizer {
             }
         } while (changed);
         String finalString = stripSymbols(strippedString);
-        System.out.println("cutString="+strippedString+" final="+finalString);
+        //System.out.println("cutString="+strippedString+" final="+finalString);
         return finalString;
     }
 
