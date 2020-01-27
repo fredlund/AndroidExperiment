@@ -3,8 +3,7 @@ package fred.docapp;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
-
+import androidx.appcompat.app.AppCompatActivity;
 import java.util.HashSet;
 import java.util.Set;
 

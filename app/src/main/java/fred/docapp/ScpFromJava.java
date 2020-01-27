@@ -2,7 +2,7 @@ package fred.docapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
