@@ -12,6 +12,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -63,8 +65,15 @@ public class TransferStatusActivity extends AppCompatActivity {
                     file_transfer_filter);
 
             setContentView(R.layout.mylist);
+                ImageButton buttonBack = (ImageButton) findViewById(R.id.backButton);
+                System.out.println("buttonBack="+buttonBack);
+                buttonBack.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        System.out.println("got a click");
+                        finish();
+                    }
+                });
             listView1 = (ListView) findViewById(android.R.id.list);
-
             listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
