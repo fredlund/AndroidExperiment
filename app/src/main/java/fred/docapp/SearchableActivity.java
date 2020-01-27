@@ -33,11 +33,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.view.View.OnClickListener;
 
 import org.json.*;
 import java.io.File;
@@ -806,7 +808,15 @@ public static Drawable convertDrawableToGrayScale(Drawable drawable) {
                 final AlertDialog.Builder billy_builder = new AlertDialog.Builder(SearchableActivity.this);
                 LayoutInflater inflater = this.getLayoutInflater();
                 billy_builder.setView(inflater.inflate(R.layout.billy, null));
-                billy_builder.show();
+                final AlertDialog dialog = billy_builder.show();
+                Button buttonOk = (Button) dialog.findViewById(R.id.billyButton);
+                System.out.println("buttonOk="+buttonOk);
+                buttonOk.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        System.out.println("got a click");
+                        dialog.dismiss();
+                    }
+                });
                 break;
             }
             case R.id.menu_sort_alfa: {

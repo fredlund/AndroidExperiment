@@ -30,5 +30,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="jzlib" exported="" />
+    <orderEntry type="module" module-name="jzlib" exported="" />
   </component>
 </module>
