@@ -135,7 +135,7 @@ public class SearchableActivity extends AppCompatActivity {
         FragmentManager fm = getFragmentManager();
         saveFragment = (SaveFragment) fm.findFragmentByTag("data");
 
-        if (saveFragment == null) {
+        if (saveFragment == null || saveFragment.getData() != null) {
             // First time activity is started
             System.out.println("external storage dir=" + Environment.getExternalStorageDirectory());
             System.out.println("external public storage dir (downloads)=" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
