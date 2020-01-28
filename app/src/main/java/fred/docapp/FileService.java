@@ -7,12 +7,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
+
+import androidx.core.content.FileProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
 import java.net.URLConnection;
+import java.util.List;
 
 public class FileService extends IntentService {
     public FileService() {
@@ -93,8 +98,12 @@ public class FileService extends IntentService {
                 if (mimeType == null)
                     mimeType = "*/*";
                 Intent newIntent = new Intent(Intent.ACTION_VIEW);
-                newIntent.setDataAndType(uri,mimeType);
-                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //newIntent.setDataAndType(uri,mimeType);
+                Uri apkURI =
+                        FileProvider.getUriForFile
+                                (this, this.getApplicationContext().getPackageName() + ".provider", myFile);
+                newIntent.setDataAndType(apkURI, mimeType);
+                newIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
                     this.startActivity(newIntent);
                 } catch (ActivityNotFoundException e) {
